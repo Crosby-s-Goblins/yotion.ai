@@ -1,5 +1,7 @@
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardAction } from "@/components/ui/card";
 import { Check } from "lucide-react";
+import Link from "next/link";
 
 export default function Hero() {
   return (
@@ -11,31 +13,41 @@ export default function Hero() {
                 </h1>
             </div>
             <div className="flex flex-row gap-4">
-                <Card className="w-[300px] h-[500px]">
+                <Card className="w-[300px] h-[500px] flex flex-col">
                     <CardHeader>
                         <CardTitle>Free</CardTitle>
                         <p>$0 / mo</p>
                         <CardDescription>A no-commitment to experience the Yotion yoga experience!</CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="flex-grow">
                         <p className="flex gap-2"><Check />Hello</p>
                         <p className="flex gap-2"><Check />Hello</p>
                         <p className="flex gap-2"><Check />Hello</p>
                         <p className="flex gap-2"><Check />Hello</p>
                     </CardContent>
+                    <CardAction>
+                        <Link href="/auth/sign-up" className="w-full">
+                            <Button className="w-full" variant="outline">Sign up now</Button>
+                        </Link>
+                    </CardAction>
                 </Card>
-                <Card className="w-[300px]">
+                <Card className="w-[300px] h-[500px] flex flex-col">
                     <CardHeader>
                         <CardTitle>Premier</CardTitle>
                         <p>$10 / mo</p>
-                        <CardDescription>Access our full range of poses and many extra features!</CardDescription>
+                        <CardDescription>Access the full experience loaded with extra features!</CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="flex-grow">
                         <p className="flex gap-2"><Check />Hello</p>
                         <p className="flex gap-2"><Check />Hello</p>
                         <p className="flex gap-2"><Check />Hello</p>
                         <p className="flex gap-2"><Check />Hello</p>
                     </CardContent>
+                    <CardAction>
+                        <Link href="/auth/sign-up" className="w-full">
+                            <Button className="w-full">Sign up now</Button>
+                        </Link>
+                    </CardAction>
                 </Card>
             </div>
         </div>

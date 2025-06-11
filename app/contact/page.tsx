@@ -39,7 +39,7 @@ export default function Hero() {
                 </h1>
             </div>
 
-            <Card className="items-center justify-items content-around">
+            <Card className="flex flex-col items-center justify-items content-around p-4">
 
                 <Label className="font-bold text-xl mx-1">
                     Send Us a Message!
@@ -51,24 +51,24 @@ export default function Hero() {
                 <form onSubmit={handleSubmit}>
                     
                     <div>
-                        <Card className="justify-content columns-2 m-1 border-transparent shadow-none">
-                            <Input type="text" name="fName" required placeholder="First name" className="border-black border-2"/>
-                            <Input type="text" name="lName" required placeholder="Last name" className="border-black border-2"/>
+                        <Card className="justify-content columns-2 border-transparent shadow-none my-4">
+                            <Input type="text" name="fName" required placeholder="First name" className="shadow"/>
+                            <Input type="text" name="lName" required placeholder="Last name" className="shadow"/>
                         </Card>
                     </div>
                     <div>
-                        <Card className="justify-content m-1">
+                        <Card className="justify-content my-4">
                             {/* <label htmlFor="email">Email</label> */}
-                            <Input type="email" name="email" required placeholder="Email Address" className="border-black border-2"/>
+                            <Input type="email" name="email" required placeholder="Email Address" className="shadow"/>
                         </Card>
                     </div>
                     <div>
-                        <Card className="justify-content m-1">
+                        <Card className="justify-content my-4">
                         {/* <label htmlFor="message">Message</label> */}
-                            <Textarea name="message" required rows="3" placeholder="Message" className="border-black border-2"></Textarea>
+                            <Textarea name="message" required rows="9" placeholder="Message" className="shadow" style={{resize:'none'}}></Textarea>
                         </Card>
                     </div>
-                    <Button type="submit" className="bg-black text-white items-center m-1 mt-0">Submit Form</Button>
+                    <Button type="submit" className="bg-black text-white items-center mt-0 w-full">Submit Form</Button>
                 </form>
             </Card>
 

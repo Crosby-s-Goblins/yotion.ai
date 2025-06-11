@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardAction }
 import { Check } from "lucide-react";
 import Link from "next/link";
 
-export default function Hero() {
+export default function PricingPage() {
   return (
     <main className="min-h-screen flex flex-col items-center">
         <div className="flex-1 w-full flex flex-col gap-10 items-center">
@@ -59,4 +59,4 @@ export default function Hero() {
         </div>
     </main>
   );
-}
+} 

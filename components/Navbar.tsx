@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 
 export default function Navbar() {
     return (
-        <nav className="flex items-center px-8 py-4">
+        <nav className="flex items-center px-8 py-4 sticky top-0 z-50 shadow bg-white">
             {/* Left section */}
             <div className="w-1/3">
                 <Link href="/page.tsx" className="font-bold">yotion.ai</Link>
@@ -11,15 +11,15 @@ export default function Navbar() {
 
             {/* Center section */}
             <div className="w-1/3 flex justify-center gap-8">
-                <Link href="/about" className="font-semibold">About</Link>
-                <Link href="/pricing" className="font-semibold">Pricing</Link>
-                <Link href="/contact" className="font-semibold">Contact</Link>
+                <Link href="/about" className="font-medium">About</Link>
+                <Link href="/pricing" className="font-medium">Pricing</Link>
+                <Link href="/contact" className="font-medium">Contact</Link>
             </div>
 
             {/* Right section */}
-            <div className="w-1/3 flex justify-end gap-2">
-                <Button className="w-[125px]">Login</Button>
-                <Button variant="outline" className="w-[125px]">Sign Up</Button>
+            <div className="w-1/3 flex justify-end gap-8">
+            <Link href="/" className="">Login</Link>
+            <Link href="/" className="">Sign Up</Link>
             </div>  
         </nav>
     )

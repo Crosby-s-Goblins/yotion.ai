@@ -13,39 +13,45 @@ export default function Hero() {
                 </h1>
             </div>
             <div className="flex flex-row gap-4">
-                <Card className="w-[300px] h-[500px] flex flex-col">
+                <Card className="w-[350px] h-[500px] flex flex-col">
                     <CardHeader>
-                        <CardTitle>Free</CardTitle>
+                        <CardTitle className="text-2xl">Free</CardTitle>
                         <p>$0 / mo</p>
                         <CardDescription>A no-commitment to experience the Yotion yoga experience!</CardDescription>
                     </CardHeader>
                     <CardContent className="flex-grow">
-                        <p className="flex gap-2"><Check />Hello</p>
-                        <p className="flex gap-2"><Check />Hello</p>
-                        <p className="flex gap-2"><Check />Hello</p>
-                        <p className="flex gap-2"><Check />Hello</p>
+                        <p className="flex gap-2"><Check />Access to 3 free yoga poses</p>
+                        <p className="flex gap-2"><Check />Post-training AI insights</p>
                     </CardContent>
                     <CardAction>
                         <Link href="/auth/sign-up" className="w-full">
-                            <Button className="w-full" variant="outline">Sign up now</Button>
+                            <Button className="w-full h-10" variant="outline">Sign up now</Button>
                         </Link>
                     </CardAction>
                 </Card>
-                <Card className="w-[300px] h-[500px] flex flex-col">
+                <Card className="w-[350px] h-[500px] flex flex-col">
                     <CardHeader>
-                        <CardTitle>Premier</CardTitle>
+                        <CardTitle className="text-2xl">Premier</CardTitle>
                         <p>$10 / mo</p>
-                        <CardDescription>Access the full experience loaded with extra features!</CardDescription>
+                        <CardDescription>Enjoy the full experience loaded with extra features!</CardDescription>
                     </CardHeader>
                     <CardContent className="flex-grow">
-                        <p className="flex gap-2"><Check />Hello</p>
-                        <p className="flex gap-2"><Check />Hello</p>
-                        <p className="flex gap-2"><Check />Hello</p>
-                        <p className="flex gap-2"><Check />Hello</p>
+                        <p className="flex gap-2"><Check />Access to all 20+ yoga poses</p>
+                        <p className="flex gap-2"><Check />Mindfulness features</p>
+                        <p className="flex gap-2"><Check />Personal progress tracking</p>
+                        <p className="flex gap-2"><Check />Community-based competition</p>
+                    </CardContent>
+                    <CardContent className="flex-grow">
+                        <p className="mb-2">Coming Soon!</p>
+                        <ul className="list-disc pl-4 text-muted-foreground">
+                            <li>Avatar selection</li>
+                            <li>Personal progress tracking</li>
+                            <li>Community-based competition</li>
+                        </ul>
                     </CardContent>
                     <CardAction>
                         <Link href="/auth/sign-up" className="w-full">
-                            <Button className="w-full">Sign up now</Button>
+                            <Button className="w-full h-10">Sign up now</Button>
                         </Link>
                     </CardAction>
                 </Card>

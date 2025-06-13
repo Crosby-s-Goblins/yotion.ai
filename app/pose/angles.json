@@ -1,0 +1,20 @@
+[
+  {
+    "pose": "Warrior II",
+    "side": "right",
+    "angles": [
+      { "joint": "frontKnee", "expected": 90, "tolerance": 10 },
+      { "joint": "backKnee", "expected": 180, "tolerance": 15 },
+      { "joint": "rightElbow", "expected": 180, "tolerance": 10 },
+      { "joint": "leftElbow", "expected": 180, "tolerance": 10 }
+    ]
+  },
+  {
+    "pose": "Tree Pose",
+    "side": "left",
+    "angles": [
+      { "joint": "leftKnee", "expected": 90, "tolerance": 10 },
+      { "joint": "rightHip", "expected": 120, "tolerance": 15 }
+    ]
+  }
+]

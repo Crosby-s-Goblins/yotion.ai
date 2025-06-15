@@ -1,5 +1,7 @@
 'use client'
 
+import { Button } from "@/components/ui/button"
+
 import {
     FilesetResolver,
     DrawingUtils,
@@ -13,7 +15,7 @@ export default function poseDetection() {
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
-    const [currentPose, setCurrentPose] = useState<string | null>(null);
+    const [displayCamera, setDisplayCamera] = useState<boolean | null>(false);
 
     // all relevant angles
     const [rightElbowAngle, setRightElbowAngle] = useState<number | null>(null);
@@ -22,11 +24,15 @@ export default function poseDetection() {
     const [rightKneeAngle, setRightKneeAngle] = useState<number | null>(null);
     const [leftKneeAngle, setLeftKneeAngle] = useState<number | null>(null);
 
-    const [rightHipAngle, setRightHipAngle] = useState<number | null>(null); // for hips: implement two angles? One for forward/ backward ben and one for side to side
+    const [rightHipAngle, setRightHipAngle] = useState<number | null>(null); 
     const [leftHipAngle, setLeftHipAngle] = useState<number | null>(null); 
 
-    const [rightShoulderAngle, setRightShoulderAngle] = useState<number | null>(null); // for shoulders: implement two angles? One for forward/ backward ben and one for side to side
+    const [rightShoulderAngle, setRightShoulderAngle] = useState<number | null>(null);
     const [leftShoulderAngle, setLeftShoulderAngle] = useState<number | null>(null);
+
+    // push up forms (up, down)
+    const [form, setForm] = useState<number | null>(null);
+    const [pushUpCount, setPushUpCount] = useState<number>(0);
 
 
     // Utility to calculate angle at point B given A, B, C
@@ -42,8 +48,10 @@ export default function poseDetection() {
     }
 
     useEffect(() => {
-        init();
-    }, []);
+        if (displayCamera) {
+            init();
+        }
+    }, [displayCamera]);    
 
     const init = async () => {
         // Load model
@@ -110,57 +118,108 @@ export default function poseDetection() {
 
                     // calculate the angles for each body part
 
-                    if (
-                        landmark[12] && landmark[14] && landmark[16]
-                    ) {
-                        const rightElbowAngle = calculateAngle(
-                            landmark[12], // right shoulder
-                            landmark[14], // right elbow
-                            landmark[16]  // right wrist
-                        );
-                        setRightElbowAngle(Math.round(rightElbowAngle));
+                    const rightElbowAngle = calculateAngle(
+                        landmark[12], 
+                        landmark[14], 
+                        landmark[16]  
+                    );
+                    setRightElbowAngle(Math.round(rightElbowAngle));
+
+                    const leftElbowAngle = calculateAngle(
+                        landmark[11], 
+                        landmark[13], 
+                        landmark[21]  
+                    );
+                    setLeftElbowAngle(Math.round(leftElbowAngle));
+
+                    const rightKneeAngle = calculateAngle(
+                        landmark[24], 
+                        landmark[26],
+                        landmark[28]  
+                    );
+                    setRightKneeAngle(Math.round(rightKneeAngle));
+
+                    const leftKneeAngle = calculateAngle(
+                        landmark[23], 
+                        landmark[25], 
+                        landmark[27]
+                    );
+                    setLeftKneeAngle(Math.round(leftKneeAngle));
+
+                    const rightShoulderAngle = calculateAngle(
+                        landmark[14], 
+                        landmark[12], 
+                        landmark[24]
+                    );
+                    setRightShoulderAngle(Math.round(rightShoulderAngle));
+
+                    const leftShoulderAngle = calculateAngle(
+                        landmark[13], 
+                        landmark[11], 
+                        landmark[23]
+                    );
+                    setLeftShoulderAngle(Math.round(leftShoulderAngle));
+
+                    const rightHipAngle = calculateAngle(
+                        landmark[12], 
+                        landmark[24], 
+                        landmark[26]
+                    );
+                    setRightHipAngle(Math.round(rightHipAngle));
+                    
+                    const leftHipAngle = calculateAngle(
+                        landmark[11], 
+                        landmark[23], 
+                        landmark[25]
+                    );
+                    setLeftHipAngle(Math.round(leftHipAngle));
+
+                    // push up logic
+                    if (leftElbowAngle !== null && rightElbowAngle !== null){
+                        if (leftElbowAngle > 140 && rightElbowAngle > 140) {
+                            setForm(0);
+                        } else {
+                            setForm(1);
+                        }
                     }
                 }
             });
 
+            
             requestAnimationFrame(renderLoop);
         }
     };
 
     return (
-        <div>
-            <div className="mb-1">
-                <span>Current pose: {currentPose}</span>
-            </div>
-            <div>
-                <video
-                    ref={videoRef}
-                    style={{ display: 'none' }}
-                    muted
-                    playsInline
-                />
-                <canvas
-                    width="320"
-                    height="240"
-                    id="output_canvas"
-                    ref={canvasRef}
-                />
-            </div>
+        <div className="w-[100vw] h-[100vh] flex items-center justify-center">
+            <Button variant="outline" onClick={() => setDisplayCamera(!displayCamera)}>toggle camera</Button>
             {
-                poseData.map((pose, index) => (
-                    <button className='bg-blue-500 rounded m-1 p-1 hover:bg-blue-600' key={index} onClick={() => setCurrentPose(pose.pose.toString())}>{pose.pose} ({pose.side})</button>
-                ))
+                displayCamera && (
+                    <div>
+                        <div className="mb-1">
+                            <h1>form: {form}, count: {pushUpCount}</h1>
+                        </div>
+                        <video
+                            ref={videoRef}
+                            style={{ display: 'none' }}
+                            muted
+                            playsInline
+                        />
+                        <canvas
+                            id="output_canvas"
+                            ref={canvasRef}
+                        />
+                        <div>
+                            <h2>rightElbowAngle: {rightElbowAngle}</h2>
+                            <h2>leftElbowAngle: {leftElbowAngle}</h2>
+                            <h2>rightShoulderAngle: {rightShoulderAngle}</h2>
+                            <h2>leftShoulderAngle: {leftShoulderAngle}</h2>
+                            <h2>rightKneeAngle: {rightKneeAngle}</h2>
+                            <h2>leftHipAngle: {leftHipAngle}</h2>
+                        </div>
+                    </div>
+                )                
             }
-            <div>
-                <h2>rightElbowAngle: {rightElbowAngle}</h2>
-                <h2>leftElbowAngle: {leftElbowAngle}</h2>
-                <h2>rightKneeAngle: {rightKneeAngle}</h2>
-                <h2>leftKneeAngle: {leftKneeAngle}</h2>
-                <h2>rightHipAngle: {rightHipAngle}</h2>
-                <h2>leftHipAngle: {leftHipAngle}</h2>
-                <h2>rightShoulderAngle: {rightShoulderAngle}</h2>
-                <h2>leftShoulderAngle: {leftShoulderAngle}</h2>
-            </div>
         </div>
     );
 }

@@ -2,70 +2,79 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 export default function PracticePage() {
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold">Welcome to Your Practice</h1>
-        <p className="text-muted-foreground mt-2">
-          Start your yoga journey with AI-powered guidance
-        </p>
-      </div>
+    <main className="flex flex-col items-center justify-center w-screen h-screen">
+        <div>
+            <h1 className="text-3xl font-semibold">yotion.ai</h1>
+        </div>
+        <div className="max-w-7xl w-full px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col space-y-6">
+                <div className="flex flex-row gap-24 justify-between">
+                    <Card className="flex flex-col justify-center items-center">
+                    <a href="/selection">
+                        <CardHeader className="flex flex-col justify-center items-center">
+                        <CardTitle className="text-2xl">Train</CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex flex-col justify-center items-center">
+                        <div className="bg-gray-200 w-48 h-48 rounded-lg mb-4 flex items-center justify-center">
+                            <p className="text-sm text-gray-500">Image Placeholder</p>
+                        </div>
+                        <p className="text-sm text-muted-foreground text-center">
+                            Choose from our curated list of poses and get real-time feedback on your form.
+                        </p>
+                        </CardContent>
+                    </a>
+                    </Card>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <a href="/selection">
-            <CardHeader>
-            <CardTitle>Start a Session</CardTitle>
-            <CardDescription>Begin a new yoga practice session</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Choose from our curated list of poses and get real-time feedback on your form.
-            </p>
-          </CardContent>
-          </a>
-        </Card>
+                    <Card className="flex flex-col justify-center items-center max-w-72">
+                    <a href="/selection" className="w-full h-full">
+                        <CardHeader className="flex flex-col justify-center items-center">
+                        <CardTitle className="text-2xl">Performance</CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex flex-col justify-center items-center">
+                        <div className="bg-gray-200 w-48 h-48 rounded-lg mb-4 flex items-center justify-center">
+                            <p className="text-sm text-gray-500">Image Placeholder</p>
+                        </div>
+                        <p className="text-sm text-muted-foreground text-center">
+                            Choose from our curated list of poses and get real-time feedback on your form.
+                        </p>
+                        </CardContent>
+                    </a>
+                    </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Your Progress</CardTitle>
-            <CardDescription>Track your improvement over time</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              View your practice history and see how your form has improved.
-            </p>
-          </CardContent>
-        </Card>
+                    <Card className="flex flex-col justify-center items-center max-w-72">
+                    <a href="/selection" className="w-full h-full">
+                        <CardHeader className="flex flex-col justify-center items-center">
+                        <CardTitle className="text-2xl">Community</CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex flex-col justify-center items-center">
+                        <div className="bg-gray-200 w-48 h-48 rounded-lg mb-4 flex items-center justify-center">
+                            <p className="text-sm text-gray-500">Image Placeholder</p>
+                        </div>
+                        <p className="text-sm text-muted-foreground text-center">
+                            Choose from our curated list of poses and get real-time feedback on your form.
+                        </p>
+                        </CardContent>
+                    </a>
+                    </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Available Poses</CardTitle>
-            <CardDescription>Explore our pose library</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Browse through our collection of yoga poses with detailed instructions.
-            </p>
-          </CardContent>
-        </Card>
-
-        <div></div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Available Poses</CardTitle>
-            <CardDescription>Explore our pose library</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Browse through our collection of yoga poses with detailed instructions.
-            </p>
-          </CardContent>
-        </Card>
-        
-        <div></div>
-
-      </div>
-    </div>
+                    <Card className="flex flex-col justify-center items-center max-w-72">
+                    <a href="/selection" className="w-full h-full">
+                        <CardHeader className="flex flex-col justify-center items-center">
+                        <CardTitle className="text-2xl">Settings</CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex flex-col justify-center items-center">
+                        <div className="bg-gray-200 w-48 h-48 rounded-lg mb-4 flex items-center justify-center">
+                            <p className="text-sm text-gray-500">Image Placeholder</p>
+                        </div>
+                        <p className="text-sm text-muted-foreground text-center">
+                            Choose from our curated list of poses and get real-time feedback on your form.
+                        </p>
+                        </CardContent>
+                    </a>
+                    </Card>
+                </div>
+            </div>
+        </div>
+    </main>
   );
 } 

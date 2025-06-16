@@ -26,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.className} antialiased overscroll-none`}>
+      <body className={`${geistSans.className} antialiased overscroll-none touch-none`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

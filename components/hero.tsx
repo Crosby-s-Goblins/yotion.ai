@@ -11,7 +11,7 @@ export function Hero() {
         </p>
         <div className="flex gap-2">
           <Button className="px-8 py-6 text-md">
-            Start Training
+            <a href="/practice">Start Training</a>
           </Button>
         </div>
         <div className="w-full max-w-[1200px] aspect-[3/2] bg-gray-200 rounded shadow flex items-center justify-center mt-8">

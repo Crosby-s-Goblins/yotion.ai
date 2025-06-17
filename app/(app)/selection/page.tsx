@@ -2,12 +2,12 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from 'framer-motion';
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
-import { X } from 'lucide-react';
+import { ArrowLeftFromLine, X } from 'lucide-react';
+import Link from "next/link";
 
 interface Pose {
   name: string;
@@ -143,14 +143,25 @@ export default function PracticePage() {
 
   return (
     <main className="h-screen flex flex-col items-center justify-center">
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold">Welcome to Your Practice</h1>
+      <div className="flex flex-col text-center">
+        <div className="flex w-screen items-center">
+          <div className="flex basis-1/3 justify-start pl-16">  
+            <Link href="/practice">
+              <ArrowLeftFromLine className=""/>
+            </Link>
+          </div>
+          <div className="flex basis-1/3 justify-center"> 
+            <h1 className="text-2xl font-bold">Welcome to Your Practice</h1>
+          </div>
+          <div className="flex basis-1/3">
+          </div>
+        </div>
         <p className="text-muted-foreground mt-2">
           Start your yoga journey with AI-powered guidance
         </p>
       </div>
 
-      <div className="w-full max-w-2xl px-4 mb-6">
+      <div className="w-full max-w-2xl px-4 mb-6 mt-12">
         <Input className="flex flex-row rounded-3xl border-2 py-6 px-8" placeholder="Search"/>
       </div>
 

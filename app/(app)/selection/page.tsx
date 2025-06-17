@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { ArrowLeftFromLine, X } from 'lucide-react';
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 interface Pose {
   name: string;
@@ -82,11 +83,11 @@ const ExpandedPoseCard = ({ pose, onClose }: { pose: Pose; onClose: () => void }
       <div className="h-full flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-8 py-4 border-b border-gray-100">
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-6 justify-center w-full">
             <h2 className="text-3xl font-bold">{pose.name}</h2>
-            <div className={`${difficultyColors[pose.difficulty]} px-6 py-3 rounded-full`}>
+            {/* <div className={`${difficultyColors[pose.difficulty]} px-6 py-3 rounded-full`}>
               <span className="text-white text-lg font-medium">{pose.difficulty}</span>
-            </div>
+            </div> */}
           </div>
           <button
             onClick={onClose}
@@ -99,9 +100,9 @@ const ExpandedPoseCard = ({ pose, onClose }: { pose: Pose; onClose: () => void }
         {/* Content */}
         <div className="flex p-8 overflow-y-auto">
           <div className="bg-gray-500 aspect-square w-96 h-96"></div>
-          <div className="flex flex-col ml-16">
+          <div className="flex flex-col ml-16 mr-16 justify-between">
             {pose.description && (
-              <div className="mb-8 pr-8">
+              <div className="mb-8">
                 <h3 className="text-xl font-semibold mb-4">Description</h3>
                 <p className="text-gray-600 leading-relaxed text-lg">{pose.description}</p>
               </div>
@@ -119,6 +120,9 @@ const ExpandedPoseCard = ({ pose, onClose }: { pose: Pose; onClose: () => void }
                 </ul>
               </div>
             )}
+            <Button className="rounded-3xl h-12 bg-blue-500">
+              <p className="text-white text-lg">Start</p>
+            </Button>
           </div>
         </div>
       </div>

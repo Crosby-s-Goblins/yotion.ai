@@ -20,7 +20,7 @@ export default function PricingPage() {
                         <CardDescription>A no-commitment to experience the Yotion yoga experience!</CardDescription>
                     </CardHeader>
                     <CardContent className="flex-grow">
-                        <p className="flex gap-2"><Check />Access to 3 free yoga poses</p>
+                        <p className="flex gap-2"><Check />Access to 3 free poses</p>
                         <p className="flex gap-2"><Check />Post-training AI insights</p>
                     </CardContent>
                     <CardAction>

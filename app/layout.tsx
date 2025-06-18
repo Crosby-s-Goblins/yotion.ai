@@ -26,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className="h-full">
       <body className={`${geistSans.className} antialiased overscroll-none touch-none h-full`}>
-        {children}
+          {children}
       </body>
     </html>
   );

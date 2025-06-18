@@ -109,10 +109,10 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="flex items-center space-x-2">
-                <Button asChild variant="ghost" size="sm">
-                  <Link href="/auth/login">Sign in</Link>
+                <Button asChild variant="ghost">
+                  <Link href="/auth/login">Log in</Link>
                 </Button>
-                <Button asChild size="sm">
+                <Button asChild>
                   <Link href="/auth/sign-up">Sign up</Link>
                 </Button>
               </div>

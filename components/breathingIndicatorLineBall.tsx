@@ -2,8 +2,11 @@
 
 import { useMemo } from "react";
 
+interface timingInd{
+    duration : Number
+}
 
-export function BreathIndication({ duration }) {
+export function BreathIndication({ duration } : timingInd) {
   // Memoize the animation style so it updates if duration changes
   const animationStyle = useMemo(() => ({
     animation: `bounce-vertical ${duration}s ease-in-out infinite`,

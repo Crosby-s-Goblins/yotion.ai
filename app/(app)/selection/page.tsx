@@ -18,7 +18,7 @@ export default function SelectionComponents() {
 
   useEffect(() => {
   async function fetchPoses() {
-    const { data, error } = await supabase.from("practTable").select('*');
+    const { data, error } = await supabase.from("poseLibrary").select('*');
     error ? console.error('Error fetching poses:', error) : setPoses(data);
   } //Change 'practTable' to actual pose table name
     /*

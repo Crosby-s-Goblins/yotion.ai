@@ -8,8 +8,28 @@ interface Props {
   onClose: () => void;
 }
 
-export const ExpandedPoseCard = ({ pose, onClose }: Props) => (
-  <motion.div
+export function ExpandedPoseCard ({ pose, onClose }: Props) {
+
+  let benefits: string[] = [];
+
+   if (pose.benefits && typeof pose.benefits === 'string' && pose.benefits.trim() !== '') {
+    try {
+      const parsed = JSON.parse(pose.benefits);
+      if (Array.isArray(parsed)) {
+        benefits = parsed;
+      } else {
+        benefits = pose.benefits.split(',').map(str => str.trim());
+      }
+    } catch {
+      //This does nothing, likely because the value is left empty
+    }
+  } else if (Array.isArray(pose.benefits)) {
+    benefits = pose.benefits.filter(b => typeof b === 'string' && b.trim() !== '');
+  }
+  
+
+  return (
+    <motion.div
     className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm"
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
@@ -47,11 +67,11 @@ export const ExpandedPoseCard = ({ pose, onClose }: Props) => (
                 <p className="text-gray-600 leading-relaxed text-lg">{pose.description}</p>
               </div>
             )}
-            {pose.benefits?.length > 0 && (
+            {benefits?.length > 0 && (
               <div className="mb-8">
                 <h3 className="text-xl font-semibold mb-4">Benefits</h3>
                 <ul className="space-y-3">
-                  {pose.benefits.map((benefit, index) => (
+                  {benefits.map((benefit, index) => (
                     <li key={index} className="flex items-start gap-3">
                       <div className="w-3 h-3 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
                       <span className="text-gray-600 text-lg">{benefit}</span>
@@ -68,4 +88,5 @@ export const ExpandedPoseCard = ({ pose, onClose }: Props) => (
       </div>
     </motion.div>
   </motion.div>
-);
+  );
+}

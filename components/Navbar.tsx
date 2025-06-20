@@ -6,10 +6,14 @@ import { LogoutButton } from './logout-button';
 import Link from 'next/link';
 import { Button } from './ui/button';
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+
+
 export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [mounted, setMounted] = useState(false);
+  const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -21,6 +25,18 @@ export default function Navbar() {
         const { data: { user } } = await supabase.auth.getUser();
         setIsLoggedIn(!!user);
         setUser(user);
+
+        if (user) {
+          // get profile info
+          const { data: profileData, error } = await supabase
+            .from('profiles')
+            .select('username, avatar_url')
+            .eq('id', user.id)
+            .single();
+          if (profileData) setProfile(profileData);
+        } else {
+          setProfile(null);
+        }
       } catch (error) {
         console.error('Error getting user:', error);
       }
@@ -103,8 +119,12 @@ export default function Navbar() {
             {isLoggedIn ? (
               <div className="flex items-center space-x-4">
                 <span className="text-sm text-foreground/60">
-                  Welcome, {user?.email}
+                  <span className='hidden lg:flex'>Welcome, </span>{profile?.username || "..."}
                 </span>
+                <Avatar>
+                  <AvatarImage src={profile?.avatar_url} alt="avatar"/>
+                  <AvatarFallback>{profile?.username?.[0]?.toUpperCase()}</AvatarFallback>
+                </Avatar>
                 <LogoutButton />
               </div>
             ) : (

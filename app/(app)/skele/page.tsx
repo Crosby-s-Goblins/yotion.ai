@@ -173,7 +173,7 @@ export default function SkelePage() {
                 </div>
             </div>
             <div className="bg-black/75 text-white px-6 py-4 rounded-full flex items-center justify-center">
-                <p className="text-2xl">0:48</p>
+                <p className="text-2xl font-medium">0:48</p>
             </div>
             <div className="flex text-white px-4 py-2 rounded-lg w-1/3 justify-end">
                 <div className="bg-black/75 text-white px-4 py-4 rounded-full">
@@ -185,7 +185,7 @@ export default function SkelePage() {
         {/* Bottom UI Bar */}
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
             <div className="bg-black/75 text-white px-12 py-4 rounded-full flex items-center justify-center gap-4">
-                <p className="text-2xl">Reset</p>
+                <p className="text-2xl font-medium">Reset</p>
                 <RotateCcw className="w-8 h-8"/>
             </div>
         </div>

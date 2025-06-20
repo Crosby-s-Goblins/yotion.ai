@@ -1,13 +1,61 @@
 'use client';
 
-import { Info, Play, RotateCcw } from "lucide-react";
+import { Info, Play, RotateCcw, Camera, CameraOff, X } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
 export default function SkelePage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isCameraOn, setIsCameraOn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [breathingPhase, setBreathingPhase] = useState<'inhale' | 'exhale'>('inhale');
   const [breathProgress, setBreathProgress] = useState(0);
+
+  // Start camera
+  const startCamera = async () => {
+    if (!videoRef.current) return;
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+          facingMode: 'user' // Use front camera
+        }
+      });
+      
+      videoRef.current.srcObject = stream;
+      setIsCameraOn(true);
+    } catch (err) {
+      console.error('Error accessing camera:', err);
+      setError('Unable to access camera. Please check permissions.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Stop camera
+  const stopCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+      setIsCameraOn(false);
+    }
+  };
+
+  // Auto-start camera on mount
+  useEffect(() => {
+    startCamera();
+    
+    // Cleanup on unmount
+    return () => {
+      stopCamera();
+    };
+  }, []);
 
   // Breathing animation
   useEffect(() => {
@@ -30,7 +78,7 @@ export default function SkelePage() {
     }, interval);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [breathingPhase]);
 
   // Calculate circle size based on breathing phase
   const getCircleSize = () => {
@@ -51,11 +99,40 @@ export default function SkelePage() {
       <div className="absolute inset-0 bg-gray-400">
         <video
           ref={videoRef}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transform scale-x-[-1]"
           autoPlay
           playsInline
           muted
         />
+        
+        {/* Loading/Error overlay */}
+        {!isCameraOn && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+            <div className="text-center text-white">
+              {isLoading ? (
+                <>
+                  <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                  <p className="text-lg">Accessing camera...</p>
+                </>
+              ) : (
+                <>
+                  <Camera className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                  <p className="text-lg mb-4">Camera not available</p>
+                  {error && (
+                    <p className="text-red-400 text-sm mb-4 max-w-md mx-auto">{error}</p>
+                  )}
+                  <button
+                    onClick={startCamera}
+                    className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg flex items-center gap-2 mx-auto"
+                  >
+                    <Camera className="w-4 h-4" />
+                    Try Again
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* UI Overlay - Absolute positioned on top */}
@@ -90,13 +167,16 @@ export default function SkelePage() {
 
         {/* Top UI Bar */}
         <div className="absolute top-4 left-4 right-4 flex justify-between items-center">
-            <div className="flex text-white px-4 py-2 rounded-lg w-1/3 justify-start">
+        <div className="flex text-white px-4 py-2 rounded-lg w-1/3 justify-start">
+                <div className="bg-black/75 text-white px-4 py-4 rounded-full">
+                    <X className="w-8 h-8" />
+                </div>
             </div>
-            <div className="flex text-white px-4 py-2 rounded-lg w-1/3 justify-center">
-                <p className="text-black text-4xl font-semibold">0:43</p>
+            <div className="bg-black/75 text-white px-6 py-4 rounded-full flex items-center justify-center">
+                <p className="text-2xl">0:48</p>
             </div>
             <div className="flex text-white px-4 py-2 rounded-lg w-1/3 justify-end">
-                <div className="bg-black/50 text-white px-4 py-4 rounded-full">
+                <div className="bg-black/75 text-white px-4 py-4 rounded-full">
                     <Info className="w-8 h-8" />
                 </div>
             </div>
@@ -104,17 +184,10 @@ export default function SkelePage() {
 
         {/* Bottom UI Bar */}
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
-            <div className="bg-black/50 text-white px-12 py-4 rounded-full flex items-center justify-center gap-4">
+            <div className="bg-black/75 text-white px-12 py-4 rounded-full flex items-center justify-center gap-4">
                 <p className="text-2xl">Reset</p>
                 <RotateCcw className="w-8 h-8"/>
             </div>
-        </div>
-
-        {/* Center UI */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <div className="bg-black/50 text-white px-4 py-2 rounded-lg">
-            Center overlay
-          </div>
         </div>
       </div>
     </div>

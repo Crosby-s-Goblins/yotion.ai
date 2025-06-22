@@ -12,7 +12,7 @@ import { toast } from "sonner"
 import { Button } from "./ui/button";
 import { FileUpload } from "@/components/ui/file-upload";
 //Icons
-import { Loader2Icon, Check } from "lucide-react"
+import { ExternalLink, Loader2Icon, Check } from "lucide-react"
 
 interface SettingsProps {
     user: any;
@@ -165,9 +165,10 @@ const Settings = ({ user }: SettingsProps) => {
                                     </form>
                                 </div>
                                 <Separator/>
-                                <div>
+                                <div className="flex flex-col gap-2">
                                     <CardTitle>Change Password</CardTitle>
                                     <CardDescription>Change the password associated with your account.</CardDescription>
+                                    <Button variant="outline" asChild><a href="/update-password"><ExternalLink/>Edit Password</a></Button>
                                 </div>
                             </CardHeader>
                         </Card>

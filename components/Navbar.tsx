@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { Button } from './ui/button';
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 
 export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -119,12 +119,25 @@ export default function Navbar() {
             {isLoggedIn ? (
               <div className="flex items-center space-x-4">
                 <span className="text-sm text-foreground/60">
-                  <span className='hidden lg:flex'>Welcome, </span>{profile?.username || "..."}
+                  <span className='hidden lg:flex'>{profile?.username || "..."}</span>
                 </span>
-                <Avatar>
-                  <AvatarImage src={profile?.avatar_url} alt="avatar"/>
-                  <AvatarFallback>{profile?.username?.[0]?.toUpperCase()}</AvatarFallback>
-                </Avatar>
+                <HoverCard openDelay={0}>
+                  <HoverCardTrigger asChild>
+                    <Avatar>
+                      <AvatarImage src={profile?.avatar_url} alt="avatar"/>
+                      <AvatarFallback>{profile?.username?.[0]?.toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                  </HoverCardTrigger>
+                  <HoverCardContent>
+                    <div className='flex flex-col items-left gap-2'>
+                      <div className='flex flex-col'>
+                        <p className='opacity-50'>Logged in as:</p>
+                        <p>{user?.email}</p>
+                      </div>
+                      <Button variant="outline" asChild><a href='/settings'>profile settings</a></Button>
+                    </div>
+                  </HoverCardContent>
+                </HoverCard>
                 <LogoutButton />
               </div>
             ) : (

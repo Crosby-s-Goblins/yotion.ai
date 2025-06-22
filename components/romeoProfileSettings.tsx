@@ -11,6 +11,7 @@ import { Toaster } from "@/components/ui/sonner"
 import { toast } from "sonner"
 import { Button } from "./ui/button";
 import { FileUpload } from "@/components/ui/file-upload";
+import { ScrollArea } from "@/components/ui/scroll-area"
 //Icons
 import { ExternalLink, Loader2Icon, Check } from "lucide-react"
 
@@ -128,11 +129,14 @@ const Settings = ({ user }: SettingsProps) => {
                 <Tabs defaultValue="profile" className="flex items-center w-[80%] max-w-[450px]">
                     <TabsList>
                         <TabsTrigger value="profile">Profile</TabsTrigger>
-                        <TabsTrigger value="account">Account</TabsTrigger>
+                        <TabsTrigger value="details">Details</TabsTrigger>
                         <TabsTrigger value="app">App</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="profile" className="w-full">
+                        <div>
+                            <p className="text-lg font-bold my-3">Account Preferences</p>
+                        </div>
                         <Card>
                             <CardHeader className="flex flex-col gap-5">
                                 <div className="flex items-center">
@@ -173,10 +177,16 @@ const Settings = ({ user }: SettingsProps) => {
                             </CardHeader>
                         </Card>
                     </TabsContent>
-                    <TabsContent value="account">
-                        <div className="mb-2 py-4">
-                            <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">Account Settings</h1>
-                            <h1 className="leading-7">Manage your profile settings</h1>
+                    <TabsContent value="details" className="w-full">
+                        <div className="w-full">
+                            <div>
+                                <p className="text-lg font-bold my-3">Account Details</p>
+                            </div>
+                            <ScrollArea className="py-4 h-[500px] rounded-md border bg-muted">
+                                <pre className="text-xs whitespace-pre-wrap">
+                                    {JSON.stringify(user, null, 2)}
+                                </pre>
+                            </ScrollArea>
                         </div>
                     </TabsContent>
                     <TabsContent value="app">

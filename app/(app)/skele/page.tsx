@@ -9,7 +9,6 @@ import { Pose } from "@/components/selectorCardComponents/types";
 import { usePoseCorrection } from "@/components/poseCorrection";
 
 function SkelePageContent() {
-  const videoRef = useRef<HTMLVideoElement>(null);
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,6 +24,21 @@ function SkelePageContent() {
 
   const searchParams = useSearchParams();
   const poseId = searchParams.get('poseId');
+
+  const [selectedPose, setSelectedPose] = useState(0);
+  const {
+    rightElbowAngle,
+    leftElbowAngle,
+    rightKneeAngle,
+    leftKneeAngle,
+    rightHipAngle,
+    leftHipAngle,
+    rightShoulderAngle,
+    leftShoulderAngle,
+    formText,
+    videoRef,
+    canvasRef,
+  } = usePoseCorrection(selectedPose);
 
   useEffect(() => {
     const fetchPose = async () => {
@@ -191,10 +205,14 @@ function SkelePageContent() {
       <div className="absolute inset-0 bg-gray-400">
         <video
           ref={videoRef}
-          className="w-full h-full object-cover transform scale-x-[-1]"
-          autoPlay
-          playsInline
+          style={{ display: 'none' }}
           muted
+          playsInline
+          className="scale-x-[-1]"
+        />
+        <canvas
+          ref={canvasRef}
+          className="scale-x-[-1]"
         />
 
         {/* Loading/Error overlay */}
@@ -356,6 +374,20 @@ function SkelePageContent() {
           </div>
         </div>
       )}
+
+      <div className="absolute z-50 flex flex-col items-center w-full">
+        <h1 className="m-3 text-white text-4xl font-bold">{formText}</h1>
+        <div>
+          <span>Right Elbow: {rightElbowAngle}</span>
+          <span>Left Elbow: {leftElbowAngle}</span>
+          <span>Right Knee: {rightKneeAngle}</span>
+          <span>Left Knee: {leftKneeAngle}</span>
+          <span>Right Hip: {rightHipAngle}</span>
+          <span>Left Hip: {leftHipAngle}</span>
+          <span>Right Shoulder: {rightShoulderAngle}</span>
+          <span>Left Shoulder: {leftShoulderAngle}</span>
+        </div>
+      </div>
     </div>
   );
 }

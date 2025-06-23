@@ -13,13 +13,13 @@ export function ExpandedPoseCard ({ pose, onClose }: Props) {
 
   let benefits: string[] = [];
 
-   if (pose.benefits && typeof pose.benefits === 'string' && pose.benefits.trim() !== '') {
+   if (pose.benefits && typeof pose.benefits === 'string' && (pose.benefits as string).trim() !== '') {
     try {
       const parsed = JSON.parse(pose.benefits);
       if (Array.isArray(parsed)) {
         benefits = parsed;
       } else {
-        benefits = pose.benefits.split(',').map(str => str.trim());
+        benefits = (pose.benefits as string).split(',').map(str => str.trim());
       }
     } catch {
       //This does nothing, likely because the value is left empty

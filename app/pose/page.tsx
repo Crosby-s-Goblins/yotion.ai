@@ -1,5 +1,3 @@
-'use client'
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import PushUpCounter from "@/components/romeoPushUpCounter"
 import FormCorrect from "@/components/romeoFormCorrect"

@@ -63,12 +63,11 @@ export default function poseDetection() {
 
     function isVisible(...points: any[]): boolean {
         return points.every(p => p && p.visibility !== undefined && p.visibility > 0.5);
-    }    
+    }
 
     useEffect(() => {
-        
         init();
-    }, []);    
+    }, []);
 
     const init = async () => {
         // Load model

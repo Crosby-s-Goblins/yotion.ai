@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { X } from "lucide-react";
 import { Pose } from "./types";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 interface Props {
   pose: Pose;
@@ -81,7 +82,9 @@ export function ExpandedPoseCard ({ pose, onClose }: Props) {
               </div>
             )}
             <Button className="rounded-3xl h-12 bg-blue-500">
-              <p className="text-white text-lg">Start</p>
+              <Link href = "/skele"> {/* Change HRef if page link name ever changes */}
+                <p className="text-white text-lg">Start</p>
+              </Link>   
             </Button>
           </div>
         </div>

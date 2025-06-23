@@ -1,6 +1,6 @@
 'use client';
 
-import { Info, Play, RotateCcw, Camera, CameraOff, X, LinkedinIcon } from "lucide-react";
+import { Info, Play, RotateCcw, Camera, CameraOff, X } from "lucide-react";
 import Link from "next/link";
 import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";

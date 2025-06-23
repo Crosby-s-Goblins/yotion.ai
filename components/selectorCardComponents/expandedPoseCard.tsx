@@ -13,6 +13,7 @@ export function ExpandedPoseCard ({ pose, onClose }: Props) {
 
   let benefits: string[] = [];
 
+
    if (pose.benefits) {
     if (Array.isArray(pose.benefits)) {
       benefits = pose.benefits;
@@ -24,6 +25,7 @@ export function ExpandedPoseCard ({ pose, onClose }: Props) {
         }
       } catch {
         // Fallback for non-JSON strings, or leave empty
+
       }
     }
   }

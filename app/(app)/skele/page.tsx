@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Info, Play, RotateCcw, Camera, CameraOff, X } from "lucide-react";
+import { Info, Play, RotateCcw, Camera, CameraOff, X, LinkedinIcon } from "lucide-react";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 
@@ -13,6 +13,7 @@ export default function SkelePage() {
     "inhale",
   );
   const [breathProgress, setBreathProgress] = useState(0);
+  const [showInfoModal, setShowInfoModal] = useState(false);
 
   // Start camera
   const startCamera = async () => {
@@ -186,7 +187,10 @@ export default function SkelePage() {
             <p className="text-2xl font-medium">0:48</p>
           </div>
           <div className="flex text-white px-4 py-2 rounded-lg w-1/3 justify-end">
-            <div className="bg-black/75 text-white px-4 py-4 rounded-full">
+            <div 
+              className="bg-black/75 text-white px-4 py-4 rounded-full cursor-pointer hover:bg-black/90 transition-colors"
+              onClick={() => setShowInfoModal(true)}
+            >
               <Info className="w-8 h-8" />
             </div>
           </div>
@@ -200,6 +204,60 @@ export default function SkelePage() {
           </div>
         </div>
       </div>
+
+      {/* Info Modal */}
+      {showInfoModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowInfoModal(false)}
+          />
+          
+          {/* Modal Content */}
+          <div className="relative bg-white rounded-2xl p-8 max-w-md mx-4 shadow-2xl">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowInfoModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            
+            {/* Modal Header */}
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Info className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Warrior I</h2>
+              <p className="text-gray-600">Follow the breathing pattern for optimal results</p>
+            </div>
+            
+            {/* Modal Body */}
+            <div className="space-y-4">      
+              <div className="space-y-3">
+                <h3 className="font-semibold text-gray-900">Instructions</h3>
+                <div className="text-sm text-gray-600 space-y-2">
+                  <p>• Put your left arm etc.</p>
+                  <p>• Put your left arm etc.</p>
+                  <p>• Put your left arm etc.</p>
+                  <p>• Put your left arm etc.</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Modal Footer */}
+            <div className="mt-6 pt-4 border-t border-gray-200">
+              <button
+                onClick={() => setShowInfoModal(false)}
+                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-6 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200"
+              >
+                Got it
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

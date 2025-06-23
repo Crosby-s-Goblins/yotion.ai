@@ -6,6 +6,7 @@ import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Pose } from "@/components/selectorCardComponents/types";
+import { usePoseCorrection } from "@/components/poseCorrection";
 
 function SkelePageContent() {
   const videoRef = useRef<HTMLVideoElement>(null);

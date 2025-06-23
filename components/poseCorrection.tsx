@@ -18,7 +18,7 @@ import {
     CarouselPrevious,
   } from "@/components/ui/carousel"
 
-export default function formCorrect() {
+export function usePoseCorrection(selectedPose: number) {
     let poseLandmarker: PoseLandmarker | null = null;
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -40,9 +40,6 @@ export default function formCorrect() {
     // text to speech 
     const [formText, setFormText] = useState<string | null>("no text yet");
 
-    // manage state
-    const [selectedPose, setSelectedPose] = useState<number>(0);
-
     const selectedPoseRef = useRef(selectedPose);
 
     useEffect(() => {
@@ -63,51 +60,51 @@ export default function formCorrect() {
 
     function isVisible(...points: any[]): boolean {
         return points.every(p => p && p.visibility !== undefined && p.visibility > 0.5);
-    }
+    }    
 
     useEffect(() => {
-        init();
-    }, []);
+        let isMounted = true;
+        let animationFrameId: number;
+        let poseLandmarkerInstance: PoseLandmarker | null = null;
 
-    const init = async () => {
-        // Load model
-        const vision = await FilesetResolver.forVisionTasks(
-            "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
-        );
-        poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
-            baseOptions: {
-                modelAssetPath:
-                    "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task",
-            },
-            runningMode: "VIDEO",
-        });
+        async function init() {
+            const vision = await FilesetResolver.forVisionTasks(
+                "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
+            );
+            poseLandmarkerInstance = await PoseLandmarker.createFromOptions(vision, {
+                baseOptions: {
+                    modelAssetPath:
+                        "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task",
+                },
+                runningMode: "VIDEO",
+            });
+            await poseLandmarkerInstance.setOptions({ runningMode: "VIDEO" });
 
-        await poseLandmarker.setOptions({ runningMode: "VIDEO" });
+            // Setup webcam
+            const video = videoRef.current;
+            if (video) {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
 
-        // Setup webcam
-        const video = videoRef.current;
-        if (video) {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            video.srcObject = stream;
-
-            video.onloadedmetadata = () => {
-                video.play();
-                renderLoop();
-            };
+                video.onloadedmetadata = () => {
+                    video.play();
+                    renderLoop();
+                };
+            }
         }
 
         function renderLoop(): void {
             const canvas = canvasRef.current;
             const video = videoRef.current;
 
-            if (!canvas || !video || !poseLandmarker) {
-                requestAnimationFrame(renderLoop);
+            if (!canvas || !video || !poseLandmarkerInstance) {
+                animationFrameId = requestAnimationFrame(renderLoop);
                 return;
             }
 
             const canvasCtx = canvas.getContext("2d");
             if (!canvasCtx) {
-                requestAnimationFrame(renderLoop);
+                animationFrameId = requestAnimationFrame(renderLoop);
                 return;
             }
 
@@ -121,7 +118,7 @@ export default function formCorrect() {
             const drawingUtils = new DrawingUtils(canvasCtx);
             const now = performance.now();
 
-            poseLandmarker.detectForVideo(video, now, (result) => {
+            poseLandmarkerInstance.detectForVideo(video, now, (result) => {
                 for (const landmark of result.landmarks) {
 
                     const rightElbowAngle = calculateAngle(
@@ -312,73 +309,36 @@ export default function formCorrect() {
                 }
             });
             
-            requestAnimationFrame(renderLoop);
+            animationFrameId = requestAnimationFrame(renderLoop);
         }
-    };
 
-    return (
-        <div>
-            <div className='flex justify-center'>
-                <div className='absolute z-50 flex'>
-                    <h1 className='m-3 text-white text-4xl font-bold'>{formText}</h1>
-                </div>
-                <video
-                    ref={videoRef}
-                    style={{ display: 'none' }}
-                    muted
-                    playsInline
-                    className="scale-x-[-1]"
-                />
-                <canvas
-                    id="output_canvas"
-                    ref={canvasRef}
-                    className="scale-x-[-1]"
-                />
-            </div>
-            <div className="flex gap-2 my-4">
-                {poseData.map((pose, index) => (
-                    <Button 
-                        variant="outline"
-                        key={index}
-                        onClick={() => setSelectedPose(index)}
-                    >
-                        {pose.pose} ({pose.side})
-                    </Button>
-                ))}
-            </div>
-            <div className='flex'>
-                <div className='flex flex-col flex-1'>
-                    <h2 className="text-xl font-bold mb-2">Current Angles</h2>
-                    <span>rightElbowAngle: {rightElbowAngle? rightElbowAngle : "invisible"}</span>
-                    <span>leftElbowAngle: {leftElbowAngle? leftElbowAngle : "invisible"}</span>
-                    <span>rightKneeAngle: {rightKneeAngle? rightKneeAngle : "invisible"}</span>
-                    <span>leftKneeAngle: {leftKneeAngle? leftKneeAngle : "invisible"}</span>
-                    <span>rightShoulderAngle: {rightShoulderAngle? rightShoulderAngle : "invisible"}</span>
-                    <span>leftShoulderAngle: {leftShoulderAngle? leftShoulderAngle : "invisible"}</span>
-                    <span>rightHipAngle: {rightHipAngle? rightHipAngle : "invisible"}</span>
-                    <span>leftHipAngle: {leftHipAngle? leftHipAngle : "invisible"}</span>
-                </div>
-                <Carousel>
-                    <CarouselContent>
-                        <CarouselItem>
-                            <div className='flex flex-col flex-1'>
-                                <h2 className="text-xl font-bold mb-2">{poseData[selectedPose].pose} ({poseData[selectedPose].side})</h2>
-                                {poseData[selectedPose].angles.map((angle, index) => (
-                                    <span key={index}>
-                                        {angle.joint}: {angle.expected}° (±{angle.tolerance}°)
-                                    </span>
-                                ))}
-                            </div>
-                        </CarouselItem>
-                        <CarouselItem>
-                            {
-                                selectedPose === 0 ? (<Image className='absolute opacity-50' src='/warrior_2.gif' width={500} height={500} alt="warrior II gif"></Image>) : (<></>)
-                            }
-                        </CarouselItem>
-                        <CarouselPrevious/>
-                    </CarouselContent>
-                </Carousel>
-            </div>
-        </div>
-    );
+        init();
+        return () => {
+            isMounted = false;
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        };
+    }, [selectedPose]);
+
+    return {
+        rightElbowAngle,
+        leftElbowAngle,
+        rightKneeAngle,
+        leftKneeAngle,
+        rightHipAngle,
+        leftHipAngle,
+        rightShoulderAngle,
+        leftShoulderAngle,
+        formText,
+        videoRef,
+        canvasRef,
+        setFormText,
+        setRightElbowAngle,
+        setLeftElbowAngle,
+        setRightKneeAngle,
+        setLeftKneeAngle,
+        setRightHipAngle,
+        setLeftHipAngle,
+        setRightShoulderAngle,
+        setLeftShoulderAngle,
+    };
 }

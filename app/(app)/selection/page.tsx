@@ -9,6 +9,7 @@ import Link from "next/link";
 import { PoseItem } from "@/components/selectorCardComponents/poseItem";
 import { ExpandedPoseCard } from "@/components/selectorCardComponents/expandedPoseCard";
 import { createClient } from "@/lib/supabase/client";
+import Loading from "@/components/loading";
 
 export default function SelectionComponents() {
   const [poses, setPoses] = useState<any[]>([]);
@@ -76,7 +77,7 @@ export default function SelectionComponents() {
   );
 
   if(paidStatus === null){
-    return <p>Loading exercises. Please hold.</p>;
+    return <Loading />;
   }
   if(paidStatus){
     return (

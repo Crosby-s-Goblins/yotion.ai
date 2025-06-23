@@ -137,7 +137,8 @@ export default function SelectionComponents() {
   );
 }
 else{
-  return (<main className="h-screen flex flex-col items-center justify-center">
+  return (
+    <main className="h-screen flex flex-col items-center justify-center">
       <div className="flex flex-col text-center">
         <div className="flex w-screen items-center">
           <div className="flex basis-1/3 justify-start pl-16">  

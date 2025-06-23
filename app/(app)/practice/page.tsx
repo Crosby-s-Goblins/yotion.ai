@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Settings, Users, ChartNoAxesCombined, Flame } from 'lucide-react';
 
 export default function PracticePage() {
@@ -27,7 +27,7 @@ export default function PracticePage() {
                     </Card>
 
                     <Card className="flex flex-col justify-center items-center w-80 h-80 aspect-square transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-gray-200/50 cursor-pointer">
-                    <a href="/selection" className="w-full h-full flex flex-col justify-center items-center">
+                    <a href="/performance" className="w-full h-full flex flex-col justify-center items-center">
                         <CardHeader className="flex flex-col justify-center items-center">
                             <CardTitle className="text-2xl">Performance</CardTitle>
                         </CardHeader>
@@ -43,7 +43,7 @@ export default function PracticePage() {
                     </Card>
 
                     <Card className="flex flex-col justify-center items-center w-80 h-80 aspect-square transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-gray-200/50 cursor-pointer">
-                    <a href="/selection" className="w-full h-full flex flex-col justify-center items-center">
+                    <a href="/community" className="w-full h-full flex flex-col justify-center items-center">
                         <CardHeader className="flex flex-col justify-center items-center">
                             <CardTitle className="text-2xl">Community</CardTitle>
                         </CardHeader>
@@ -59,7 +59,7 @@ export default function PracticePage() {
                     </Card>
 
                     <Card className="flex flex-col justify-center items-center w-80 h-80 aspect-square transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-gray-200/50 cursor-pointer">
-                    <a href="/selection" className="w-full h-full flex flex-col justify-center items-center">
+                    <a href="/appSettings" className="w-full h-full flex flex-col justify-center items-center">
                         <CardHeader className="flex flex-col justify-center items-center">
                             <CardTitle className="text-2xl">Settings</CardTitle>
                         </CardHeader>

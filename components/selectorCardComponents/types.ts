@@ -1,6 +1,7 @@
 export interface Pose {
+  id: number;
   name: string;
   difficulty: 'Easy' | 'Medium' | 'Hard';
   description?: string;
-  benefits?: string[];
+  benefits?: string[] | string;
 }

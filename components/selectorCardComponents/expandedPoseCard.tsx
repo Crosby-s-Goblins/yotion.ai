@@ -13,19 +13,19 @@ export function ExpandedPoseCard ({ pose, onClose }: Props) {
 
   let benefits: string[] = [];
 
-   if (pose.benefits && typeof pose.benefits === 'string' && pose.benefits.trim() !== '') {
-    try {
-      const parsed = JSON.parse(pose.benefits);
-      if (Array.isArray(parsed)) {
-        benefits = parsed;
-      } else {
-        benefits = pose.benefits.split(',').map(str => str.trim());
+   if (pose.benefits) {
+    if (Array.isArray(pose.benefits)) {
+      benefits = pose.benefits;
+    } else if (typeof pose.benefits === 'string' && pose.benefits.trim() !== '') {
+      try {
+        const parsed = JSON.parse(pose.benefits);
+        if (Array.isArray(parsed)) {
+          benefits = parsed;
+        }
+      } catch {
+        // Fallback for non-JSON strings, or leave empty
       }
-    } catch {
-      //This does nothing, likely because the value is left empty
     }
-  } else if (Array.isArray(pose.benefits)) {
-    benefits = pose.benefits.filter(b => typeof b === 'string' && b.trim() !== '');
   }
   
 
@@ -82,7 +82,7 @@ export function ExpandedPoseCard ({ pose, onClose }: Props) {
               </div>
             )}
             <Button className="rounded-3xl h-12 bg-blue-500">
-              <Link href = "/skele"> {/* Change HRef if page link name ever changes */}
+              <Link href={`/skele?poseId=${pose.id}`}>
                 <p className="text-white text-lg">Start</p>
               </Link>   
             </Button>

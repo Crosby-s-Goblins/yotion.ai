@@ -1,80 +1,104 @@
-'use client'
+"use client";
 // Logic
 import { createClient } from "@/lib/supabase/client";
 import { useState } from "react";
+import { LogoutButton } from "./logout-button";
+
 // UI stuff
-import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+    Card,
+    CardAction,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Separator } from "@/components/ui/separator";
-import { Toaster } from "@/components/ui/sonner"
-import { toast } from "sonner"
+import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import { Button } from "./ui/button";
 import { FileUpload } from "@/components/ui/file-upload";
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+
 //Icons
-import { ExternalLink, Loader2Icon, Check } from "lucide-react"
+import { ExternalLink, Loader2Icon, Check, CircleAlert } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface SettingsProps {
     user: any;
 }
 
 const Settings = ({ user }: SettingsProps) => {
-    const [username, setUsername] = useState<string>('');
-    
-    // states for the username input too lazy to change the names 
+    const [username, setUsername] = useState<string>("");
+
+    // states for the username input too lazy to change the names
     const [loading, setLoading] = useState<boolean>(false);
     const [locked, setLocked] = useState<boolean>(false);
 
     // states for the avatar input
     const [loadingAvatar, setLoadingAvatar] = useState<boolean>(false);
+    const router = useRouter();
 
-    const changeUsername = async (newName : string) => {
+    const changeUsername = async (newName: string) => {
         setLoading(true);
         const supabase = await createClient();
 
         try {
             if (newName.length < 3) {
-                throw ("Username must be above 3 characters!")
-            } else if (newName.length > 15){
-                throw ("Username must be under 15 characters!")
-            } else if (!/^[a-zA-Z0-9]+$/.test(newName)){
+                throw "Username must be above 3 characters!";
+            } else if (newName.length > 15) {
+                throw "Username must be under 15 characters!";
+            } else if (!/^[a-zA-Z0-9]+$/.test(newName)) {
                 throw "Username can only contain letters and numbers!";
             }
 
             const { error } = await supabase
-                .from('profiles')
-                .update({username: newName})
-                .eq('id', user?.id)
-    
-            setLocked(true)
-            toast("Success! Changes will be applied shortly.")
+                .from("profiles")
+                .update({ username: newName })
+                .eq("id", user?.id);
+
+            setLocked(true);
+            toast("Success! Changes will be applied shortly.");
         } catch (e) {
             toast(`${e}`);
         }
-        setLoading(false)
-    }
+        setLoading(false);
+    };
 
     const changeAvatar = async (newAvatarUrl: string) => {
         const supabase = await createClient();
-      
+
         const { error } = await supabase
-          .from('profiles')
-          .update({ avatar_url: newAvatarUrl })
-          .eq('id', user?.id);
-      
+            .from("profiles")
+            .update({ avatar_url: newAvatarUrl })
+            .eq("id", user?.id);
+
         if (error) {
-          toast(`Error updating avatar: ${error}`);
+            toast(`Error updating avatar: ${error}`);
         } else {
-          toast("Avatar updated!");
+            toast("Avatar updated!");
         }
-      };
-      
-    
+    };
+
     const handleAvatarUpload = async (files: File[]) => {
         setLoadingAvatar(true);
         const file = files[0];
-        
+
         if (!file) {
             setLoadingAvatar(false);
             return;
@@ -84,9 +108,8 @@ const Settings = ({ user }: SettingsProps) => {
             const supabase = await createClient();
             const filePath = `${user?.id}`;
 
-            const { error: uploadError } = await supabase
-                .storage
-                .from('avatars')
+            const { error: uploadError } = await supabase.storage
+                .from("avatars")
                 .upload(filePath, file, { upsert: true });
 
             if (uploadError) {
@@ -95,8 +118,10 @@ const Settings = ({ user }: SettingsProps) => {
                 return;
             }
 
-            const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
-            const publicUrl = data?.publicUrl ? `${data.publicUrl}?v=${Date.now()}` : undefined;
+            const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+            const publicUrl = data?.publicUrl
+                ? `${data.publicUrl}?v=${Date.now()}`
+                : undefined;
 
             if (!publicUrl) {
                 toast("Failed to retrieve image URL.");
@@ -115,72 +140,132 @@ const Settings = ({ user }: SettingsProps) => {
     const handleUsernameSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         await changeUsername(username);
-        setUsername('');
+        setUsername("");
+    };
+
+    const logout = async () => {
+        const supabase = createClient();
+        await supabase.auth.signOut();
+        router.push("/");
     };
 
     return (
         <div>
-            <Toaster/>
+            <Toaster />
             <div className="w-full flex flex-col items-center">
                 <div className="my-8 w-[80%] max-w-[450px]">
-                    <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">Manage Settings</h1>
+                    <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
+                        Manage Settings
+                    </h1>
                     <h1 className="leading-7">Welcome, fellow Yogi!</h1>
                 </div>
-                <Tabs defaultValue="profile" className="flex items-center w-[80%] max-w-[450px]">
+                <Tabs
+                    defaultValue="profile"
+                    className="flex items-center w-[80%] max-w-[450px] mb-10"
+                >
                     <TabsList>
                         <TabsTrigger value="profile">Profile</TabsTrigger>
                         <TabsTrigger value="details">Details</TabsTrigger>
-                        <TabsTrigger value="app">App</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="profile" className="w-full">
                         <div>
                             <p className="text-lg font-bold my-3">Account Preferences</p>
                         </div>
-                        <Card>
-                            <CardHeader className="flex flex-col gap-5">
-                                <div className="flex items-center">
-                                    <div className="w-full">
-                                        <div className="flex flex-col gap-1 flex-1">
-                                            <CardTitle>Change Avatar</CardTitle>
-                                            <CardDescription>Upload a new profile picture for your account.</CardDescription>
+                        <div className="flex flex-col gap-3">
+                            <Card>
+                                <CardHeader className="flex flex-col gap-5">
+                                    <div className="flex items-center">
+                                        <div className="w-full">
+                                            <div className="flex flex-col gap-1 flex-1">
+                                                <CardTitle>Change Avatar</CardTitle>
+                                                <CardDescription>
+                                                    Upload a new profile picture for your account.
+                                                </CardDescription>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <FileUpload isLoading={loadingAvatar} onChange={handleAvatarUpload}/>
-                                </div>
-                                <Separator/>
-                                <div className="flex flex-col gap-3">
-                                    <div className="flex flex-col gap-1">
-                                        <CardTitle>Change Username</CardTitle>
-                                        <CardDescription>Change the way your name appears on Yogai.</CardDescription>
-                                    </div>
-                                    <form className="flex gap-2" onSubmit={handleUsernameSubmit}>
-                                        <Input 
-                                            placeholder="New username" 
-                                            value={username}
-                                            onChange={(e) => setUsername(e.target.value)}
-                                            disabled={locked}
+                                        <FileUpload
+                                            isLoading={loadingAvatar}
+                                            onChange={handleAvatarUpload}
                                         />
-                                        <Button type="submit" disabled={loading || locked}>
-                                            {
-                                                loading ? (<Loader2Icon className="animate-spin"/>) : (locked ? (<Check></Check>) : ("Submit"))
-                                            }
+                                    </div>
+                                    <Separator />
+                                    <div className="flex flex-col gap-3">
+                                        <div className="flex flex-col gap-1">
+                                            <CardTitle>Change Username</CardTitle>
+                                            <CardDescription>
+                                                Change the way your name appears on Yogai.
+                                            </CardDescription>
+                                        </div>
+                                        <form
+                                            className="flex gap-2"
+                                            onSubmit={handleUsernameSubmit}
+                                        >
+                                            <Input
+                                                placeholder="New username"
+                                                value={username}
+                                                onChange={(e) => setUsername(e.target.value)}
+                                                disabled={locked}
+                                            />
+                                            <Button type="submit" disabled={loading || locked}>
+                                                {loading ? (
+                                                    <Loader2Icon className="animate-spin" />
+                                                ) : locked ? (
+                                                    <Check></Check>
+                                                ) : (
+                                                    "Submit"
+                                                )}
+                                            </Button>
+                                        </form>
+                                    </div>
+                                    <Separator />
+                                    <div className="flex flex-col gap-2">
+                                        <CardTitle>Change Password</CardTitle>
+                                        <CardDescription>
+                                            Change the password associated with your account.
+                                        </CardDescription>
+                                        <Button asChild>
+                                            <a href="/update-password">
+                                                <ExternalLink />
+                                                Edit Password
+                                            </a>
                                         </Button>
-                                    </form>
-                                </div>
-                                <Separator/>
-                                <div className="flex flex-col gap-2">
-                                    <CardTitle>Change Password</CardTitle>
-                                    <CardDescription>Change the password associated with your account.</CardDescription>
-                                    <Button variant="outline" asChild><a href="/update-password"><ExternalLink/>Edit Password</a></Button>
-                                </div>
-                            </CardHeader>
-                        </Card>
+                                    </div>
+                                    <Separator />
+                                    <div className="flex flex-col gap-3">
+                                        <CardTitle>User Settings</CardTitle>
+                                        <Button onClick={logout}>
+                                            Logout
+                                        </Button>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button variant="destructive"><CircleAlert/>Delete account</Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <p className="font-bold text-red-500 text-2xl">WARNING!</p>
+                                                    <AlertDialogTitle>Are you <span className="text-red-600">absolutely</span> sure?</AlertDialogTitle>
+                                                    <AlertDialogDescription> This action cannot be undone. This will permanently delete your account and remove your data from our servers.</AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction>Continue</AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </div>
+                                </CardHeader>
+                            </Card>
+                        </div>
                     </TabsContent>
                     <TabsContent value="details" className="w-full">
                         <div className="w-full">
-                            <div>
+                            <div className="flex items-center gap-3">
                                 <p className="text-lg font-bold my-3">Account Details</p>
+                                <Badge variant="destructive" className="flex gap-1">
+                                    <CircleAlert size={11} />
+                                    Advanced
+                                </Badge>
                             </div>
                             <ScrollArea className="py-4 h-[500px] rounded-md border bg-muted">
                                 <pre className="text-xs whitespace-pre-wrap">
@@ -189,13 +274,10 @@ const Settings = ({ user }: SettingsProps) => {
                             </ScrollArea>
                         </div>
                     </TabsContent>
-                    <TabsContent value="app">
-                        <h1>App Settings</h1>
-                    </TabsContent>
                 </Tabs>
             </div>
         </div>
     );
-}
- 
+};
+
 export default Settings;

@@ -123,10 +123,12 @@ export default function Navbar() {
                 </span>
                 <HoverCard openDelay={0}>
                   <HoverCardTrigger asChild>
-                    <Avatar>
-                      <AvatarImage src={profile?.avatar_url} alt="avatar"/>
-                      <AvatarFallback>{profile?.username?.[0]?.toUpperCase()}</AvatarFallback>
-                    </Avatar>
+                    <a href='/settings'>
+                      <Avatar>
+                        <AvatarImage src={profile?.avatar_url} alt="avatar"/>
+                        <AvatarFallback>{profile?.username?.[0]?.toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                    </a>
                   </HoverCardTrigger>
                   <HoverCardContent>
                     <div className='flex flex-col items-left gap-2'>
@@ -135,10 +137,11 @@ export default function Navbar() {
                         <p>{user?.email}</p>
                       </div>
                       <Button variant="outline" asChild><a href='/settings'>profile settings</a></Button>
+                      <LogoutButton/>
                     </div>
                   </HoverCardContent>
                 </HoverCard>
-                <LogoutButton />
+                <span className='hidden md:flex'><LogoutButton/></span>
               </div>
             ) : (
               <div className="flex items-center space-x-2">

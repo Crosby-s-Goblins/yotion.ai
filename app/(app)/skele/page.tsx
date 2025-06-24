@@ -26,7 +26,7 @@ function SkelePageContent() {
   const searchParams = useSearchParams();
   const poseId = searchParams.get('poseId');
 
-  const [selectedPose, setSelectedPose] = useState(11);
+  const [selectedPose, setSelectedPose] = useState(Number(poseId));
   const {
     rightElbowAngle,
     leftElbowAngle,

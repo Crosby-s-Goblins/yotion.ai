@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Pose } from "@/components/selectorCardComponents/types";
 import { usePoseCorrection } from "@/components/poseCorrection";
 import { BreathIndication } from "@/components/breathingIndicatorLineBall";
+import { Button } from "@/components/ui/button";
 
 function SkelePageContent() {
   const [isCameraOn, setIsCameraOn] = useState(false);
@@ -41,6 +42,14 @@ function SkelePageContent() {
     canvasRef,
   } = usePoseCorrection(selectedPose);
 
+  const [resetFlag, setResetFlag] = useState(false);
+
+  useEffect(() => {
+    if (resetFlag) {
+      setTimerSeconds(60); // Reset your logic here
+      setResetFlag(false); // Important: Reset the flag
+    }
+  }, [resetFlag]);
   useEffect(() => {
     const fetchPose = async () => {
       if (!poseId) {
@@ -277,10 +286,12 @@ function SkelePageContent() {
 
         {/* Bottom UI Bar */}
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
-          <div className="bg-black/75 text-white px-12 py-4 rounded-full flex items-center justify-center gap-4">
-            <p className="text-2xl font-medium">Reset</p>
-            <RotateCcw className="w-8 h-8" />
-          </div>
+          {/* <div className="bg-black/75 text-white px-12 py-4 rounded-full flex items-center justify-center gap-4"> */}
+            <Button onClick={() => setResetFlag(true)} className="bg-black/75 text-white px-12 py-4 rounded-full flex items-center justify-center gap-4">
+              <p className="text-2xl font-medium">Reset</p>
+              <RotateCcw className="w-8 h-8" />
+            </Button>
+          {/* </div> */}
         </div>
       </div>
 

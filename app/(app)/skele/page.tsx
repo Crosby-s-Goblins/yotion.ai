@@ -9,6 +9,7 @@ import { Pose } from "@/components/selectorCardComponents/types";
 import { usePoseCorrection } from "@/components/poseCorrection";
 import { BreathIndication } from "@/components/breathingIndicatorLineBall";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 function SkelePageContent() {
   const [isCameraOn, setIsCameraOn] = useState(false);
@@ -28,6 +29,7 @@ function SkelePageContent() {
   const poseId = searchParams.get('poseId');
 
   const [selectedPose, setSelectedPose] = useState(Number(poseId));
+  const [go, setGo] = useState(true);
   const {
     rightElbowAngle,
     leftElbowAngle,
@@ -43,13 +45,23 @@ function SkelePageContent() {
   } = usePoseCorrection(selectedPose);
 
   const [resetFlag, setResetFlag] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     if (resetFlag) {
-      setTimerSeconds(60); // Reset your logic here
+      setTimerSeconds(5); // Reset your logic here
       setResetFlag(false); // Important: Reset the flag
     }
   }, [resetFlag]);
+
+  useEffect(() => {
+
+    if (timerSeconds <= 0 && go) {
+      setGo(false);
+      window.location.href = '/practice'; //Force, Fix later
+    }
+  }, [timerSeconds, go, router]);
+
   useEffect(() => {
     const fetchPose = async () => {
       if (!poseId) {

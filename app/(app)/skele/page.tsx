@@ -351,9 +351,9 @@ function SkelePageContent() {
         </div>
       )}
 
-      <div className="absolute flex flex-col items-center w-full"> {/* z-50 */}
-        <h1 className="m-3 text-white text-4xl font-bold">{formText}</h1>
-        <div>
+      {/* Omit pre-production; testing only */}
+      <div className="absolute flex flex-col justify-center items-end w-full h-full"> {/* z-50 */}
+        <div className="flex flex-col mr-10 bg-white p-8 rounded-lg w-56">
           <span>Right Elbow: {rightElbowAngle}</span>
           <span>Left Elbow: {leftElbowAngle}</span>
           <span>Right Knee: {rightKneeAngle}</span>
@@ -363,6 +363,10 @@ function SkelePageContent() {
           <span>Right Shoulder: {rightShoulderAngle}</span>
           <span>Left Shoulder: {leftShoulderAngle}</span>
         </div>
+      </div>
+
+      <div className="absolute flex justify-center top-48 w-full h-full">
+        <h1 className="m-3 text-white text-4xl font-bold">{formText}</h1>
       </div>
     </div>
   );

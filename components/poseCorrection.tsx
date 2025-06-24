@@ -279,7 +279,7 @@ export function usePoseCorrection(selectedPose: number) {
                         }
 
                         else {
-                            setFormText("Perfect!")
+                            setFormText("")
                         }
                           
                     }

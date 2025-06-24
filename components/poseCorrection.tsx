@@ -6,20 +6,20 @@ import {
     PoseLandmarker
 } from '@mediapipe/tasks-vision';
 import { useEffect, useRef, useState } from 'react';
-import poseData from '@/app/pose/angles.json';
-import { Button } from './ui/button';
-import Image from 'next/image'
+import { createClient } from '@/lib/supabase/client';
 
-import {
-    Carousel,
-    CarouselContent,
-    CarouselItem,
-    CarouselNext,
-    CarouselPrevious,
-  } from "@/components/ui/carousel"
+type PoseAngle = {
+    joint: string;
+    expected: number;
+    tolerance: number;
+};
+type PoseAngles = PoseAngle[];
 
 export function usePoseCorrection(selectedPose: number) {
     let poseLandmarker: PoseLandmarker | null = null;
+    let temp : string;
+
+    const [poseAngles, setPoseAngles] = useState<PoseAngles | null>(null);
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -40,11 +40,50 @@ export function usePoseCorrection(selectedPose: number) {
     // text to speech 
     const [formText, setFormText] = useState<string | null>("no text yet");
 
-    const selectedPoseRef = useRef(selectedPose);
+    const selectedPoseRef = useRef<PoseAngles | null>(null);
 
     useEffect(() => {
-        selectedPoseRef.current = selectedPose;
+        selectedPoseRef.current = poseAngles;
+    }, [poseAngles]);
+
+    useEffect(() => {
+    async function fetchPose() {
+        const supabase = createClient();
+
+        const { data, error } = await supabase
+        .from('poseLibrary')
+        .select('angles')
+        .eq('id', selectedPose)
+        .single();
+
+        
+        if (error) {
+            console.error("Supabase error:", error.message);
+            setPoseAngles(null);
+            return;
+        }
+
+        if (!data || !data.angles) {
+            setPoseAngles(null);
+            return;
+        }
+
+        try {
+        const parsed = typeof data.angles === "string"
+            ? JSON.parse(data.angles.trim())
+            : data.angles;
+
+            setPoseAngles(Array.isArray(parsed) ? parsed : null);
+        } catch (e) {
+            console.error("Failed to parse angles JSON:", e);
+            setPoseAngles(null);
+        }
+
+
+    };
+    if (selectedPose) fetchPose();
     }, [selectedPose]);
+
 
     // Utility to calculate angle given points A, B, C
     function calculateAngle(A: any, B: any, C: any): number {
@@ -209,16 +248,16 @@ export function usePoseCorrection(selectedPose: number) {
                         // setLeftHipAngle(null)
                         setFormText("Body not in frame")
                     } else {
-                        const currentPose = poseData[selectedPoseRef.current];
+                        const currentPose = selectedPoseRef.current;
                         
-                        const rightElbowData = currentPose?.angles.find(a => a.joint === "rightElbow");
-                        const leftElbowData = currentPose?.angles.find(a => a.joint === "leftElbow");
-                        const rightShoulderData = currentPose?.angles.find(a => a.joint === "rightShoulder");
-                        const leftShoulderData = currentPose?.angles.find(a => a.joint === "leftShoulder");
-                        const rightKneeData = currentPose?.angles.find(a => a.joint === "rightKnee");
-                        const leftKneeData = currentPose?.angles.find(a => a.joint === "leftKnee");
-                        const rightHipData = currentPose?.angles.find(a => a.joint === "rightHip");
-                        const leftHipData = currentPose?.angles.find(a => a.joint === "leftHip");
+                        const rightElbowData = poseAngles?.find(a => a.joint === "rightElbow");
+                        const leftElbowData = poseAngles?.find(a => a.joint === "leftElbow");
+                        const rightShoulderData = poseAngles?.find(a => a.joint === "rightShoulder");
+                        const leftShoulderData = poseAngles?.find(a => a.joint === "leftShoulder");
+                        const rightKneeData = poseAngles?.find(a => a.joint === "rightKnee");
+                        const leftKneeData = poseAngles?.find(a => a.joint === "leftKnee");
+                        const rightHipData = poseAngles?.find(a => a.joint === "rightHip");
+                        const leftHipData = poseAngles?.find(a => a.joint === "leftHip");
                     
                         if ( rightElbowData && rightElbowAngle < (rightElbowData.expected - rightElbowData.tolerance)) {
                             console.log(rightElbowData.expected - rightElbowData.tolerance)
@@ -239,16 +278,15 @@ export function usePoseCorrection(selectedPose: number) {
                             setFormText("Close your left shoulder.");
                         }
 
-                        
-
                         else {
                             setFormText("Perfect!")
                         }
                           
                     }
 
+                    
                     // Get current pose data
-                    const currentPose = poseData[selectedPoseRef.current];
+                    const currentPose = selectedPoseRef.current;
                     
                     // Function to check if an angle is within tolerance
                     const isAngleCorrect = (angle: number | null, expected: number, tolerance: number) => {
@@ -265,35 +303,35 @@ export function usePoseCorrection(selectedPose: number) {
                             
                             // Check each joint's angle and color
                             if (index === 12 || index === 14 || index === 16) { // Right elbow
-                                const angleData = currentPose.angles.find(a => a.joint === "rightElbow");
+                                const angleData = currentPose?.find(a => a.joint === "rightElbow");
                                 return isAngleCorrect(rightElbowAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? 'green' : 'red';
                             }
                             if (index === 11 || index === 13 || index === 21) { // Left elbow
-                                const angleData = currentPose.angles.find(a => a.joint === "leftElbow");
+                                const angleData = currentPose?.find(a => a.joint === "leftElbow");
                                 return isAngleCorrect(leftElbowAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? 'green' : 'red';
                             }
                             if (index === 24 || index === 26 || index === 28) { // Right knee
-                                const angleData = currentPose.angles.find(a => a.joint === "rightKnee");
+                                const angleData = currentPose?.find(a => a.joint === "rightKnee");
                                 return isAngleCorrect(rightKneeAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? 'green' : 'red';
                             }
                             if (index === 23 || index === 25 || index === 27) { // Left knee
-                                const angleData = currentPose.angles.find(a => a.joint === "leftKnee");
+                                const angleData = currentPose?.find(a => a.joint === "leftKnee");
                                 return isAngleCorrect(leftKneeAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? 'green' : 'red';
                             }
                             if (index === 14 || index === 12 || index === 24) { // Right shoulder
-                                const angleData = currentPose.angles.find(a => a.joint === "rightShoulder");
+                                const angleData = currentPose?.find(a => a.joint === "rightShoulder");
                                 return isAngleCorrect(rightShoulderAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? 'green' : 'red';
                             }
                             if (index === 13 || index === 11 || index === 23) { // Left shoulder
-                                const angleData = currentPose.angles.find(a => a.joint === "leftShoulder");
+                                const angleData = currentPose?.find(a => a.joint === "leftShoulder");
                                 return isAngleCorrect(leftShoulderAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? 'green' : 'red';
                             }
                             if (index === 12 || index === 24 || index === 26) { // Right hip
-                                const angleData = currentPose.angles.find(a => a.joint === "rightHip");
+                                const angleData = currentPose?.find(a => a.joint === "rightHip");
                                 return isAngleCorrect(rightHipAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? 'green' : 'red';
                             }
                             if (index === 11 || index === 23 || index === 25) { // Left hip
-                                const angleData = currentPose.angles.find(a => a.joint === "leftHip");
+                                const angleData = currentPose?.find(a => a.joint === "leftHip");
                                 return isAngleCorrect(leftHipAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? 'green' : 'red';
                             }
                                                         
@@ -316,6 +354,7 @@ export function usePoseCorrection(selectedPose: number) {
         return () => {
             isMounted = false;
             if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            if (poseLandmarkerInstance) poseLandmarkerInstance.close();
         };
     }, [selectedPose]);
 

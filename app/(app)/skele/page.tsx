@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Pose } from "@/components/selectorCardComponents/types";
 import { usePoseCorrection } from "@/components/poseCorrection";
+import { BreathIndication } from "@/components/breathingIndicatorLineBall";
 
 function SkelePageContent() {
   const [isCameraOn, setIsCameraOn] = useState(false);
@@ -25,7 +26,7 @@ function SkelePageContent() {
   const searchParams = useSearchParams();
   const poseId = searchParams.get('poseId');
 
-  const [selectedPose, setSelectedPose] = useState(0);
+  const [selectedPose, setSelectedPose] = useState(11);
   const {
     rightElbowAngle,
     leftElbowAngle,
@@ -250,32 +251,7 @@ function SkelePageContent() {
       {/* UI Overlay - Absolute positioned on top */}
       <div className="absolute inset-0 z-10">
         {/* Breathing Indicator - Left Side */}
-        <div className="absolute left-16 top-1/2 transform -translate-y-1/2">
-          <div className="flex flex-col items-center">
-            {/* Vertical Line with Ball */}
-            <div className="relative" style={{ height: "300px" }}>
-              {/* Vertical line */}
-              <div
-                className="absolute left-1/2 transform -translate-x-1/2 w-2 bg-white/60 rounded-full"
-                style={{ height: "300px", top: "0px" }}
-              />
-
-              {/* Moving ball */}
-              <div
-                className="absolute w-4 h-4 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full border-2 border-white/40 shadow-lg transition-all duration-300 ease-in-out"
-                style={{
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  top: `${0 + breathProgress * 300}px`,
-                }}
-              />
-
-              {/* Top and bottom markers */}
-              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-white/20 rounded-full" />
-              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-white/20 rounded-full" />
-            </div>
-          </div>
-        </div>
+        <BreathIndication duration={5}/>
 
         {/* Top UI Bar */}
         <div className="absolute top-4 left-4 right-4 flex justify-between items-center">
@@ -375,7 +351,7 @@ function SkelePageContent() {
         </div>
       )}
 
-      <div className="absolute z-50 flex flex-col items-center w-full">
+      <div className="absolute flex flex-col items-center w-full"> {/* z-50 */}
         <h1 className="m-3 text-white text-4xl font-bold">{formText}</h1>
         <div>
           <span>Right Elbow: {rightElbowAngle}</span>

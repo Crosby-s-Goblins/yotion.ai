@@ -2,7 +2,6 @@
 // Logic
 import { createClient } from "@/lib/supabase/client";
 import { useState } from "react";
-import { LogoutButton } from "./logout-button";
 
 // UI stuff
 import { Input } from "@/components/ui/input";

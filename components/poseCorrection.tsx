@@ -295,50 +295,67 @@ export function usePoseCorrection(selectedPose: number) {
                     };
 
                     // Filter out face landmarks (indices 0-10) and only keep body landmarks
-                    const bodyLandmarks = landmark.filter((_, index) => index > 10);
+                    const bodyLandmarks = landmark.filter((_, index) => 
+                        index > 10 && 
+                        ![17, 18, 19, 20, 21, 22, 29, 30, 31, 32].includes(index)
+                    );
 
                     // Draw landmarks with color coding (only body landmarks)
                     drawingUtils.drawLandmarks(bodyLandmarks, {
-                        radius: (data) =>
-                            DrawingUtils.lerp(data.from!.z, -0.15, 0.1, 10, 1),
+                        radius: (data) => {
+                            // Increase base radius for better visibility
+                            const baseRadius = DrawingUtils.lerp(data.from!.z, -0.15, 0.1, 15, 3);
+                            // Make key joints (shoulders, elbows, hips, knees) larger
+                            const originalIndex = landmark.indexOf(data.from!);
+                            if ([11, 12, 13, 14, 23, 24, 25, 26, 27, 28].includes(originalIndex)) {
+                                return baseRadius * 1.3; // 30% larger for key joints
+                            }
+                            return baseRadius;
+                        },
                         color: (data) => {
                             const originalIndex = landmark.indexOf(data.from!);
                             
                             // Check each joint's angle and color
-                            if (originalIndex === 12 || originalIndex === 14 || originalIndex === 16) { // Right elbow
+                            if (originalIndex === 12 || originalIndex === 14) { // Right elbow (remove 16)
                                 const angleData = currentPose?.find(a => a.joint === "rightElbow");
-                                return isAngleCorrect(rightElbowAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? 'green' : 'red';
+                                return isAngleCorrect(rightElbowAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? '#00ff00' : '#ff0000';
                             }
-                            if (originalIndex === 11 || originalIndex === 13 || originalIndex === 21) { // Left elbow
+                            if (originalIndex === 11 || originalIndex === 13) { // Left elbow (remove 21)
                                 const angleData = currentPose?.find(a => a.joint === "leftElbow");
-                                return isAngleCorrect(leftElbowAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? 'green' : 'red';
+                                return isAngleCorrect(leftElbowAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? '#00ff00' : '#ff0000';
                             }
                             if (originalIndex === 24 || originalIndex === 26 || originalIndex === 28) { // Right knee
                                 const angleData = currentPose?.find(a => a.joint === "rightKnee");
-                                return isAngleCorrect(rightKneeAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? 'green' : 'red';
+                                return isAngleCorrect(rightKneeAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? '#00ff00' : '#ff0000';
                             }
                             if (originalIndex === 23 || originalIndex === 25 || originalIndex === 27) { // Left knee
                                 const angleData = currentPose?.find(a => a.joint === "leftKnee");
-                                return isAngleCorrect(leftKneeAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? 'green' : 'red';
+                                return isAngleCorrect(leftKneeAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? '#00ff00' : '#ff0000';
                             }
                             if (originalIndex === 14 || originalIndex === 12 || originalIndex === 24) { // Right shoulder
                                 const angleData = currentPose?.find(a => a.joint === "rightShoulder");
-                                return isAngleCorrect(rightShoulderAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? 'green' : 'red';
+                                return isAngleCorrect(rightShoulderAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? '#00ff00' : '#ff0000';
                             }
                             if (originalIndex === 13 || originalIndex === 11 || originalIndex === 23) { // Left shoulder
                                 const angleData = currentPose?.find(a => a.joint === "leftShoulder");
-                                return isAngleCorrect(leftShoulderAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? 'green' : 'red';
+                                return isAngleCorrect(leftShoulderAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? '#00ff00' : '#ff0000';
                             }
                             if (originalIndex === 12 || originalIndex === 24 || originalIndex === 26) { // Right hip
                                 const angleData = currentPose?.find(a => a.joint === "rightHip");
-                                return isAngleCorrect(rightHipAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? 'green' : 'red';
+                                return isAngleCorrect(rightHipAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? '#00ff00' : '#ff0000';
                             }
                             if (originalIndex === 11 || originalIndex === 23 || originalIndex === 25) { // Left hip
                                 const angleData = currentPose?.find(a => a.joint === "leftHip");
-                                return isAngleCorrect(leftHipAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? 'green' : 'red';
+                                return isAngleCorrect(leftHipAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? '#00ff00' : '#ff0000';
                             }
-                                                        
-                            return 'blue'; // Default color for other landmarks
+                            if (originalIndex === 16) { // Right wrist
+                                return '#0066ff';
+                            }
+                            if (originalIndex === 15) { // Left wrist  
+                                return '#0066ff';
+                            }
+                           
+                            return '#0066ff'; // Brighter blue for other landmarks
                             
                         }
                         
@@ -349,9 +366,14 @@ export function usePoseCorrection(selectedPose: number) {
                         connection.start > 10 && connection.end > 10
                     );
                     
+                    // Draw thicker, more visible connections
                     drawingUtils.drawConnectors(
                         landmark,
-                        bodyConnections
+                        bodyConnections,
+                        {
+                            color: '#ffffff', // White lines for better contrast
+                            lineWidth: 3 // Thicker lines
+                        }
                     );
                 }
             });

@@ -13,7 +13,7 @@ export function BreathIndication({ duration } : timingInd) {
   }), [duration]);
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen">
+    <main className="absolute left-16 top-1/2 transform -translate-y-1/2">
       <div className="flex flex-col items-center">
             {/* Vertical Line with Ball */}
             <div className="relative" style={{ height: '300px' }}>

@@ -316,35 +316,35 @@ export function usePoseCorrection(selectedPose: number) {
                             const originalIndex = landmark.indexOf(data.from!);
                             
                             // Check each joint's angle and color
-                            if (originalIndex === 12 || originalIndex === 14) { // Right elbow (remove 16)
+                            if (originalIndex === 14) { // Right elbow
                                 const angleData = currentPose?.find(a => a.joint === "rightElbow");
                                 return isAngleCorrect(rightElbowAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? '#00ff00' : '#ff0000';
                             }
-                            if (originalIndex === 11 || originalIndex === 13) { // Left elbow (remove 21)
+                            if (originalIndex === 13) { // Left elbow
                                 const angleData = currentPose?.find(a => a.joint === "leftElbow");
                                 return isAngleCorrect(leftElbowAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? '#00ff00' : '#ff0000';
                             }
-                            if (originalIndex === 24 || originalIndex === 26 || originalIndex === 28) { // Right knee
+                            if (originalIndex === 26) { // Right knee
                                 const angleData = currentPose?.find(a => a.joint === "rightKnee");
                                 return isAngleCorrect(rightKneeAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? '#00ff00' : '#ff0000';
                             }
-                            if (originalIndex === 23 || originalIndex === 25 || originalIndex === 27) { // Left knee
+                            if (originalIndex === 25) { // Left knee
                                 const angleData = currentPose?.find(a => a.joint === "leftKnee");
                                 return isAngleCorrect(leftKneeAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? '#00ff00' : '#ff0000';
                             }
-                            if (originalIndex === 14 || originalIndex === 12 || originalIndex === 24) { // Right shoulder
+                            if (originalIndex === 12) { // Right shoulder
                                 const angleData = currentPose?.find(a => a.joint === "rightShoulder");
                                 return isAngleCorrect(rightShoulderAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? '#00ff00' : '#ff0000';
                             }
-                            if (originalIndex === 13 || originalIndex === 11 || originalIndex === 23) { // Left shoulder
+                            if (originalIndex === 11) { // Left shoulder
                                 const angleData = currentPose?.find(a => a.joint === "leftShoulder");
                                 return isAngleCorrect(leftShoulderAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? '#00ff00' : '#ff0000';
                             }
-                            if (originalIndex === 12 || originalIndex === 24 || originalIndex === 26) { // Right hip
+                            if (originalIndex === 24) { // Right hip
                                 const angleData = currentPose?.find(a => a.joint === "rightHip");
                                 return isAngleCorrect(rightHipAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? '#00ff00' : '#ff0000';
                             }
-                            if (originalIndex === 11 || originalIndex === 23 || originalIndex === 25) { // Left hip
+                            if (originalIndex === 23) { // Left hip
                                 const angleData = currentPose?.find(a => a.joint === "leftHip");
                                 return isAngleCorrect(leftHipAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? '#00ff00' : '#ff0000';
                             }

@@ -60,18 +60,7 @@ function SkelePageContent() {
 
     if (timerSeconds <= 0 && go) {
       setGo(false);
-      closePose();
-      if (videoRef.current) {
-        videoRef.current.pause();
-        videoRef.current.srcObject = null;
-      }
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-        streamRef.current = null;
-      }
-      setTimeout(() => {
-        router.push('/practice');
-      }, 150);
+      window.location.href = '/post_workout'; //Force, Fix later
     }
   }, [timerSeconds, go, router]);
 

@@ -3,7 +3,7 @@
     "pose": "Warrior II",
     "side": "right",
     "angles": [
-      { "joint": "rightElbow", "expected": 100, "tolerance": 15 },
+      { "joint": "rightElbow", "expected": 180, "tolerance": 15 },
       { "joint": "leftElbow", "expected": 180, "tolerance": 15 },
       { "joint": "rightShoulder", "expected": 90, "tolerance": 20 },
       { "joint": "leftShoulder", "expected": 90, "tolerance": 20 },

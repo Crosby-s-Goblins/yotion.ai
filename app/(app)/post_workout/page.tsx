@@ -1,7 +1,25 @@
+'use client'
+
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function PostWorkoutPage() {
+  
+    useEffect(() => {
+    const alreadyReloaded = sessionStorage.getItem('reloaded');
+
+    if (!alreadyReloaded) {
+      sessionStorage.setItem('reloaded', 'true');
+      window.location.reload();
+    } //Force reload
+
+    
+    return () => {
+      sessionStorage.removeItem('reloaded');
+    };
+  }, []);
+
     return (
         <main className="relative flex flex-col items-center w-full min-h-screen bg-white">
 

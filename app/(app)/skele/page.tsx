@@ -23,7 +23,7 @@ function SkelePageContent() {
   const [pose, setPose] = useState<Pose | null>(null);
   const [isLoadingPose, setIsLoadingPose] = useState(true);
   const [dbError, setDbError] = useState<string | null>(null);
-  const [timerSeconds, setTimerSeconds] = useState(60);
+  const [timerSeconds, setTimerSeconds] = useState(2);
 
   const searchParams = useSearchParams();
   const poseId = searchParams.get('poseId');
@@ -60,20 +60,23 @@ function SkelePageContent() {
 
     if (timerSeconds <= 0 && go) {
       setGo(false);
-      closePose();
-      if (videoRef.current) {
-        videoRef.current.pause();
-        videoRef.current.srcObject = null;
-      }
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-        streamRef.current = null;
-      }
-      setTimeout(() => {
-        router.push('/pose_workout');
-      }, 150);
+      stopCameraAndPose().then(() => {
+        router.push('/post_workout');
+      });
     }
-  }, [timerSeconds, go, router]);
+  }, [timerSeconds, go]);
+
+  const stopCameraAndPose = async () => {
+    closePose();
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.srcObject = null;
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+  }
 
   useEffect(() => {
     const fetchPose = async () => {

@@ -389,6 +389,11 @@ export function usePoseCorrection(selectedPose: number) {
         };
     }, [selectedPose]);
 
+    function closePose(){
+        poseLandmarker?.close?.();
+        poseLandmarker = null;
+    }
+
     return {
         rightElbowAngle,
         leftElbowAngle,
@@ -410,5 +415,6 @@ export function usePoseCorrection(selectedPose: number) {
         setLeftHipAngle,
         setRightShoulderAngle,
         setLeftShoulderAngle,
+        closePose,
     };
 }

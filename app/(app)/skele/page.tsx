@@ -58,7 +58,7 @@ function SkelePageContent() {
 
     if (timerSeconds <= 0 && go) {
       setGo(false);
-      window.location.href = '/practice'; //Force, Fix later
+      window.location.href = '/post_workout'; //Force, Fix later
     }
   }, [timerSeconds, go, router]);
 

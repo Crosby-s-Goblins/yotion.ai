@@ -60,7 +60,18 @@ function SkelePageContent() {
 
     if (timerSeconds <= 0 && go) {
       setGo(false);
-      window.location.href = '/post_workout'; //Force, Fix later
+      closePose();
+      if (videoRef.current) {
+        videoRef.current.pause();
+        videoRef.current.srcObject = null;
+      }
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+      }
+      setTimeout(() => {
+        router.push('/pose_workout');
+      }, 150);
     }
   }, [timerSeconds, go, router]);
 

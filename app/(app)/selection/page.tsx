@@ -35,6 +35,20 @@ export default function SelectionComponents() {
   fetchPoses(); 
   }, []);
 
+  useEffect(() => {
+          const alreadyReloaded = sessionStorage.getItem('reloaded');
+  
+          if (!alreadyReloaded) {
+          sessionStorage.setItem('reloaded', 'true');
+          window.location.reload();
+          } //Force reload
+  
+          
+          return () => {
+          sessionStorage.removeItem('reloaded');
+          };
+      }, []);
+
   const supabase = createClient();
       const getUser = async () => {
         try {

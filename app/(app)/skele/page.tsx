@@ -10,6 +10,7 @@ import { usePoseCorrection } from "@/components/poseCorrection";
 import { BreathIndication } from "@/components/breathingIndicatorLineBall";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { Timestamp } from "next/dist/server/lib/cache-handlers/types";
 
 function SkelePageContent() {
   const [isCameraOn, setIsCameraOn] = useState(false);
@@ -23,7 +24,10 @@ function SkelePageContent() {
   const [pose, setPose] = useState<Pose | null>(null);
   const [isLoadingPose, setIsLoadingPose] = useState(true);
   const [dbError, setDbError] = useState<string | null>(null);
-  const [timerSeconds, setTimerSeconds] = useState(2);
+  const [timerSeconds, setTimerSeconds] = useState(60);
+  const [timerStarted, setTimerStarted] = useState(false);
+
+  const [poseStart, setPoseStart] = useState<boolean | Timestamp>(false); //False if don't start, timeStamp if need to check time help for starting?
 
   const searchParams = useSearchParams();
   const poseId = searchParams.get('poseId');
@@ -31,18 +35,19 @@ function SkelePageContent() {
   const [selectedPose, setSelectedPose] = useState(Number(poseId));
   const [go, setGo] = useState(true);
   const {
-    rightElbowAngle,
-    leftElbowAngle,
-    rightKneeAngle,
-    leftKneeAngle,
-    rightHipAngle,
-    leftHipAngle,
-    rightShoulderAngle,
-    leftShoulderAngle,
+    rightElbowAngleRef,
+    leftElbowAngleRef,
+    rightKneeAngleRef,
+    leftKneeAngleRef,
+    rightHipAngleRef,
+    leftHipAngleRef,
+    rightShoulderAngleRef,
+    leftShoulderAngleRef,
     formText,
     videoRef,
     canvasRef,
     closePose,
+    correctPose,
   } = usePoseCorrection(selectedPose);
 
   const [resetFlag, setResetFlag] = useState(false);
@@ -51,8 +56,10 @@ function SkelePageContent() {
 
   useEffect(() => {
     if (resetFlag) {
-      setTimerSeconds(5); // Reset your logic here
+      setTimerSeconds(60); // Reset your logic here
       setResetFlag(false); // Important: Reset the flag
+      setTimerStarted(false); //Force the timer to be paused
+      console.log(poseStart);
     }
   }, [resetFlag]);
 
@@ -184,22 +191,35 @@ function SkelePageContent() {
     return () => clearInterval(timer);
   }, [breathingPhase]);
 
+  useEffect(() => {
+  if (!isCameraOn || timerStarted) return;
+
+  const poseCheckInterval = setInterval(() => {
+    if (correctPose()) {
+      setTimerStarted(true);
+      clearInterval(poseCheckInterval);
+    }
+  }, 200); //200ms interval for checking
+
+  return () => clearInterval(poseCheckInterval);
+}, [isCameraOn, timerStarted]);
+
   // Timer logic
   useEffect(() => {
-    if (isCameraOn) {
-      const timerInterval = setInterval(() => {
-        setTimerSeconds(prevSeconds => {
-          if (prevSeconds > 0) {
-            return prevSeconds - 1;
-          }
-          clearInterval(timerInterval);
-          return 0;
-        });
-      }, 1000);
+    if (!timerStarted) return;
+ 
+    const timerInterval = setInterval(() => {
+      setTimerSeconds(prevSeconds => {
+        if (prevSeconds > 0) {
+          return prevSeconds - 1;
+        }
+        clearInterval(timerInterval);
+        return 0;
+      });
+    }, 1000);
 
-      return () => clearInterval(timerInterval);
-    }
-  }, [isCameraOn]);
+    return () => clearInterval(timerInterval);
+  }, [timerStarted]);
 
   // Calculate circle size based on breathing phase
   const getCircleSize = () => {
@@ -393,14 +413,14 @@ function SkelePageContent() {
       {/* Omit pre-production; testing only */}
       <div className="absolute flex flex-col justify-center items-end w-full h-full"> {/* z-50 */}
         <div className="flex flex-col mr-10 bg-white p-8 rounded-lg w-56">
-          <span>Right Elbow: {rightElbowAngle}</span>
-          <span>Left Elbow: {leftElbowAngle}</span>
-          <span>Right Knee: {rightKneeAngle}</span>
-          <span>Left Knee: {leftKneeAngle}</span>
-          <span>Right Hip: {rightHipAngle}</span>
-          <span>Left Hip: {leftHipAngle}</span>
-          <span>Right Shoulder: {rightShoulderAngle}</span>
-          <span>Left Shoulder: {leftShoulderAngle}</span>
+          <span>Right Elbow: {rightElbowAngleRef.current}</span>
+          <span>Left Elbow: {leftElbowAngleRef.current}</span>
+          <span>Right Knee: {rightKneeAngleRef.current}</span>
+          <span>Left Knee: {leftKneeAngleRef.current}</span>
+          <span>Right Hip: {rightHipAngleRef.current}</span>
+          <span>Left Hip: {leftHipAngleRef.current}</span>
+          <span>Right Shoulder: {rightShoulderAngleRef.current}</span>
+          <span>Left Shoulder: {leftShoulderAngleRef.current}</span>
         </div>
       </div>
 

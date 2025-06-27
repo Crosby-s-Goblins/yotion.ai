@@ -266,11 +266,11 @@ function SkelePageContent() {
           style={{ display: 'none' }}
           muted
           playsInline
-          className="scale-x-[-1]"
+          className="scale-x-[-1] absolute inset-0 w-full h-full object-contain" // CAN CHANGE *object-contain* TO *object-cover* to remove the stripes
         />
         <canvas
           ref={canvasRef}
-          className="scale-x-[-1]"
+          className="scale-x-[-1] absolute inset-0 w-full h-full object-contain" // also change to object-cover here
         />
 
         {/* Loading/Error overlay */}

@@ -1,7 +1,7 @@
 import { Pose } from './types';
 import { motion } from "framer-motion";
 
-const difficultyColors = {
+export const difficultyColors = {
   Easy: 'bg-green-500',
   Medium: 'bg-yellow-500',
   Hard: 'bg-red-500',

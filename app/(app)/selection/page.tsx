@@ -10,6 +10,8 @@ import { PoseItem } from "@/components/selectorCardComponents/poseItem";
 import { ExpandedPoseCard } from "@/components/selectorCardComponents/expandedPoseCard";
 import { createClient } from "@/lib/supabase/client";
 import Loading from "@/components/loading";
+import { difficultyColors } from "@/components/selectorCardComponents/poseItem";
+import { motion } from "framer-motion";
 
 export default function SelectionComponents() {
   const [poses, setPoses] = useState<any[]>([]);
@@ -151,6 +153,8 @@ export default function SelectionComponents() {
   );
 }
 else{
+  const maxFree = 3; //Set maximum number of free poses
+  const lockedItems = filteredItems.slice(maxFree);
   return (
     <main className="h-screen flex flex-col items-center justify-center">
       <div className="flex flex-col text-center">
@@ -182,6 +186,7 @@ else{
         How to cover up the other exercises and if someone tries to click those, "Link" them to payment
         Make sure functionality continues to work
       */}
+      {/* Need to filter down to free poses - Attribute in Supabase */}
       <div className="w-full max-w-2xl px-4">
         <div className="bg-white rounded-3xl border-2 h-full overflow-hidden">
           <ScrollArea className="h-[700px] rounded-3xl">
@@ -189,7 +194,7 @@ else{
               {filteredItems.length === 0 ? (
             <p className="text-gray-500 items-center justify-center flex mt-10">No items found.</p>
               ) : (
-              filteredItems.map((pose, index) => (
+              filteredItems.filter(pose => pose.isFree).map((pose, index) => (
                 <div key={index} className="relative">
                   <PoseItem 
                     {...pose} 
@@ -206,6 +211,43 @@ else{
                   </AnimatePresence>
                 </div>
               )))}
+                <div className="relative mt-4">
+                {/* Fake locked cards */}
+                  <div className="space-y-2 pointer-events-none select-none">
+                    {lockedItems.map((pose, i) => (
+                      <motion.div
+                        key={i}
+                        className="flex flex-col bg-white/70 rounded-2xl shadow cursor-not-allowed"
+                        whileHover={{ backgroundColor: 'rgba(0,0,0,0.02)' }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <div className="flex flex-row py-4 px-8 items-center justify-between opacity-40">
+                          <p className="font-medium">{pose.name}</p>
+                          <div
+                            className={`flex flex-row ${difficultyColors[pose.difficulty]} px-6 py-2 rounded-full w-28 justify-center items-center`}
+                          >
+                            <p className="text-white text-sm font-medium">{pose.difficulty}</p>
+                          </div>
+                        </div>
+                        <hr className="border-gray-200 -mx-8 opacity-40" />
+                      </motion.div>
+                    ))}
+                </div>
+
+                {/* Frosted glass overlay with lock */}
+                <div className="absolute inset-0 rounded-3xl z-10 flex items-center justify-center bg-white/40 backdrop-blur-md text-black font-semibold text-center -mt-4">
+                  <div>
+                    🔒 <br />
+                    These poses are premium. <br />
+                    <button
+                      onClick={console.log("Implement Payment later")} //TODO: Implement proper logic later
+                      className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                      Unlock Premium
+                    </button>
+                  </div>
+                </div> 
+              </div>           
             </div>
           </ScrollArea>
         </div>

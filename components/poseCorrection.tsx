@@ -25,17 +25,27 @@ export function usePoseCorrection(selectedPose: number) {
     const videoRef = useRef<HTMLVideoElement>(null);
 
     // all relevant angles
-    const [rightElbowAngle, setRightElbowAngle] = useState<number | null>(null);
-    const [leftElbowAngle, setLeftElbowAngle] = useState<number | null>(null);
+    // const [rightElbowAngle, setRightElbowAngle] = useState<number | null>(null);
+    // const [leftElbowAngle, setLeftElbowAngle] = useState<number | null>(null);
 
-    const [rightKneeAngle, setRightKneeAngle] = useState<number | null>(null);
-    const [leftKneeAngle, setLeftKneeAngle] = useState<number | null>(null);
+    // const [rightKneeAngle, setRightKneeAngle] = useState<number | null>(null);
+    // const [leftKneeAngle, setLeftKneeAngle] = useState<number | null>(null);
 
-    const [rightHipAngle, setRightHipAngle] = useState<number | null>(null); 
-    const [leftHipAngle, setLeftHipAngle] = useState<number | null>(null); 
+    // const [rightHipAngle, setRightHipAngle] = useState<number | null>(null); 
+    // const [leftHipAngle, setLeftHipAngle] = useState<number | null>(null); 
 
-    const [rightShoulderAngle, setRightShoulderAngle] = useState<number | null>(null);
-    const [leftShoulderAngle, setLeftShoulderAngle] = useState<number | null>(null);
+    // const [rightShoulderAngle, setRightShoulderAngle] = useState<number | null>(null);
+    // const [leftShoulderAngle, setLeftShoulderAngle] = useState<number | null>(null);
+
+    //Bulk values for timer start? -- Redundant with above, pick one later
+    const rightElbowAngleRef = useRef<number | null>(null);
+    const leftElbowAngleRef = useRef<number | null>(null);
+    const rightKneeAngleRef = useRef<number | null>(null);
+    const leftKneeAngleRef = useRef<number | null>(null);
+    const rightHipAngleRef = useRef<number | null>(null);
+    const leftHipAngleRef = useRef<number | null>(null);
+    const rightShoulderAngleRef = useRef<number | null>(null);
+    const leftShoulderAngleRef = useRef<number | null>(null);
 
     // text to speech 
     const [formText, setFormText] = useState<string | null>("no text yet");
@@ -132,7 +142,7 @@ export function usePoseCorrection(selectedPose: number) {
             }
         }
 
-        function renderLoop(): void {
+        function renderLoop(): void {            
             const canvas = canvasRef.current;
             const video = videoRef.current;
 
@@ -160,96 +170,126 @@ export function usePoseCorrection(selectedPose: number) {
             poseLandmarkerInstance.detectForVideo(video, now, (result) => {
                 for (const landmark of result.landmarks) {
 
-                    const rightElbowAngle = calculateAngle(
-                        landmark[12],
-                        landmark[14],
-                        landmark[16]
-                    );
-                    setRightElbowAngle(Math.round(rightElbowAngle));
+                    // const rightElbowAngle = calculateAngle(
+                    //     landmark[12],
+                    //     landmark[14],
+                    //     landmark[16]
+                    // );
+                    // setRightElbowAngle(Math.round(rightElbowAngle));
                     // if (!isVisible(landmark[12], landmark[14], landmark[16])) {
                     //     setRightElbowAngle(null)
                     //     setFormText("Body not in frame")
                     // }
 
-                    const leftElbowAngle = calculateAngle(
-                        landmark[11],
-                        landmark[13],
-                        landmark[21]
-                    );
-                    setLeftElbowAngle(Math.round(leftElbowAngle));
+                    rightElbowAngleRef.current = Math.round(calculateAngle(landmark[12],
+                        landmark[14],
+                        landmark[16]));
+
+                    // const leftElbowAngle = calculateAngle(
+                    //     landmark[11],
+                    //     landmark[13],
+                    //     landmark[21]
+                    // );
+                    // setLeftElbowAngle(Math.round(leftElbowAngle));
                     // if (!isVisible(landmark[11], landmark[13], landmark[21])) {
                     //     setLeftElbowAngle(null)
                     //     setFormText("Body not in frame")
                     // }
 
-                    const rightKneeAngle = calculateAngle(
-                        landmark[24],
-                        landmark[26],
-                        landmark[28]
-                    );
-                    setRightKneeAngle(Math.round(rightKneeAngle));
+                     leftElbowAngleRef.current = Math.round(calculateAngle(landmark[11],
+                        landmark[13],
+                        landmark[21]));
+
+                    // const rightKneeAngle = calculateAngle(
+                    //     landmark[24],
+                    //     landmark[26],
+                    //     landmark[28]
+                    // );
+                    // setRightKneeAngle(Math.round(rightKneeAngle));
                     // if (!isVisible(landmark[24], landmark[26], landmark[28])) {
                     //     setRightKneeAngle(null)
                     //     setFormText("Body not in frame")
                     // }
 
-                    const leftKneeAngle = calculateAngle(
-                        landmark[23],
-                        landmark[25],
-                        landmark[27]
-                    );
-                    setLeftKneeAngle(Math.round(leftKneeAngle));
+                     rightKneeAngleRef.current = Math.round(calculateAngle(landmark[24],
+                        landmark[26],
+                        landmark[28]));
+
+                    // const leftKneeAngle = calculateAngle(
+                    //     landmark[23],
+                    //     landmark[25],
+                    //     landmark[27]
+                    // );
+                    // setLeftKneeAngle(Math.round(leftKneeAngle));
                     // if (!isVisible(landmark[23], landmark[25], landmark[27])) {
                     //     setLeftKneeAngle(null)
                     //     setFormText("Body not in frame")
                     // }
 
-                    const rightShoulderAngle = calculateAngle(
-                        landmark[14],
-                        landmark[12],
-                        landmark[24]
-                    );
-                    setRightShoulderAngle(Math.round(rightShoulderAngle));
+                     leftKneeAngleRef.current = Math.round(calculateAngle(landmark[23],
+                        landmark[25],
+                        landmark[27]));
+
+                    // const rightShoulderAngle = calculateAngle(
+                    //     landmark[14],
+                    //     landmark[12],
+                    //     landmark[24]
+                    // );
+                    // setRightShoulderAngle(Math.round(rightShoulderAngle));
                     // if (!isVisible(landmark[14], landmark[12], landmark[24])) {
                     //     setRightShoulderAngle(null)
                     //     setFormText("Body not in frame")
                     // }
 
-                    const leftShoulderAngle = calculateAngle(
-                        landmark[13],
-                        landmark[11],
-                        landmark[23]
-                    );
-                    setLeftShoulderAngle(Math.round(leftShoulderAngle));
+                     rightShoulderAngleRef.current = Math.round(calculateAngle(landmark[14],
+                        landmark[12],
+                        landmark[24]));
+
+                    // const leftShoulderAngle = calculateAngle(
+                    //     landmark[13],
+                    //     landmark[11],
+                    //     landmark[23]
+                    // );
+                    // setLeftShoulderAngle(Math.round(leftShoulderAngle));
                     // if (!isVisible(landmark[13], landmark[11], landmark[23])) {
                     //     setLeftShoulderAngle(null)
                     //     setFormText("Body not in frame")
                     // }
 
-                    const rightHipAngle = calculateAngle(
-                        landmark[12],
-                        landmark[24],
-                        landmark[26]
-                    );
-                    setRightHipAngle(Math.round(rightHipAngle));
+                     leftShoulderAngleRef.current = Math.round(calculateAngle(landmark[13],
+                        landmark[11],
+                        landmark[23]));
+
+                    // const rightHipAngle = calculateAngle(
+                    //     landmark[12],
+                    //     landmark[24],
+                    //     landmark[26]
+                    // );
+                    // setRightHipAngle(Math.round(rightHipAngle));
                     // if (!isVisible(landmark[12], landmark[24], landmark[26])) {
                     //     setRightHipAngle(null)
                     //     setFormText("Body not in frame")
                     // }
 
-                    const leftHipAngle = calculateAngle(
-                        landmark[11],
+                     rightHipAngleRef.current = Math.round(calculateAngle(landmark[12],
+                        landmark[24],
+                        landmark[26]));
+
+                    // const leftHipAngle = calculateAngle(
+                    //     landmark[11],
+                    //     landmark[23],
+                    //     landmark[25]
+                    // );
+                    // setLeftHipAngle(Math.round(leftHipAngle));
+
+                     leftHipAngleRef.current = Math.round(calculateAngle(landmark[11],
                         landmark[23],
-                        landmark[25]
-                    );
-                    setLeftHipAngle(Math.round(leftHipAngle));
+                        landmark[25]));
                     
                     if (!isVisible(landmark[13], landmark[11], landmark[23], landmark[14], landmark[12], landmark[24], landmark[23], landmark[25], landmark[27], landmark[12], landmark[14], landmark[16], landmark[11], landmark[13], landmark[21], landmark[24], landmark[26], landmark[28], landmark[11], landmark[23], landmark[25])) {
                         // setLeftHipAngle(null)
                         setFormText("Body not in frame")
                     } else {
-                        const currentPose = selectedPoseRef.current;
-                        
                         const rightElbowData = poseAngles?.find(a => a.joint === "rightElbow");
                         const leftElbowData = poseAngles?.find(a => a.joint === "leftElbow");
                         const rightShoulderData = poseAngles?.find(a => a.joint === "rightShoulder");
@@ -259,22 +299,22 @@ export function usePoseCorrection(selectedPose: number) {
                         const rightHipData = poseAngles?.find(a => a.joint === "rightHip");
                         const leftHipData = poseAngles?.find(a => a.joint === "leftHip");
                     
-                        if ( rightElbowData && rightElbowAngle < (rightElbowData.expected - rightElbowData.tolerance)) {
+                        if ( rightElbowData && rightElbowAngleRef.current < (rightElbowData.expected - rightElbowData.tolerance)) {
                             console.log(rightElbowData.expected - rightElbowData.tolerance)
                             setFormText("Open your right arm.");
-                        } else if (rightElbowData && rightElbowAngle > (rightElbowData.expected + rightElbowData.tolerance)) {
+                        } else if (rightElbowData && rightElbowAngleRef.current > (rightElbowData.expected + rightElbowData.tolerance)) {
                             setFormText("Close your right arm.");
                         } 
                         
-                        else if (leftElbowData && leftElbowAngle < (leftElbowData.expected - leftElbowData.tolerance)) {
+                        else if (leftElbowData && leftElbowAngleRef.current < (leftElbowData.expected - leftElbowData.tolerance)) {
                             setFormText("Open your left arm.");
-                        } else if (leftElbowData && leftElbowAngle > (leftElbowData.expected + leftElbowData.tolerance)) {
+                        } else if (leftElbowData && leftElbowAngleRef.current > (leftElbowData.expected + leftElbowData.tolerance)) {
                             setFormText("Close left right arm.");
                         }
 
-                        else if (rightShoulderData && rightShoulderAngle < (rightShoulderData.expected - rightShoulderData.tolerance)){
+                        else if (rightShoulderData && rightShoulderAngleRef.current < (rightShoulderData.expected - rightShoulderData.tolerance)){
                             setFormText("Open your right shoulder.")
-                        } else if (rightShoulderData && rightShoulderAngle > (rightShoulderData.expected + rightShoulderData.tolerance)) {
+                        } else if (rightShoulderData && rightShoulderAngleRef.current > (rightShoulderData.expected + rightShoulderData.tolerance)) {
                             setFormText("Close your left shoulder.");
                         }
 
@@ -287,12 +327,6 @@ export function usePoseCorrection(selectedPose: number) {
                     
                     // Get current pose data
                     const currentPose = selectedPoseRef.current;
-                    
-                    // Function to check if an angle is within tolerance
-                    const isAngleCorrect = (angle: number | null, expected: number, tolerance: number) => {
-                        if (angle === null) return false;
-                        return Math.abs(angle - expected) <= tolerance;
-                    };
 
                     // Filter out face landmarks (indices 0-10) and only keep body landmarks
                     const bodyLandmarks = landmark.filter((_, index) => 
@@ -315,46 +349,28 @@ export function usePoseCorrection(selectedPose: number) {
                         color: (data) => {
                             const originalIndex = landmark.indexOf(data.from!);
                             
-                            // Check each joint's angle and color
-                            if (originalIndex === 14) { // Right elbow
-                                const angleData = currentPose?.find(a => a.joint === "rightElbow");
-                                return isAngleCorrect(rightElbowAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? '#00ff00' : '#ff0000';
+                            const jointMap: Record<number, { joint: string, angle: number | null }> = {
+                                14: { joint: "rightElbow", angle: rightElbowAngleRef.current },
+                                13: { joint: "leftElbow", angle: leftElbowAngleRef.current },
+                                26: { joint: "rightKnee", angle: rightKneeAngleRef.current },
+                                25: { joint: "leftKnee", angle: leftKneeAngleRef.current },
+                                12: { joint: "rightShoulder", angle: rightShoulderAngleRef.current },
+                                11: { joint: "leftShoulder", angle: leftShoulderAngleRef.current },
+                                24: { joint: "rightHip", angle: rightHipAngleRef.current },
+                                23: { joint: "leftHip", angle: leftHipAngleRef.current },
+                            };
+
+                            if (jointMap[originalIndex]) {
+                                const { joint, angle } = jointMap[originalIndex];
+                                const angleData = currentPose?.find(a => a.joint === joint);
+                                const isCorrect = isAngleCorrect(angle, angleData?.expected ?? 0, angleData?.tolerance ?? 0);
+                                return isCorrect ? '#00ff00' : '#ff0000';
                             }
-                            if (originalIndex === 13) { // Left elbow
-                                const angleData = currentPose?.find(a => a.joint === "leftElbow");
-                                return isAngleCorrect(leftElbowAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? '#00ff00' : '#ff0000';
+
+                            if (originalIndex === 15 || originalIndex === 16) {
+                                return '#0066ff'; // wrists
                             }
-                            if (originalIndex === 26) { // Right knee
-                                const angleData = currentPose?.find(a => a.joint === "rightKnee");
-                                return isAngleCorrect(rightKneeAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? '#00ff00' : '#ff0000';
-                            }
-                            if (originalIndex === 25) { // Left knee
-                                const angleData = currentPose?.find(a => a.joint === "leftKnee");
-                                return isAngleCorrect(leftKneeAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? '#00ff00' : '#ff0000';
-                            }
-                            if (originalIndex === 12) { // Right shoulder
-                                const angleData = currentPose?.find(a => a.joint === "rightShoulder");
-                                return isAngleCorrect(rightShoulderAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? '#00ff00' : '#ff0000';
-                            }
-                            if (originalIndex === 11) { // Left shoulder
-                                const angleData = currentPose?.find(a => a.joint === "leftShoulder");
-                                return isAngleCorrect(leftShoulderAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? '#00ff00' : '#ff0000';
-                            }
-                            if (originalIndex === 24) { // Right hip
-                                const angleData = currentPose?.find(a => a.joint === "rightHip");
-                                return isAngleCorrect(rightHipAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? '#00ff00' : '#ff0000';
-                            }
-                            if (originalIndex === 23) { // Left hip
-                                const angleData = currentPose?.find(a => a.joint === "leftHip");
-                                return isAngleCorrect(leftHipAngle, angleData?.expected || 0, angleData?.tolerance || 0) ? '#00ff00' : '#ff0000';
-                            }
-                            if (originalIndex === 16) { // Right wrist
-                                return '#0066ff';
-                            }
-                            if (originalIndex === 15) { // Left wrist  
-                                return '#0066ff';
-                            }
-                           
+
                             return '#0066ff'; // Brighter blue for other landmarks
                             
                         }
@@ -389,32 +405,62 @@ export function usePoseCorrection(selectedPose: number) {
         };
     }, [selectedPose]);
 
+    // Function to check if an angle is within tolerance
+    function isAngleCorrect(angle: number | null, expected: number, tolerance: number){
+        if (angle === null) return false;
+        return Math.abs(angle - expected) <= tolerance;
+    };
+
     function closePose(){
         poseLandmarker?.close?.();
         poseLandmarker = null;
     }
 
+    function correctPose(){
+        const currentPose = selectedPoseRef.current;
+
+        const requiredJoints = [
+            { joint: "rightElbow", value: rightElbowAngleRef.current },
+            { joint: "leftElbow", value: leftElbowAngleRef.current },
+            { joint: "rightKnee", value: rightKneeAngleRef.current },
+            { joint: "leftKnee", value: leftKneeAngleRef.current },
+            { joint: "rightShoulder", value: rightShoulderAngleRef.current },
+            { joint: "leftShoulder", value: leftShoulderAngleRef.current },
+            { joint: "rightHip", value: rightHipAngleRef.current },
+            { joint: "leftHip", value: leftHipAngleRef.current },
+        ];
+
+        for (const { joint, value } of requiredJoints) {
+            const angleData = currentPose?.find(a => a.joint === joint);
+            if (!isAngleCorrect(value, angleData?.expected || 0, angleData?.tolerance || 0)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     return {
-        rightElbowAngle,
-        leftElbowAngle,
-        rightKneeAngle,
-        leftKneeAngle,
-        rightHipAngle,
-        leftHipAngle,
-        rightShoulderAngle,
-        leftShoulderAngle,
+        rightElbowAngleRef,
+        leftElbowAngleRef,
+        rightKneeAngleRef,
+        leftKneeAngleRef,
+        rightHipAngleRef,
+        leftHipAngleRef,
+        rightShoulderAngleRef,
+        leftShoulderAngleRef,
         formText,
         videoRef,
         canvasRef,
         setFormText,
-        setRightElbowAngle,
-        setLeftElbowAngle,
-        setRightKneeAngle,
-        setLeftKneeAngle,
-        setRightHipAngle,
-        setLeftHipAngle,
-        setRightShoulderAngle,
-        setLeftShoulderAngle,
+        // setRightElbowAngle,
+        // setLeftElbowAngle,
+        // setRightKneeAngle,
+        // setLeftKneeAngle,
+        // setRightHipAngle,
+        // setLeftHipAngle,
+        // setRightShoulderAngle,
+        // setLeftShoulderAngle,
         closePose,
+        correctPose,
     };
 }

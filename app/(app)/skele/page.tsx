@@ -25,9 +25,10 @@ function SkelePageContent() {
   const [isLoadingPose, setIsLoadingPose] = useState(true);
   const [dbError, setDbError] = useState<string | null>(null);
   const [timerSeconds, setTimerSeconds] = useState(60);
-  const [timerStarted, setTimerStarted] = useState(false);
+  const [poseStartTimer, setPoseStartTimer] = useState(3);
+  const [timerStarted, setTimerStarted] = useState(0);
 
-  const [poseStart, setPoseStart] = useState<boolean | Timestamp>(false); //False if don't start, timeStamp if need to check time help for starting?
+  const [poseStart, setPoseStart] = useState<boolean | Timestamp>(false); //False if don't start, timeStamp if need to check time help for starting? (Seems like bool should be fine)
 
   const searchParams = useSearchParams();
   const poseId = searchParams.get('poseId');
@@ -55,11 +56,25 @@ function SkelePageContent() {
   const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
+          const alreadyReloaded = sessionStorage.getItem('reloaded');
+  
+          if (!alreadyReloaded) {
+          sessionStorage.setItem('reloaded', 'true');
+          window.location.reload();
+          } //Force reload to allow MediaPipe Startup?
+          
+          return () => {
+          sessionStorage.removeItem('reloaded');
+          };
+      }, []);
+
+  useEffect(() => {
     if (resetFlag) {
+      setTimerStarted(0); //Force the timer to be paused
       setTimerSeconds(60); // Reset your logic here
-      setResetFlag(false); // Important: Reset the flag
-      setTimerStarted(false); //Force the timer to be paused
-      console.log(poseStart);
+      setPoseStartTimer(3); //Reset pre-pose recording countdown
+      setResetFlag(false); // Important: Reset the fla
+      // console.log(poseStart);
     }
   }, [resetFlag]);
 
@@ -192,21 +207,48 @@ function SkelePageContent() {
   }, [breathingPhase]);
 
   useEffect(() => {
-  if (!isCameraOn || timerStarted) return;
+  if (!isCameraOn || timerStarted !== 0) return;
 
   const poseCheckInterval = setInterval(() => {
-    if (correctPose()) {
-      setTimerStarted(true);
+    if (correctPose()) { //Hold the pose for the necessary time
+      setTimerStarted(1);
       clearInterval(poseCheckInterval);
+    } else { //Else reset values until conditons met
+      setTimerStarted(0);
+      setPoseStartTimer(3);
     }
   }, 200); //200ms interval for checking
 
   return () => clearInterval(poseCheckInterval);
 }, [isCameraOn, timerStarted]);
 
+  //Timer before the "recording" timer
+  useEffect(() => {
+    if (timerStarted !== 1) return;
+
+    const timerInterval = setInterval(() => {
+      if (!correctPose()) {
+        clearInterval(timerInterval);
+        setPoseStartTimer(3);  // Reset to your starting countdown value
+        setTimerStarted(0);    // Reset state or pause timer as needed
+        return;
+      }
+      setPoseStartTimer(prevSeconds => {
+        if (prevSeconds > 1) {
+          return prevSeconds - 1;
+        }
+        clearInterval(timerInterval);
+        setTimerStarted(2);
+        return 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timerInterval);
+    }, [timerStarted])
+
   // Timer logic
   useEffect(() => {
-    if (!timerStarted) return;
+    if (timerStarted !== 2) return;
  
     const timerInterval = setInterval(() => {
       setTimerSeconds(prevSeconds => {
@@ -449,7 +491,15 @@ function SkelePageContent() {
       </div>
 
       <div className="absolute flex justify-center top-48 w-full h-full">
-        <h1 className="m-3 text-white text-4xl font-bold">{formText}</h1>
+        {formText !== "" ? (
+          <h1 className="m-3 text-white text-4xl font-bold">{formText}</h1>
+        ) : (
+          timerStarted === 1 ? (
+            <h1 className="m-3 text-white text-9xl font-bold opactiy-75">{poseStartTimer}</h1>
+          ) : (
+            <h1 className="m-3 text-white text-4xl font-bold"> {/* Literally just an else condition, LEAVE EMPTY */} </h1> 
+          )
+        )}
       </div>
     </div>
   );

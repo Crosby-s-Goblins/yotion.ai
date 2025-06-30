@@ -113,7 +113,7 @@ function SkelePageContent() {
       try {
         const { data, error } = await supabase
           .from("poseLibrary")
-          .select('id, name, difficulty, description, benefits')
+          .select('id, name, difficulty, description, benefits, images')
           .eq('id', poseId)
           .single();
 
@@ -299,6 +299,8 @@ function SkelePageContent() {
     }
   }
 
+  console.log("POSE OBJECT:", pose);
+
   return (
     <div className="relative w-screen h-screen overflow-hidden">
       {/* Camera Container - Full viewport */}
@@ -308,11 +310,11 @@ function SkelePageContent() {
           style={{ display: 'none' }}
           muted
           playsInline
-          className="scale-x-[-1] absolute inset-0 w-full h-full object-contain" // CAN CHANGE *object-contain* TO *object-cover* to remove the stripes
+          className="scale-x-[-1] absolute inset-0 w-full h-full object-cover" // CAN CHANGE *object-contain* TO *object-cover* to remove the stripes
         />
         <canvas
           ref={canvasRef}
-          className="scale-x-[-1] absolute inset-0 w-full h-full object-contain" // also change to object-cover here
+          className="scale-x-[-1] absolute inset-0 w-full h-full object-cover" // also change to object-cover here
         />
 
         {/* Loading/Error overlay */}
@@ -348,13 +350,13 @@ function SkelePageContent() {
       </div>
 
       {/* UI Overlay - Absolute positioned on top */}
-      <div className="absolute inset-0 z-10">
+      <div className="absolute inset-0 z-10 px-8">
         {/* Breathing Indicator - Left Side */}
         <BreathIndication duration={5}/>
 
         {/* Top UI Bar */}
-        <div className="absolute top-4 left-4 right-4 flex justify-between items-center">
-          <div className="flex text-white px-4 py-2 rounded-lg w-1/3 justify-start">
+        <div className="absolute top-4 left-0 right-0 flex justify-between items-center px-8">
+          <div className="flex text-white py-2 rounded-lg w-1/3 justify-start">
            <Link href='/selection'>
               <div className="bg-black/75 text-white px-4 py-4 rounded-full">
                 <X className="w-8 h-8" />
@@ -364,7 +366,7 @@ function SkelePageContent() {
           <div className="bg-black/75 text-white px-6 py-4 rounded-full min-w-[120px] text-center">
             <p className="text-2xl font-medium">{formatTime(timerSeconds)}</p>
           </div>
-          <div className="flex text-white px-4 py-2 rounded-lg w-1/3 justify-end">
+          <div className="flex text-white py-2 rounded-lg w-1/3 justify-end">
             <div 
               className="bg-black/75 text-white px-4 py-4 rounded-full cursor-pointer hover:bg-black/90 transition-colors"
               onClick={() => setShowInfoModal(true)}
@@ -375,14 +377,35 @@ function SkelePageContent() {
         </div>
 
         {/* Bottom UI Bar */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
-          {/* <div className="bg-black/75 text-white px-12 py-4 rounded-full flex items-center justify-center gap-4"> */}
-            <Button onClick={() => setResetFlag(true)} 
-            className="bg-black/75 text-white px-12 py-4 rounded-full flex items-center justify-center gap-4">
+        <div className="absolute bottom-4 left-0 w-full flex items-end justify-between px-8 z-20">
+          {/* Left Spacer */}
+          <div className="w-1/3" />
+          {/* Centered Reset Button */}
+          <div className="w-1/3 flex justify-center">
+            <Button
+              onClick={() => setResetFlag(true)}
+              className="bg-black/75 text-white px-12 py-8 rounded-full flex items-center justify-center gap-4"
+            >
               <p className="text-2xl font-medium">Reset</p>
               <RotateCcw className="w-8 h-8" />
             </Button>
-          {/* </div> */}
+          </div>
+          {/* Pose Reference Image (Right) */}
+          <div className="w-1/3 flex justify-end">
+            {pose?.images && (
+              <div className="bg-black/75 rounded-lg p-2 shadow-lg">
+                <img
+                  src={pose.images}
+                  alt={`${pose.name} reference`}
+                  className="w-48 h-48 object-contain rounded-lg border-2 border-white/20"
+                  onError={(e) => {
+                    e.currentTarget.parentElement!.style.display = 'none';
+                  }}
+                />
+                <p className="text-white text-xs text-center mt-1 font-medium">{pose.name}</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -454,8 +477,8 @@ function SkelePageContent() {
       )}
 
       {/* Omit pre-production; testing only */}
-      <div className="absolute flex flex-col justify-center items-end w-full h-full"> {/* z-50 */}
-        <div className="flex flex-col mr-10 bg-white p-8 rounded-lg w-56">
+      <div className="static w-full h-full opacity-30 z-20">
+        <div className="absolute bottom-1/2 right-8 bg-white p-8 rounded-lg w-48 flex flex-col text-sm">
           <span>Right Elbow: {rightElbowAngleRef.current}</span>
           <span>Left Elbow: {leftElbowAngleRef.current}</span>
           <span>Right Knee: {rightKneeAngleRef.current}</span>

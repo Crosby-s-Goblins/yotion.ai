@@ -62,7 +62,16 @@ export function ExpandedPoseCard ({ pose, onClose }: Props) {
         </div>
 
         <div className="flex p-8 overflow-y-auto">
-          <div className="bg-gray-500 aspect-square w-96 h-96"></div>
+          <div className="bg-gray-500 aspect-square w-96 h-96">
+            <img
+                  src={pose.images}
+                  alt={`${pose.name} reference`}
+                  className="w-96 h-96 object-contain rounded-lg border-2 border-white/20"
+                  onError={(e) => {
+                    e.currentTarget.parentElement!.style.display = 'none';
+                  }}
+                />
+          </div>
           <div className="flex flex-col ml-16 mr-16 justify-between">
             {pose.description && (
               <div className="mb-8">

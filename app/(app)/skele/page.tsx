@@ -75,7 +75,7 @@ function SkelePageContent() {
       try {
         const { data, error } = await supabase
           .from("poseLibrary")
-          .select('id, name, difficulty, description, benefits')
+          .select('id, name, difficulty, description, benefits, images')
           .eq('id', poseId)
           .single();
 
@@ -221,6 +221,8 @@ function SkelePageContent() {
     }
   }
 
+  console.log("POSE IMAGES:", pose?.images);
+
   return (
     <div className="relative w-screen h-screen overflow-hidden">
       {/* Camera Container - Full viewport */}
@@ -295,6 +297,24 @@ function SkelePageContent() {
             </div>
           </div>
         </div>
+
+        {/* Pose Reference Image - Top Right Corner */}
+        {pose?.images && (
+          <div className="absolute top-20 right-4 z-20">
+            <div className="bg-black/75 rounded-lg p-2 shadow-lg">
+              <img 
+                src={pose.images[0].url} 
+                alt={`${pose.name} reference`}
+                className="w-32 h-32 object-cover rounded-lg border-2 border-white/20"
+                onError={(e) => {
+                  // Hide the image container if image fails to load
+                  e.currentTarget.parentElement!.style.display = 'none';
+                }}
+              />
+              <p className="text-white text-xs text-center mt-1 font-medium">{pose.name}</p>
+            </div>
+          </div>
+        )}
 
         {/* Bottom UI Bar */}
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">

@@ -4,4 +4,5 @@ export interface Pose {
   difficulty: 'Easy' | 'Medium' | 'Hard';
   description?: string;
   benefits?: string[] | string;
+  images?: Array<{ url: string }>;
 }

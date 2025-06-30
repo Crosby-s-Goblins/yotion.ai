@@ -54,6 +54,9 @@ function SkelePageContent() {
   const router = useRouter();
   const streamRef = useRef<MediaStream | null>(null);
 
+  // scoring feature 
+  const [score, setScore] = useState([]);
+
   useEffect(() => {
     if (resetFlag) {
       setTimerSeconds(60); // Reset your logic here
@@ -83,6 +86,12 @@ function SkelePageContent() {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
+  }
+
+  const calculateFrameScore = async () => {
+    const supabase = createClient()
+
+    
   }
 
   useEffect(() => {
@@ -412,6 +421,7 @@ function SkelePageContent() {
 
       {/* Omit pre-production; testing only */}
       <div className="absolute flex flex-col justify-center items-end w-full h-full"> {/* z-50 */}
+        <div>{score}</div>
         <div className="flex flex-col mr-10 bg-white p-8 rounded-lg w-56">
           <span>Right Elbow: {rightElbowAngleRef.current}</span>
           <span>Left Elbow: {leftElbowAngleRef.current}</span>

@@ -61,27 +61,29 @@ export function ExpandedPoseCard ({ pose, onClose }: Props) {
           </button>
         </div>
 
-        <div className="flex p-8 overflow-y-auto">
-          <div className="bg-gray-500 aspect-square w-96 h-96">
+        <div className="flex p-12 overflow-y-auto h-full w-full items-center gap-8">
+          {/* Left side - image */}
+          <div className="aspect-square w-1/2 h-full flex items-center justify-center">
             <img
                   src={pose.images}
                   alt={`${pose.name} reference`}
-                  className="w-96 h-96 object-contain rounded-lg border-2 border-white/20"
+                  className="h-full w-full object-contain rounded-lg bg-black/25"
                   onError={(e) => {
                     e.currentTarget.parentElement!.style.display = 'none';
                   }}
                 />
           </div>
-          <div className="flex flex-col ml-16 mr-16 justify-between">
+          {/* Right side - details */}
+          <div className="flex flex-col w-1/2 h-full justify-between">
             {pose.description && (
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold mb-4">Description</h3>
+              <div className="">
+                <h3 className="text-xl font-semibold">Description</h3>
                 <p className="text-gray-600 leading-relaxed text-lg">{pose.description}</p>
               </div>
             )}
             {benefits?.length > 0 && (
               <div className="mb-8">
-                <h3 className="text-xl font-semibold mb-4">Benefits</h3>
+                <h3 className="text-xl font-semibold">Benefits</h3>
                 <ul className="space-y-3">
                   {benefits.map((benefit, index) => (
                     <li key={index} className="flex items-start gap-3">

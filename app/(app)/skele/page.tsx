@@ -207,20 +207,20 @@ function SkelePageContent() {
   }, [breathingPhase]);
 
   useEffect(() => {
-  if (!isCameraOn || timerStarted !== 0) return;
+    if (!isCameraOn || timerStarted !== 0) return;
 
-  const poseCheckInterval = setInterval(() => {
-    if (correctPose()) { //Hold the pose for the necessary time
-      setTimerStarted(1);
-      clearInterval(poseCheckInterval);
-    } else { //Else reset values until conditons met
-      setTimerStarted(0);
-      setPoseStartTimer(3);
-    }
-  }, 200); //200ms interval for checking
+    const poseCheckInterval = setInterval(() => {
+      if (correctPose()) { //Hold the pose for the necessary time
+        setTimerStarted(1);
+        clearInterval(poseCheckInterval);
+      } else { //Else reset values until conditons met
+        setTimerStarted(0);
+        setPoseStartTimer(3);
+      }
+    }, 200); //200ms interval for checking
 
-  return () => clearInterval(poseCheckInterval);
-}, [isCameraOn, timerStarted]);
+    return () => clearInterval(poseCheckInterval);
+  }, [isCameraOn, timerStarted]);
 
   //Timer before the "recording" timer
   useEffect(() => {

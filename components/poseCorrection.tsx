@@ -290,17 +290,16 @@ export function usePoseCorrection(selectedPose: number) {
                         // setLeftHipAngle(null)
                         setFormText("Body not in frame")
                     } else {
-                        const rightElbowData = poseAngles?.find(a => a.joint === "rightElbow");
-                        const leftElbowData = poseAngles?.find(a => a.joint === "leftElbow");
-                        const rightShoulderData = poseAngles?.find(a => a.joint === "rightShoulder");
-                        const leftShoulderData = poseAngles?.find(a => a.joint === "leftShoulder");
-                        const rightKneeData = poseAngles?.find(a => a.joint === "rightKnee");
-                        const leftKneeData = poseAngles?.find(a => a.joint === "leftKnee");
-                        const rightHipData = poseAngles?.find(a => a.joint === "rightHip");
-                        const leftHipData = poseAngles?.find(a => a.joint === "leftHip");
+                        const rightElbowData = selectedPoseRef.current?.find(a => a.joint === "rightElbow");
+                        const leftElbowData = selectedPoseRef.current?.find(a => a.joint === "leftElbow");
+                        const rightShoulderData = selectedPoseRef.current?.find(a => a.joint === "rightShoulder");
+                        const leftShoulderData = selectedPoseRef.current?.find(a => a.joint === "leftShoulder");
+                        const rightKneeData = selectedPoseRef.current?.find(a => a.joint === "rightKnee");
+                        const leftKneeData = selectedPoseRef.current?.find(a => a.joint === "leftKnee");
+                        const rightHipData = selectedPoseRef.current?.find(a => a.joint === "rightHip");
+                        const leftHipData = selectedPoseRef.current?.find(a => a.joint === "leftHip");
                     
                         if ( rightElbowData && rightElbowAngleRef.current < (rightElbowData.expected - rightElbowData.tolerance)) {
-                            console.log(rightElbowData.expected - rightElbowData.tolerance)
                             setFormText("Open your right arm.");
                         } else if (rightElbowData && rightElbowAngleRef.current > (rightElbowData.expected + rightElbowData.tolerance)) {
                             setFormText("Close your right arm.");
@@ -323,8 +322,6 @@ export function usePoseCorrection(selectedPose: number) {
                         }
                           
                     }
-
-                    
                     // Get current pose data
                     const currentPose = selectedPoseRef.current;
 

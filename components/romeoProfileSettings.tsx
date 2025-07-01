@@ -37,6 +37,7 @@ import { Badge } from "@/components/ui/badge";
 //Icons
 import { ExternalLink, Loader2Icon, Check, CircleAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
+import PasswordAlteration from "./passwordChanger";
 
 interface SettingsProps {
     user: any;
@@ -223,12 +224,7 @@ const Settings = ({ user }: SettingsProps) => {
                                         <CardDescription>
                                             Change the password associated with your account.
                                         </CardDescription>
-                                        <Button asChild>
-                                            <a href="/update-password">
-                                                <ExternalLink />
-                                                Edit Password
-                                            </a>
-                                        </Button>
+                                        <PasswordAlteration />
                                     </div>
                                     <Separator />
                                     <div className="flex flex-col gap-3">

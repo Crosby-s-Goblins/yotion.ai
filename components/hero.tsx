@@ -2,38 +2,20 @@
 
 import { Button } from "./ui/button";
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useUser } from './user-provider';
 
 export function Hero() {
+  const user = useUser();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
   
   useEffect(() => {
     setMounted(true);
-    const supabase = createClient();
-    
-    // Get initial user state
-    const getUser = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        setIsLoggedIn(!!user);
-      } catch (error) {
-        console.error('Error getting user:', error);
-      }
-    };
-  
-    getUser();
-  
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setIsLoggedIn(!!session?.user);
-    });
-  
-    return () => subscription.unsubscribe();
-  }, []);
+    setIsLoggedIn(!!user);
+  }, [user]);
 
   const handleStartTraining = () => {
     if (isLoggedIn) {

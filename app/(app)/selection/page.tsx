@@ -12,30 +12,38 @@ import { createClient } from "@/lib/supabase/client";
 import Loading from "@/components/loading";
 import { difficultyColors } from "@/components/selectorCardComponents/poseItem";
 import { motion } from "framer-motion";
+import { useUser } from '@/components/user-provider';
 
 export default function SelectionComponents() {
+  const user = useUser();
   const [poses, setPoses] = useState<any[]>([]);
   const [search, setSearch] = useState('');
   const [expandedPose, setExpandedPose] = useState<number | null>(null);
   const [paidStatus, setPaidStatus] = useState<boolean | null>(null);
-  const [user, setUser] = useState<any>(null);
-
 
   useEffect(() => {
-  async function fetchPoses() {
-    const { data, error } = await supabase.from("poseLibrary").select('*');
-    error ? console.error('Error fetching poses:', error) : setPoses(data);
-  } //Change 'practTable' to actual pose table name
-    /*
-    Run in SQL editor on Supabase (Allows read access necessary for pull):
-    CREATE POLICY "Allow public read"
-    ON "table_name_here"
-    FOR SELECT
-    USING (true);
-    */
-
-  fetchPoses(); 
+    async function fetchPoses() {
+      const { data, error } = await supabase.from("poseLibrary").select('*');
+      error ? console.error('Error fetching poses:', error) : setPoses(data);
+    }
+    fetchPoses();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      const supabase = createClient();
+      supabase
+        .from('profiles')
+        .select('paidUser')
+        .eq('id', user.id)
+        .single()
+        .then(({ data: profileData }) => {
+          if (profileData) setPaidStatus(profileData.paidUser);
+        });
+    } else {
+      setPaidStatus(null);
+    }
+  }, [user]);
 
   useEffect(() => {
           const alreadyReloaded = sessionStorage.getItem('reloaded');
@@ -52,28 +60,6 @@ export default function SelectionComponents() {
       }, []);
 
   const supabase = createClient();
-      const getUser = async () => {
-        try {
-          const { data: { user } } = await supabase.auth.getUser();
-          setUser(user);
-  
-          if (user) {
-            // get profile info
-            const { data: profileData, error } = await supabase
-              .from('profiles')
-              .select("paidUser")
-              .eq('id', user.id)
-              .single();
-            if (profileData) setPaidStatus(profileData.paidUser);
-          } else {
-            setPaidStatus(null);
-          }
-        } catch (error) {
-          console.error('Error getting user:', error);
-        }
-      };
-      getUser();
-  
 
   const handlePoseClick = (index: number) => {
     if (expandedPose === index) {

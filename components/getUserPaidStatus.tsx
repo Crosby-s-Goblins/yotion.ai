@@ -1,37 +1,28 @@
 'use client';
 
 import { createClient } from '@/lib/supabase/client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useUser } from './user-provider';
 
 
 // Returns a boolean status from the current logged-in user's profile.
 export async function getUserStatus(): Promise<boolean | null> {
-
-    const [user, setUser] = useState<any>(null);
-    const [paidStatus, setPaidStatus] = useState<any>(null);
-
-    const supabase = createClient();
-    const getUser = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        setUser(user);
-
-        if (user) {
-          // get profile info
-          const { data: profileData, error } = await supabase
-            .from('profiles')
-            .select("paidUser")
-            .eq('id', user.id)
-            .single();
-          if (profileData) setPaidStatus(profileData);
-        } else {
-          setPaidStatus(null);
-        }
-      } catch (error) {
-        console.error('Error getting user:', error);
-      }
-    };
-    
-
-  return paidStatus.paidUser ?? null;
+  const user = useUser();
+  const [paidStatus, setPaidStatus] = useState<any>(null);
+  useEffect(() => {
+    if (user) {
+      const supabase = createClient();
+      supabase
+        .from('profiles')
+        .select('paidUser')
+        .eq('id', user.id)
+        .single()
+        .then(({ data: profileData }) => {
+          if (profileData) setPaidStatus(profileData.paidUser);
+        });
+    } else {
+      setPaidStatus(null);
+    }
+  }, [user]);
+  return paidStatus ?? null;
 }

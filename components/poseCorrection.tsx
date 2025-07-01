@@ -20,9 +20,6 @@ function useTextToSpeech(text: string) {
         if (text) {
             const synth = window.speechSynthesis;
             synth.cancel();
-            if (synth.paused) {
-                synth.speak(new SpeechSynthesisUtterance("Good"));
-            }
             const utterance = new SpeechSynthesisUtterance(text);
             synth.speak(utterance);
         }

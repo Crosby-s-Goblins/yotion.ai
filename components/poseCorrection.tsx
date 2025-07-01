@@ -15,6 +15,20 @@ type PoseAngle = {
 };
 type PoseAngles = PoseAngle[];
 
+function useTextToSpeech(text: string) {
+    useEffect(() => {
+        if (text) {
+            const synth = window.speechSynthesis;
+            synth.cancel();
+            if (synth.paused) {
+                synth.speak(new SpeechSynthesisUtterance("Good"));
+            }
+            const utterance = new SpeechSynthesisUtterance(text);
+            synth.speak(utterance);
+        }
+    }, [text]);
+}
+
 export function usePoseCorrection(selectedPose: number) {
     let poseLandmarker: PoseLandmarker | null = null;
     let temp : string;
@@ -49,6 +63,7 @@ export function usePoseCorrection(selectedPose: number) {
 
     // text to speech 
     const [formText, setFormText] = useState<string | null>("no text yet");
+    useTextToSpeech(formText ?? "");
 
     const selectedPoseRef = useRef<PoseAngles | null>(null);
 
@@ -290,17 +305,16 @@ export function usePoseCorrection(selectedPose: number) {
                         // setLeftHipAngle(null)
                         setFormText("Body not in frame")
                     } else {
-                        const rightElbowData = poseAngles?.find(a => a.joint === "rightElbow");
-                        const leftElbowData = poseAngles?.find(a => a.joint === "leftElbow");
-                        const rightShoulderData = poseAngles?.find(a => a.joint === "rightShoulder");
-                        const leftShoulderData = poseAngles?.find(a => a.joint === "leftShoulder");
-                        const rightKneeData = poseAngles?.find(a => a.joint === "rightKnee");
-                        const leftKneeData = poseAngles?.find(a => a.joint === "leftKnee");
-                        const rightHipData = poseAngles?.find(a => a.joint === "rightHip");
-                        const leftHipData = poseAngles?.find(a => a.joint === "leftHip");
+                        const rightElbowData = selectedPoseRef.current?.find(a => a.joint === "rightElbow");
+                        const leftElbowData = selectedPoseRef.current?.find(a => a.joint === "leftElbow");
+                        const rightShoulderData = selectedPoseRef.current?.find(a => a.joint === "rightShoulder");
+                        const leftShoulderData = selectedPoseRef.current?.find(a => a.joint === "leftShoulder");
+                        const rightKneeData = selectedPoseRef.current?.find(a => a.joint === "rightKnee");
+                        const leftKneeData = selectedPoseRef.current?.find(a => a.joint === "leftKnee");
+                        const rightHipData = selectedPoseRef.current?.find(a => a.joint === "rightHip");
+                        const leftHipData = selectedPoseRef.current?.find(a => a.joint === "leftHip");
                     
                         if ( rightElbowData && rightElbowAngleRef.current < (rightElbowData.expected - rightElbowData.tolerance)) {
-                            console.log(rightElbowData.expected - rightElbowData.tolerance)
                             setFormText("Open your right arm.");
                         } else if (rightElbowData && rightElbowAngleRef.current > (rightElbowData.expected + rightElbowData.tolerance)) {
                             setFormText("Close your right arm.");
@@ -315,11 +329,41 @@ export function usePoseCorrection(selectedPose: number) {
                         else if (rightShoulderData && rightShoulderAngleRef.current < (rightShoulderData.expected - rightShoulderData.tolerance)){
                             setFormText("Open your right shoulder.")
                         } else if (rightShoulderData && rightShoulderAngleRef.current > (rightShoulderData.expected + rightShoulderData.tolerance)) {
+                            setFormText("Close your right shoulder.");
+                        }
+
+                        else if (leftShoulderData && leftShoulderAngleRef.current < (leftShoulderData.expected - leftShoulderData.tolerance)){
+                            setFormText("Open your left shoulder.")
+                        } else if (leftShoulderData && leftShoulderAngleRef.current > (leftShoulderData.expected + leftShoulderData.tolerance)) {
                             setFormText("Close your left shoulder.");
                         }
 
+                        else if (rightHipData && rightHipAngleRef.current < (rightHipData.expected - rightHipData.tolerance)){
+                            setFormText("Open your right hip.")
+                        } else if (rightHipData && rightHipAngleRef.current > (rightHipData.expected + rightHipData.tolerance)) {
+                            setFormText("Close your right hip.");
+                        }
+                        
+                        else if (leftHipData && leftHipAngleRef.current < (leftHipData.expected - leftHipData.tolerance)){
+                            setFormText("Open your left hip.")
+                        } else if (leftHipData && leftHipAngleRef.current > (leftHipData.expected + leftHipData.tolerance)) {
+                            setFormText("Close your left hip.");
+                        }
+
+                        else if (rightKneeData && rightKneeAngleRef.current < (rightKneeData.expected - rightKneeData.tolerance)){
+                            setFormText("Open your right knee.")
+                        } else if (rightKneeData && rightKneeAngleRef.current > (rightKneeData.expected + rightKneeData.tolerance)) {
+                            setFormText("Close your right knee.");
+                        }
+
+                        else if (leftKneeData && leftKneeAngleRef.current < (leftKneeData.expected - leftKneeData.tolerance)){
+                            setFormText("Open your left knee.")
+                        } else if (leftKneeData && leftKneeAngleRef.current > (leftKneeData.expected + leftKneeData.tolerance)) {
+                            setFormText("Close your left knee.");
+                        }
+
                         else {
-                            setFormText("")
+                            setFormText("Perfect!")
                         }
                           
                     }

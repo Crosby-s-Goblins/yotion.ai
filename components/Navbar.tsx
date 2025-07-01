@@ -5,54 +5,36 @@ import { createClient } from '@/lib/supabase/client';
 import { LogoutButton } from './logout-button';
 import Link from 'next/link';
 import { Button } from './ui/button';
+import { useUser } from './user-provider';
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 
 export default function Navbar() {
+  const user = useUser();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [mounted, setMounted] = useState(false);
   const [profile, setProfile] = useState<any>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    const supabase = createClient();
-    
-    // Get initial user state
-    const getUser = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        setIsLoggedIn(!!user);
-        setUser(user);
-
-        if (user) {
-          // get profile info
-          const { data: profileData, error } = await supabase
-            .from('profiles')
-            .select('username, avatar_url')
-            .eq('id', user.id)
-            .single();
+    if (user) {
+      setIsLoggedIn(true);
+      // get profile info
+      const supabase = createClient();
+      supabase
+        .from('profiles')
+        .select('username, avatar_url')
+        .eq('id', user.id)
+        .single()
+        .then(({ data: profileData }) => {
           if (profileData) setProfile(profileData);
-        } else {
-          setProfile(null);
-        }
-      } catch (error) {
-        console.error('Error getting user:', error);
-      }
-    };
-
-    getUser();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state changed:', event, session?.user?.email);
-      setIsLoggedIn(!!session?.user);
-      setUser(session?.user);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+        });
+    } else {
+      setIsLoggedIn(false);
+      setProfile(null);
+    }
+  }, [user]);
 
   // Don't render anything until mounted to prevent hydration mismatch
   if (!mounted) {

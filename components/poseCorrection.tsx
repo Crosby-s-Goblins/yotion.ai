@@ -364,8 +364,6 @@ export function usePoseCorrection(selectedPose: number) {
                         }
                           
                     }
-
-                    
                     // Get current pose data
                     const currentPose = selectedPoseRef.current;
 

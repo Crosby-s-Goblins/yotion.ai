@@ -299,7 +299,7 @@ function SkelePageContent() {
     }
   }
 
-  console.log("POSE OBJECT:", pose);
+  // console.log("POSE OBJECT:", pose);
 
   return (
     <div className="relative w-screen h-screen overflow-hidden">

@@ -13,6 +13,9 @@ export default function poseDetection() {
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
+    
+    // Store previous landmarks for smoothing
+    const previousLandmarksRef = useRef<any[]>([]);
 
     // all relevant angles
     const [rightElbowAngle, setRightElbowAngle] = useState<number | null>(null);
@@ -40,6 +43,23 @@ export default function poseDetection() {
         const cosineAngle = dot / (magAB * magCB);
         const angleRad = Math.acos(Math.max(-1, Math.min(1, cosineAngle)));
         return angleRad * (180 / Math.PI);
+    }
+
+    // Smooth landmarks using Exponential Moving Average (EMA)
+    function smoothLandmarks(current: any[], previous: any[], alpha: number = 0.6): any[] {
+        if (!previous || previous.length === 0) return current;
+
+        return current.map((currPoint, i) => {
+            const prevPoint = previous[i];
+            if (!prevPoint || !currPoint) return currPoint;
+            
+            return {
+                x: alpha * currPoint.x + (1 - alpha) * prevPoint.x,
+                y: alpha * currPoint.y + (1 - alpha) * prevPoint.y,
+                z: alpha * currPoint.z + (1 - alpha) * prevPoint.z,
+                visibility: currPoint.visibility, // Keep current visibility
+            };
+        });
     }
 
     useEffect(() => {
@@ -99,7 +119,13 @@ export default function poseDetection() {
             const now = performance.now();
 
             poseLandmarker.detectForVideo(video, now, (result) => {
-                for (const landmark of result.landmarks) {
+                for (const originalLandmark of result.landmarks) {
+                    // Apply smoothing to landmarks
+                    const smoothedLandmarks = smoothLandmarks(originalLandmark, previousLandmarksRef.current);
+                    previousLandmarksRef.current = smoothedLandmarks;
+                    
+                    // Use smoothed landmarks for all calculations
+                    const landmark = smoothedLandmarks;
                     drawingUtils.drawLandmarks(landmark, {
                         radius: (data) =>
                             DrawingUtils.lerp(data.from!.z, -0.15, 0.1, 5, 1),

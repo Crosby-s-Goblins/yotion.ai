@@ -34,6 +34,9 @@ export function usePoseCorrection(selectedPose: number) {
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
+    
+    // Store previous landmarks for smoothing
+    const previousLandmarksRef = useRef<any[]>([]);
 
     // all relevant angles
     // const [rightElbowAngle, setRightElbowAngle] = useState<number | null>(null);
@@ -121,6 +124,23 @@ export function usePoseCorrection(selectedPose: number) {
 
     function isVisible(...points: any[]): boolean {
         return points.every(p => p && p.visibility !== undefined && p.visibility > 0.5);
+    }
+
+    // Smooth landmarks using Exponential Moving Average (EMA)
+    function smoothLandmarks(current: any[], previous: any[], alpha: number = 0.5): any[] {
+        if (!previous || previous.length === 0) return current;
+
+        return current.map((currPoint, i) => {
+            const prevPoint = previous[i];
+            if (!prevPoint || !currPoint) return currPoint;
+            
+            return {
+                x: alpha * currPoint.x + (1 - alpha) * prevPoint.x,
+                y: alpha * currPoint.y + (1 - alpha) * prevPoint.y,
+                z: alpha * currPoint.z + (1 - alpha) * prevPoint.z,
+                visibility: currPoint.visibility, // Keep current visibility
+            };
+        });
     }    
 
     useEffect(() => {
@@ -180,7 +200,13 @@ export function usePoseCorrection(selectedPose: number) {
             const now = performance.now();
 
             poseLandmarkerInstance.detectForVideo(video, now, (result) => {
-                for (const landmark of result.landmarks) {
+                for (const originalLandmark of result.landmarks) {
+                    // Apply smoothing to landmarks
+                    const smoothedLandmarks = smoothLandmarks(originalLandmark, previousLandmarksRef.current);
+                    previousLandmarksRef.current = smoothedLandmarks;
+                    
+                    // Use smoothed landmarks for all calculations
+                    const landmark = smoothedLandmarks;
 
                     // const rightElbowAngle = calculateAngle(
                     //     landmark[12],

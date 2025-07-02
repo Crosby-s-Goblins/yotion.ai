@@ -90,39 +90,36 @@ export default function SelectionComponents() {
         description="Start your yoga journey with AI-powered guidance"
         backHref="/practice"
       />
-      <section className="flex flex-col w-full h-screen items-center">
+      <section className="flex flex-col w-full flex-1 items-center">
         <div className="w-full max-w-2xl px-4 mb-6">
           <Input className="flex flex-row rounded-3xl border-2 py-6 px-8" placeholder="Search"
             type="text" value={search} onChange={(e) => setSearch(e.target.value)}/>
         </div>
-
         <div className="w-full max-w-2xl px-4">
-          <div className="bg-white rounded-3xl border-2 h-full overflow-hidden">
-            <ScrollArea className="h-[700px] rounded-3xl">
-              <div className="pr-4 -mr-4">
-                {filteredItems.length === 0 ? (
-              <p className="text-gray-500 items-center justify-center flex mt-10">No items found.</p>
-                ) : (
-                filteredItems.map((pose, index) => (
-                  <div key={index} className="relative">
-                    <PoseItem 
-                      {...pose} 
-                      onClick={() => handlePoseClick(index)}
-                      isExpanded={expandedPose === index}
-                    />
-                    <AnimatePresence>
-                      {expandedPose === index && (
-                        <ExpandedPoseCard 
-                          pose={pose} 
-                          onClose={handleClose}
-                        />
-                      )}
-                    </AnimatePresence>
-                  </div>
-                )))}
-              </div>
-            </ScrollArea>
-          </div>
+          <ScrollArea className="rounded-3xl border-2 h-[100px] h-full w-full flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-300px)]">
+            <div className="pr-4 -mr-4">
+              {filteredItems.length === 0 ? (
+            <p className="text-gray-500 items-center justify-center flex mt-10">No items found.</p>
+              ) : (
+              filteredItems.map((pose, index) => (
+                <div key={index} className="relative">
+                  <PoseItem 
+                    {...pose} 
+                    onClick={() => handlePoseClick(index)}
+                    isExpanded={expandedPose === index}
+                  />
+                  <AnimatePresence>
+                    {expandedPose === index && (
+                      <ExpandedPoseCard 
+                        pose={pose} 
+                        onClose={handleClose}
+                      />
+                    )}
+                  </AnimatePresence>
+                </div>
+              )))}
+            </div>
+          </ScrollArea>
         </div>
       </section>
     </main>    

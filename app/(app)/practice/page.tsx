@@ -3,7 +3,7 @@ import { Settings, Users, ChartNoAxesCombined, Flame } from 'lucide-react';
 
 export default function PracticePage() {
   return (
-    <main className="flex flex-col items-center justify-center w-full md:h-screen md:items-center 2xl:h-screen 2xl:items-center gap-8">
+    <main className="flex py-7 flex-col items-center justify-center w-full md:h-screen md:items-center 2xl:h-screen 2xl:items-center gap-8">
         <div>
             <h1 className="text-3xl font-semibold"><a href='/'>yotion.ai</a></h1>
         </div>

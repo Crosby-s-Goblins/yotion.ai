@@ -1,11 +1,10 @@
+// post workout page
 'use client'
-
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-export default function PostWorkoutPage() {
-  
+export default function PostWorkoutPage() {  
     useEffect(() => {
         const alreadyReloaded = sessionStorage.getItem('reloaded');
 

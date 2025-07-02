@@ -1,3 +1,4 @@
+// poseCorrection component for Skele page
 'use client'
 
 import {
@@ -26,7 +27,7 @@ function useTextToSpeech(text: string) {
     }, [text]);
 }
 
-export function usePoseCorrection(selectedPose: number) {
+export function usePoseCorrection(selectedPose: number, timerStartedRef: React.RefObject<number>) {
     let poseLandmarker: PoseLandmarker | null = null;
     let temp : string;
 
@@ -37,19 +38,6 @@ export function usePoseCorrection(selectedPose: number) {
     
     // Store previous landmarks for smoothing
     const previousLandmarksRef = useRef<any[]>([]);
-
-    // all relevant angles
-    // const [rightElbowAngle, setRightElbowAngle] = useState<number | null>(null);
-    // const [leftElbowAngle, setLeftElbowAngle] = useState<number | null>(null);
-
-    // const [rightKneeAngle, setRightKneeAngle] = useState<number | null>(null);
-    // const [leftKneeAngle, setLeftKneeAngle] = useState<number | null>(null);
-
-    // const [rightHipAngle, setRightHipAngle] = useState<number | null>(null); 
-    // const [leftHipAngle, setLeftHipAngle] = useState<number | null>(null); 
-
-    // const [rightShoulderAngle, setRightShoulderAngle] = useState<number | null>(null);
-    // const [leftShoulderAngle, setLeftShoulderAngle] = useState<number | null>(null);
 
     //Bulk values for timer start? -- Redundant with above, pick one later
     const rightElbowAngleRef = useRef<number | null>(null);
@@ -66,6 +54,9 @@ export function usePoseCorrection(selectedPose: number) {
     useTextToSpeech(formText ?? "");
 
     const selectedPoseRef = useRef<PoseAngles | null>(null);
+
+    // score system
+    const [score, setScore] = useState<number>(100);
 
     useEffect(() => {
         selectedPoseRef.current = poseAngles;
@@ -208,124 +199,39 @@ export function usePoseCorrection(selectedPose: number) {
                     // Use smoothed landmarks for all calculations
                     const landmark = smoothedLandmarks;
 
-                    // const rightElbowAngle = calculateAngle(
-                    //     landmark[12],
-                    //     landmark[14],
-                    //     landmark[16]
-                    // );
-                    // setRightElbowAngle(Math.round(rightElbowAngle));
-                    // if (!isVisible(landmark[12], landmark[14], landmark[16])) {
-                    //     setRightElbowAngle(null)
-                    //     setFormText("Body not in frame")
-                    // }
-
                     rightElbowAngleRef.current = Math.round(calculateAngle(landmark[12],
                         landmark[14],
                         landmark[16]));
-
-                    // const leftElbowAngle = calculateAngle(
-                    //     landmark[11],
-                    //     landmark[13],
-                    //     landmark[21]
-                    // );
-                    // setLeftElbowAngle(Math.round(leftElbowAngle));
-                    // if (!isVisible(landmark[11], landmark[13], landmark[21])) {
-                    //     setLeftElbowAngle(null)
-                    //     setFormText("Body not in frame")
-                    // }
 
                      leftElbowAngleRef.current = Math.round(calculateAngle(landmark[11],
                         landmark[13],
                         landmark[21]));
 
-                    // const rightKneeAngle = calculateAngle(
-                    //     landmark[24],
-                    //     landmark[26],
-                    //     landmark[28]
-                    // );
-                    // setRightKneeAngle(Math.round(rightKneeAngle));
-                    // if (!isVisible(landmark[24], landmark[26], landmark[28])) {
-                    //     setRightKneeAngle(null)
-                    //     setFormText("Body not in frame")
-                    // }
-
                      rightKneeAngleRef.current = Math.round(calculateAngle(landmark[24],
                         landmark[26],
                         landmark[28]));
-
-                    // const leftKneeAngle = calculateAngle(
-                    //     landmark[23],
-                    //     landmark[25],
-                    //     landmark[27]
-                    // );
-                    // setLeftKneeAngle(Math.round(leftKneeAngle));
-                    // if (!isVisible(landmark[23], landmark[25], landmark[27])) {
-                    //     setLeftKneeAngle(null)
-                    //     setFormText("Body not in frame")
-                    // }
 
                      leftKneeAngleRef.current = Math.round(calculateAngle(landmark[23],
                         landmark[25],
                         landmark[27]));
 
-                    // const rightShoulderAngle = calculateAngle(
-                    //     landmark[14],
-                    //     landmark[12],
-                    //     landmark[24]
-                    // );
-                    // setRightShoulderAngle(Math.round(rightShoulderAngle));
-                    // if (!isVisible(landmark[14], landmark[12], landmark[24])) {
-                    //     setRightShoulderAngle(null)
-                    //     setFormText("Body not in frame")
-                    // }
-
                      rightShoulderAngleRef.current = Math.round(calculateAngle(landmark[14],
                         landmark[12],
                         landmark[24]));
-
-                    // const leftShoulderAngle = calculateAngle(
-                    //     landmark[13],
-                    //     landmark[11],
-                    //     landmark[23]
-                    // );
-                    // setLeftShoulderAngle(Math.round(leftShoulderAngle));
-                    // if (!isVisible(landmark[13], landmark[11], landmark[23])) {
-                    //     setLeftShoulderAngle(null)
-                    //     setFormText("Body not in frame")
-                    // }
 
                      leftShoulderAngleRef.current = Math.round(calculateAngle(landmark[13],
                         landmark[11],
                         landmark[23]));
 
-                    // const rightHipAngle = calculateAngle(
-                    //     landmark[12],
-                    //     landmark[24],
-                    //     landmark[26]
-                    // );
-                    // setRightHipAngle(Math.round(rightHipAngle));
-                    // if (!isVisible(landmark[12], landmark[24], landmark[26])) {
-                    //     setRightHipAngle(null)
-                    //     setFormText("Body not in frame")
-                    // }
-
                      rightHipAngleRef.current = Math.round(calculateAngle(landmark[12],
                         landmark[24],
                         landmark[26]));
-
-                    // const leftHipAngle = calculateAngle(
-                    //     landmark[11],
-                    //     landmark[23],
-                    //     landmark[25]
-                    // );
-                    // setLeftHipAngle(Math.round(leftHipAngle));
 
                      leftHipAngleRef.current = Math.round(calculateAngle(landmark[11],
                         landmark[23],
                         landmark[25]));
                     
                     if (!isVisible(landmark[13], landmark[11], landmark[23], landmark[14], landmark[12], landmark[24], landmark[23], landmark[25], landmark[27], landmark[12], landmark[14], landmark[16], landmark[11], landmark[13], landmark[21], landmark[24], landmark[26], landmark[28], landmark[11], landmark[23], landmark[25])) {
-                        // setLeftHipAngle(null)
                         setFormText("Body not in frame")
                     } else {
                         const rightElbowData = selectedPoseRef.current?.find(a => a.joint === "rightElbow");
@@ -390,6 +296,34 @@ export function usePoseCorrection(selectedPose: number) {
                         }
                           
                     }
+
+                    // calculate the score for each joint
+                    const joints = [
+                        { ref: rightElbowAngleRef, name: "rightElbow" },
+                        { ref: leftElbowAngleRef, name: "leftElbow" },
+                        { ref: rightKneeAngleRef, name: "rightKnee" },
+                        { ref: leftKneeAngleRef, name: "leftKnee" },
+                        { ref: rightShoulderAngleRef, name: "rightShoulder" },
+                        { ref: leftShoulderAngleRef, name: "leftShoulder" },
+                        { ref: rightHipAngleRef, name: "rightHip" },
+                        { ref: leftHipAngleRef, name: "leftHip" },
+                    ];
+                    if (selectedPoseRef.current) {
+                        for (const joint of joints) {
+                            const current = joint.ref.current;
+                            const expected = selectedPoseRef.current.find(a => a.joint === joint.name)?.expected;
+                            const tolerance = selectedPoseRef.current.find(a => a.joint === joint.name)?.tolerance;
+                            if (
+                                typeof current === "number" &&
+                                typeof expected === "number" &&
+                                typeof tolerance === "number"
+                            ) {
+                                scoreCalc(current, expected, tolerance);
+                            }
+                        }
+                    }
+
+                    
                     // Get current pose data
                     const currentPose = selectedPoseRef.current;
 
@@ -471,17 +405,17 @@ export function usePoseCorrection(selectedPose: number) {
     }, [selectedPose]);
 
     // Function to check if an angle is within tolerance
-    function isAngleCorrect(angle: number | null, expected: number, tolerance: number){
+    function isAngleCorrect(angle: number | null, expected: number, tolerance: number) {
         if (angle === null) return false;
         return Math.abs(angle - expected) <= tolerance;
     };
 
-    function closePose(){
+    function closePose() {
         poseLandmarker?.close?.();
         poseLandmarker = null;
     }
 
-    function correctPose(){
+    function correctPose() {
         const currentPose = selectedPoseRef.current;
 
         const requiredJoints = [
@@ -504,6 +438,19 @@ export function usePoseCorrection(selectedPose: number) {
         return true;
     }
 
+    function scoreCalc(current: number, expected: number, tol: number) {
+        const para = expected - current;
+        let pointLoss = 0;
+        if (((para < -tol) || (para > tol)) && timerStartedRef.current == 2) {
+            pointLoss = 0.000001 * (para ** 2);
+        }
+        console.log(timerStartedRef.current)
+        if (typeof pointLoss === 'number' && !isNaN(pointLoss)) {
+            setScore(prev => Math.max(0, prev - pointLoss));
+        }
+        return pointLoss;
+    }
+
     return {
         rightElbowAngleRef,
         leftElbowAngleRef,
@@ -516,15 +463,8 @@ export function usePoseCorrection(selectedPose: number) {
         formText,
         videoRef,
         canvasRef,
+        score,
         setFormText,
-        // setRightElbowAngle,
-        // setLeftElbowAngle,
-        // setRightKneeAngle,
-        // setLeftKneeAngle,
-        // setRightHipAngle,
-        // setLeftHipAngle,
-        // setRightShoulderAngle,
-        // setLeftShoulderAngle,
         closePose,
         correctPose,
     };

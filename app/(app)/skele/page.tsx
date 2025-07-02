@@ -1,3 +1,4 @@
+// Skele/page.tsx
 'use client';
 
 import { Info, Play, RotateCcw, Camera, CameraOff, X } from "lucide-react";
@@ -10,27 +11,27 @@ import { usePoseCorrection } from "@/components/poseCorrection";
 import { BreathIndication } from "@/components/breathingIndicatorLineBall";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { Timestamp } from "next/dist/server/lib/cache-handlers/types";
+// import { Timestamp } from "next/dist/server/lib/cache-handlers/types";
 
 function SkelePageContent() {
-  const [isCameraOn, setIsCameraOn] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isCameraOn, setIsCameraOn] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [showInfoModal, setShowInfoModal] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState<boolean>(false);
   const [pose, setPose] = useState<Pose | null>(null);
-  const [isLoadingPose, setIsLoadingPose] = useState(true);
+  const [isLoadingPose, setIsLoadingPose] = useState<boolean>(true);
   const [dbError, setDbError] = useState<string | null>(null);
-  const [timerSeconds, setTimerSeconds] = useState(60);
-  const [poseStartTimer, setPoseStartTimer] = useState(3);
-  const [timerStarted, setTimerStarted] = useState(0);
-
-  const [poseStart, setPoseStart] = useState<boolean | Timestamp>(false); //False if don't start, timeStamp if need to check time help for starting? (Seems like bool should be fine)
+  const [timerSeconds, setTimerSeconds] = useState<number>(30);
+  const [poseStartTimer, setPoseStartTimer] = useState<number>(3);
+  const [timerStarted, setTimerStarted] = useState<number>(0);
+  const timerStartedRef = useRef(timerStarted);
 
   const searchParams = useSearchParams();
   const poseId = searchParams.get('poseId');
 
   const [selectedPose, setSelectedPose] = useState(Number(poseId));
   const [go, setGo] = useState(true);
+  
   const {
     rightElbowAngleRef,
     leftElbowAngleRef,
@@ -45,7 +46,8 @@ function SkelePageContent() {
     canvasRef,
     closePose,
     correctPose,
-  } = usePoseCorrection(selectedPose);
+    score,
+  } = usePoseCorrection(selectedPose, timerStartedRef);
 
   const [resetFlag, setResetFlag] = useState(false);
   const router = useRouter();
@@ -73,6 +75,10 @@ function SkelePageContent() {
       // console.log(poseStart);
     }
   }, [resetFlag]);
+
+  useEffect(() => {
+    timerStartedRef.current = timerStarted;
+  }, [timerStarted]);  
 
   useEffect(() => {
 
@@ -177,20 +183,22 @@ function SkelePageContent() {
   }, []);
 
   useEffect(() => {
-    if (!isCameraOn || timerStarted !== 0) return;
-
+    if (!isCameraOn) return;
+  
     const poseCheckInterval = setInterval(() => {
-      if (correctPose()) { //Hold the pose for the necessary time
+      if (timerStartedRef.current !== 0) return;
+  
+      if (correctPose()) {
         setTimerStarted(1);
-        clearInterval(poseCheckInterval);
-      } else { //Else reset values until conditons met
+      } else {
         setTimerStarted(0);
         setPoseStartTimer(3);
       }
-    }, 200); //200ms interval for checking
-
+    }, 200);
+  
     return () => clearInterval(poseCheckInterval);
-  }, [isCameraOn, timerStarted]);
+  }, [isCameraOn, correctPose]);
+  
 
   //Timer before the "recording" timer
   useEffect(() => {
@@ -434,8 +442,13 @@ function SkelePageContent() {
       )}
 
       {/* Omit pre-production; testing only */}
-      <div className="static w-full h-full opacity-30 z-20">
-        <div className="absolute bottom-1/2 right-8 bg-white p-8 rounded-lg w-48 flex flex-col text-sm">
+      <div className="absolute flex flex-col justify-center items-end w-full h-full"> {/* z-50 */}
+        <div>
+          <div className="bg-white/90 rounded-lg px-6 py-3 mb-4 shadow text-2xl font-bold text-gray-800">
+            Score: {Math.round(score * 100) / 100}
+          </div>
+        </div>
+        <div className="flex flex-col mr-10 bg-white p-8 rounded-lg w-56">
           <span>Right Elbow: {rightElbowAngleRef.current}</span>
           <span>Left Elbow: {leftElbowAngleRef.current}</span>
           <span>Right Knee: {rightKneeAngleRef.current}</span>

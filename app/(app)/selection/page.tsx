@@ -188,7 +188,7 @@ else{
                         <div className="flex flex-row py-4 px-8 items-center justify-between opacity-40">
                           <p className="font-medium">{pose.name}</p>
                           <div
-                            className={`flex flex-row ${difficultyColors[pose.difficulty]} px-6 py-2 rounded-full w-28 justify-center items-center`}
+                            className={`flex flex-row ${difficultyColors[pose.difficulty as keyof typeof difficultyColors]} px-6 py-2 rounded-full w-28 justify-center items-center`}
                           >
                             <p className="text-white text-sm font-medium">{pose.difficulty}</p>
                           </div>

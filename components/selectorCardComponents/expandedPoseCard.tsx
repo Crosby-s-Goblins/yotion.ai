@@ -94,7 +94,7 @@ export function ExpandedPoseCard ({ pose, onClose }: Props) {
                 </ul>
               </div>
             )}
-            <Button className="rounded-3xl h-12 bg-blue-500">
+            <Button className="rounded-3xl h-12 bg-blue-500" asChild>
               <Link href={`/skele?poseId=${pose.id}`}>
                 <p className="text-white text-lg">Start</p>
               </Link>   

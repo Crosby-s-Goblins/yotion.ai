@@ -13,6 +13,7 @@ import Loading from "@/components/loading";
 import { difficultyColors } from "@/components/selectorCardComponents/poseItem";
 import { motion } from "framer-motion";
 import { useUser } from '@/components/user-provider';
+import PageTopBar from "@/components/page-top-bar";
 
 export default function SelectionComponents() {
   const user = useUser();
@@ -83,58 +84,47 @@ export default function SelectionComponents() {
   }
   if(paidStatus){
     return (
-    <main className="h-screen flex flex-col items-center justify-center">
-      <div className="flex flex-col text-center">
-        <div className="flex w-screen items-center">
-          <div className="flex basis-1/3 justify-start pl-16">  
-            <Link href="/practice">
-              <ArrowLeftFromLine className=""/>
-            </Link>
-          </div>
-          <div className="flex basis-1/3 justify-center"> 
-            <h1 className="text-2xl font-bold">Welcome to Your Practice</h1>
-          </div>
-          <div className="flex basis-1/3">
+    <main className="h-screen flex flex-col items-center">
+      <PageTopBar
+        title="Welcome to Your Practice"
+        description="Start your yoga journey with AI-powered guidance"
+        backHref="/practice"
+      />
+      <section className="flex flex-col w-full h-screen items-center">
+        <div className="w-full max-w-2xl px-4 mb-6 mt-12">
+          <Input className="flex flex-row rounded-3xl border-2 py-6 px-8" placeholder="Search"
+            type="text" value={search} onChange={(e) => setSearch(e.target.value)}/>
+        </div>
+
+        <div className="w-full max-w-2xl px-4">
+          <div className="bg-white rounded-3xl border-2 h-full overflow-hidden">
+            <ScrollArea className="h-[700px] rounded-3xl">
+              <div className="pr-4 -mr-4">
+                {filteredItems.length === 0 ? (
+              <p className="text-gray-500 items-center justify-center flex mt-10">No items found.</p>
+                ) : (
+                filteredItems.map((pose, index) => (
+                  <div key={index} className="relative">
+                    <PoseItem 
+                      {...pose} 
+                      onClick={() => handlePoseClick(index)}
+                      isExpanded={expandedPose === index}
+                    />
+                    <AnimatePresence>
+                      {expandedPose === index && (
+                        <ExpandedPoseCard 
+                          pose={pose} 
+                          onClose={handleClose}
+                        />
+                      )}
+                    </AnimatePresence>
+                  </div>
+                )))}
+              </div>
+            </ScrollArea>
           </div>
         </div>
-        <p className="text-muted-foreground mt-2">
-          Start your yoga journey with AI-powered guidance
-        </p>
-      </div>
-
-      <div className="w-full max-w-2xl px-4 mb-6 mt-12">
-        <Input className="flex flex-row rounded-3xl border-2 py-6 px-8" placeholder="Search"
-          type="text" value={search} onChange={(e) => setSearch(e.target.value)}/>
-      </div>
-
-      <div className="w-full max-w-2xl px-4">
-        <div className="bg-white rounded-3xl border-2 h-full overflow-hidden">
-          <ScrollArea className="h-[700px] rounded-3xl">
-            <div className="pr-4 -mr-4">
-              {filteredItems.length === 0 ? (
-            <p className="text-gray-500 items-center justify-center flex mt-10">No items found.</p>
-              ) : (
-              filteredItems.map((pose, index) => (
-                <div key={index} className="relative">
-                  <PoseItem 
-                    {...pose} 
-                    onClick={() => handlePoseClick(index)}
-                    isExpanded={expandedPose === index}
-                  />
-                  <AnimatePresence>
-                    {expandedPose === index && (
-                      <ExpandedPoseCard 
-                        pose={pose} 
-                        onClose={handleClose}
-                      />
-                    )}
-                  </AnimatePresence>
-                </div>
-              )))}
-            </div>
-          </ScrollArea>
-        </div>
-      </div>
+      </section>
     </main>    
   );
 }

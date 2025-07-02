@@ -48,14 +48,12 @@ function SkelePageContent() {
     canvasRef,
     closePose,
     correctPose,
+    score,
   } = usePoseCorrection(selectedPose);
 
   const [resetFlag, setResetFlag] = useState(false);
   const router = useRouter();
   const streamRef = useRef<MediaStream | null>(null);
-
-  // scoring feature 
-  const [score, setScore] = useState([]);
 
   useEffect(() => {
     if (resetFlag) {
@@ -421,7 +419,11 @@ function SkelePageContent() {
 
       {/* Omit pre-production; testing only */}
       <div className="absolute flex flex-col justify-center items-end w-full h-full"> {/* z-50 */}
-        <div>{score}</div>
+        <div>
+          <div className="bg-white/90 rounded-lg px-6 py-3 mb-4 shadow text-2xl font-bold text-gray-800">
+            Score: {Math.round(score)}
+          </div>
+        </div>
         <div className="flex flex-col mr-10 bg-white p-8 rounded-lg w-56">
           <span>Right Elbow: {rightElbowAngleRef.current}</span>
           <span>Left Elbow: {leftElbowAngleRef.current}</span>

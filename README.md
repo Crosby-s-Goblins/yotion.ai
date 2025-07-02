@@ -1,105 +1,193 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
+# 🧘‍♀️ Yotion.ai - AI-Powered Yoga Pose Tracking
 
-<p align="center">
- The fastest way to build apps with Next.js and Supabase
-</p>
+<div align="center">
+  <img src="public/warrior1.png" alt="Warrior 1 Pose" width="200"/>
+  <h1>Transform Your Yoga Practice with Real-Time AI Guidance</h1>
+  <p>Advanced pose tracking, form correction, and performance analytics powered by MediaPipe and AI</p>
+</div>
 
-<p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
-</p>
-<br/>
+## ✨ Features
 
-## Features
+### 🎯 **Real-Time Pose Tracking**
+- **MediaPipe Integration**: Advanced pose detection using Google's MediaPipe framework
+- **Smooth Tracking**: Exponential Moving Average (EMA) smoothing for stable, jitter-free tracking
+- **Multi-Pose Support**: Track and analyze various yoga poses with custom angle configurations
+- **Face Filtering**: Clean pose visualization by filtering out face landmarks
 
-- Works across the entire [Next.js](https://nextjs.org) stack
-  - App Router
-  - Pages Router
-  - Middleware
-  - Client
-  - Server
-  - It just works!
-- supabase-ssr. A package to configure Supabase Auth to use cookies
-- Password-based authentication block installed via the [Supabase UI Library](https://supabase.com/ui/docs/nextjs/password-based-auth)
-- Styling with [Tailwind CSS](https://tailwindcss.com)
-- Components with [shadcn/ui](https://ui.shadcn.com/)
-- Optional deployment with [Supabase Vercel Integration and Vercel deploy](#deploy-your-own)
-  - Environment variables automatically assigned to Vercel project
+### 🏃‍♀️ **Form Correction & Guidance**
+- **Real-Time Feedback**: Instant voice and text guidance for pose adjustments
+- **Angle Analysis**: Precise joint angle calculations for elbows, knees, shoulders, and hips
+- **Tolerance-Based Correction**: Customizable tolerance ranges for each joint
+- **Visual Indicators**: Color-coded landmarks (green = correct, red = needs adjustment)
 
-## Demo
+### 📊 **Performance Analytics**
+- **Interactive Charts**: Beautiful blue-themed visualizations using Recharts
+- **Progress Tracking**: Daily pose count and performance metrics
+- **Data Visualization**: Bar charts, line charts, and pie charts for comprehensive insights
+- **Historical Data**: Track your yoga journey over time
 
-You can view a fully working demo at [demo-nextjs-with-supabase.vercel.app](https://demo-nextjs-with-supabase.vercel.app/).
+### 🔐 **User Management**
+- **Supabase Authentication**: Secure user registration and login
+- **Profile Management**: Personalized settings and preferences
+- **Session Management**: Persistent login with cookie-based auth
+- **Protected Routes**: Secure access to personal data and features
 
-## Deploy to Vercel
+### 🎨 **Modern UI/UX**
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
+- **Tailwind CSS**: Beautiful, consistent styling
+- **shadcn/ui Components**: Professional, accessible UI components
+- **Dark/Light Mode**: Comfortable viewing in any lighting condition
 
-Vercel deployment will guide you through creating a Supabase account and project.
+## 🛠️ Technology Stack
 
-After installation of the Supabase integration, all relevant environment variables will be assigned to the project so the deployment is fully functioning.
+### **Frontend**
+- **Next.js 14**: React framework with App Router
+- **TypeScript**: Type-safe development
+- **Tailwind CSS**: Utility-first CSS framework
+- **shadcn/ui**: High-quality React components
+- **Recharts**: Beautiful, composable charting library
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&project-name=nextjs-with-supabase&repository-name=nextjs-with-supabase&demo-title=nextjs-with-supabase&demo-description=This+starter+configures+Supabase+Auth+to+use+cookies%2C+making+the+user%27s+session+available+throughout+the+entire+Next.js+app+-+Client+Components%2C+Server+Components%2C+Route+Handlers%2C+Server+Actions+and+Middleware.&demo-url=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2F&external-id=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&demo-image=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2Fopengraph-image.png)
+### **AI & Computer Vision**
+- **MediaPipe**: Google's ML framework for pose detection
+- **PoseLandmarker**: Advanced pose tracking with 33 body landmarks
+- **Custom Smoothing**: EMA algorithm for stable tracking
 
-The above will also clone the Starter kit to your GitHub, you can clone that locally and develop locally.
+### **Backend & Database**
+- **Supabase**: Open-source Firebase alternative
+- **PostgreSQL**: Robust relational database
+- **Real-time Subscriptions**: Live data updates
+- **Row Level Security**: Secure data access
 
-If you wish to just develop locally and not deploy to Vercel, [follow the steps below](#clone-and-run-locally).
+### **Authentication & Security**
+- **Supabase Auth**: Password-based authentication
+- **Cookie-based Sessions**: Secure session management
+- **Middleware Protection**: Route-level security
 
-## Clone and run locally
+## 🚀 Getting Started
 
-1. You'll first need a Supabase project which can be made [via the Supabase dashboard](https://database.new)
+### Prerequisites
+- Node.js 18+ 
+- npm, yarn, or pnpm
+- Supabase account
 
-2. Create a Next.js app using the Supabase Starter template npx command
+### Installation
 
+1. **Clone the repository**
    ```bash
-   npx create-next-app --example with-supabase with-supabase-app
+   git clone https://github.com/yourusername/yotion.ai.git
+   cd yotion.ai
    ```
 
+2. **Install dependencies**
    ```bash
-   yarn create next-app --example with-supabase with-supabase-app
+   npm install
+   # or
+   yarn install
+   # or
+   pnpm install
    ```
 
+3. **Set up Supabase**
+   - Create a new project at [supabase.com](https://supabase.com)
+   - Get your project URL and anon key from Settings > API
+
+4. **Configure environment variables**
    ```bash
-   pnpm create next-app --example with-supabase with-supabase-app
+   cp .env.example .env.local
+   ```
+   
+   Update `.env.local` with your Supabase credentials:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    ```
 
-3. Use `cd` to change into the app's directory
-
-   ```bash
-   cd with-supabase-app
-   ```
-
-4. Rename `.env.example` to `.env.local` and update the following:
-
-   ```
-   NEXT_PUBLIC_SUPABASE_URL=[INSERT SUPABASE PROJECT URL]
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=[INSERT SUPABASE PROJECT API ANON KEY]
-   ```
-
-   Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` can be found in [your Supabase project's API settings](https://supabase.com/dashboard/project/_?showConnect=true)
-
-5. You can now run the Next.js local development server:
-
+5. **Run the development server**
    ```bash
    npm run dev
+   # or
+   yarn dev
+   # or
+   pnpm dev
    ```
 
-   The starter kit should now be running on [localhost:3000](http://localhost:3000/).
+6. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
 
-6. This template comes with the default shadcn/ui style initialized. If you instead want other ui.shadcn styles, delete `components.json` and [re-install shadcn/ui](https://ui.shadcn.com/docs/installation/next)
+## 📱 Usage Guide
 
-> Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
+### **Getting Started with Pose Tracking**
+1. **Sign up/Login**: Create an account or sign in
+2. **Select a Pose**: Choose from available yoga poses
+3. **Position Yourself**: Stand in front of your camera
+4. **Follow Guidance**: Listen to real-time form corrections
+5. **Track Progress**: View your performance analytics
 
-## Feedback and issues
+### **Understanding the Interface**
+- **Green Landmarks**: Correct joint angles
+- **Red Landmarks**: Joints that need adjustment
+- **Blue Landmarks**: Neutral tracking points
+- **Voice Feedback**: Audio guidance for corrections
+- **Performance Charts**: Visual progress tracking
 
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
+### **Customizing Pose Tolerance**
+Each pose has configurable tolerance ranges for:
+- Elbow angles (left/right)
+- Knee angles (left/right)
+- Shoulder angles (left/right)
+- Hip angles (left/right)
 
-## More Supabase examples
+## 🔧 Configuration
 
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+### **Smoothing Settings**
+Adjust tracking stability in `components/poseCorrection.tsx`:
+```typescript
+// More stable (less responsive)
+alpha = 0.4
+
+// Balanced (current setting)
+alpha = 0.5
+
+// More responsive (less stable)
+alpha = 0.7
+```
+
+## 📊 Database Schema
+
+### **Users Table**
+- User profiles and authentication data
+- Performance history and preferences
+
+### **Pose Library**
+- Pose definitions and angle configurations
+- Reference images and descriptions
+
+### **Performance Data**
+- Daily pose counts and metrics
+- Historical tracking data
+
+### **Development Setup**
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **MediaPipe**: Google's pose detection framework
+- **Supabase**: Backend infrastructure
+- **shadcn/ui**: Beautiful UI components
+- **Recharts**: Charting library
+- **Next.js**: React framework
+
+---
+
+<div align="center">
+  <p>Made with ❤️ by our team</p>
+  <p>Transform your practice with AI-powered guidance</p>
+</div>

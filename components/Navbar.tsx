@@ -18,22 +18,22 @@ export default function Navbar() {
 
   useEffect(() => {
     setMounted(true);
-    if (user) {
+        if (user) {
       setIsLoggedIn(true);
-      // get profile info
+          // get profile info
       const supabase = createClient();
       supabase
-        .from('profiles')
-        .select('username, avatar_url')
-        .eq('id', user.id)
+            .from('profiles')
+            .select('username, avatar_url')
+            .eq('id', user.id)
         .single()
         .then(({ data: profileData }) => {
           if (profileData) setProfile(profileData);
         });
-    } else {
+        } else {
       setIsLoggedIn(false);
-      setProfile(null);
-    }
+          setProfile(null);
+        }
   }, [user]);
 
   // Don't render anything until mounted to prevent hydration mismatch
@@ -118,7 +118,7 @@ export default function Navbar() {
                         <p className='opacity-50'>Logged in as:</p>
                         <p>{user?.email}</p>
                       </div>
-                      <Button variant="outline" asChild><a href='/settings'>profile settings</a></Button>
+                      <Button variant="outline" asChild><a href='/settings'>Profile Settings</a></Button>
                       <LogoutButton/>
                     </div>
                   </HoverCardContent>

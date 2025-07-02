@@ -1,7 +1,7 @@
 "use client"
 
 import { TrendingUp } from "lucide-react"
-import { Bar, BarChart, CartesianGrid, LabelList, XAxis } from "recharts"
+import { CartesianGrid, Line, LineChart, XAxis } from "recharts"
 
 import {
   Card,
@@ -18,16 +18,15 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 
-export const description = "A bar chart with a label"
+export const description = "A line chart"
 
 const chartData = [
-  { day: "Sunday", desktop: 1 },
-  { day: "Monday", desktop: 2 },
-  { day: "Tuesday", desktop: 3 },
-  { day: "Wednesday", desktop: 0 },
-  { day: "Thursday", desktop: 4 },
-  { day: "Friday", desktop: 3 },
-  { day: "Saturday", desktop: 3 },
+  { month: "January", desktop: 186 },
+  { month: "February", desktop: 305 },
+  { month: "March", desktop: 237 },
+  { month: "April", desktop: 73 },
+  { month: "May", desktop: 209 },
+  { month: "June", desktop: 214 },
 ]
 
 const chartConfig = {
@@ -37,51 +36,51 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function ChartBarLabel() {
+export function ChartLineDefault() {
   return (
-    <Card className="flex flex-col h-full">
+    <Card className="h-full">
       <CardHeader>
-        <CardTitle>Daily Pose Count</CardTitle>
-        <CardDescription>Test desc</CardDescription>
+        <CardTitle>Line Chart</CardTitle>
+        <CardDescription>January - June 2024</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
-          <BarChart
+          <LineChart
             accessibilityLayer
             data={chartData}
             margin={{
-              top: 20,
+              left: 12,
+              right: 12,
             }}
           >
             <CartesianGrid vertical={false} />
             <XAxis
-              dataKey="day"
+              dataKey="month"
               tickLine={false}
-              tickMargin={10}
               axisLine={false}
+              tickMargin={8}
               tickFormatter={(value) => value.slice(0, 3)}
             />
             <ChartTooltip
               cursor={false}
               content={<ChartTooltipContent hideLabel />}
             />
-            <Bar dataKey="desktop" fill="#3B82F6" radius={8}>
-              <LabelList
-                position="top"
-                offset={12}
-                className="fill-foreground"
-                fontSize={12}
-              />
-            </Bar>
-          </BarChart>
+            <Line
+              dataKey="desktop"
+              type="natural"
+              stroke="#3B82F6"
+              strokeWidth={2}
+              dot={false}
+            />
+          </LineChart>
         </ChartContainer>
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 leading-none font-medium">
-          An exercise increase of 34% this week! <TrendingUp className="h-4 w-4" />
+          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
         </div>
         <div className="text-muted-foreground leading-none">
-          Keep up the great work!
+          Showing total visitors for the last 6 months
         </div>
       </CardFooter>
     </Card>

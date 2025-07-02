@@ -16,10 +16,6 @@ function SkelePageContent() {
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [breathingPhase, setBreathingPhase] = useState<"inhale" | "exhale">(
-    "inhale",
-  );
-  const [breathProgress, setBreathProgress] = useState(0);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [pose, setPose] = useState<Pose | null>(null);
   const [isLoadingPose, setIsLoadingPose] = useState(true);
@@ -180,32 +176,6 @@ function SkelePageContent() {
     };
   }, []);
 
-  // Breathing animation
-  useEffect(() => {
-    const inhaleDuration = 4000; // 4 seconds inhale
-    const exhaleDuration = 4000; // 4 seconds exhale
-    const interval = 50; // Update every 50ms
-
-    const timer = setInterval(() => {
-      setBreathProgress((prev) => {
-        const currentDuration =
-          breathingPhase === "inhale" ? inhaleDuration : exhaleDuration;
-        const newProgress = prev + interval / currentDuration;
-
-        if (newProgress >= 1) {
-          setBreathingPhase((prevPhase) =>
-            prevPhase === "inhale" ? "exhale" : "inhale",
-          );
-          return 0;
-        }
-
-        return newProgress;
-      });
-    }, interval);
-
-    return () => clearInterval(timer);
-  }, [breathingPhase]);
-
   useEffect(() => {
     if (!isCameraOn || timerStarted !== 0) return;
 
@@ -262,19 +232,6 @@ function SkelePageContent() {
 
     return () => clearInterval(timerInterval);
   }, [timerStarted]);
-
-  // Calculate circle size based on breathing phase
-  const getCircleSize = () => {
-    if (breathingPhase === "inhale") {
-      // Grow from 60px to 120px during inhale
-      return 60 + breathProgress * 60;
-    } else {
-      // Shrink from 120px to 60px during exhale
-      return 120 - breathProgress * 60;
-    }
-  };
-
-  const circleSize = getCircleSize();
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -352,7 +309,7 @@ function SkelePageContent() {
       {/* UI Overlay - Absolute positioned on top */}
       <div className="absolute inset-0 z-10 px-8">
         {/* Breathing Indicator - Left Side */}
-        <BreathIndication duration={5}/>
+        <BreathIndication duration={10}/>
 
         {/* Top UI Bar */}
         <div className="absolute top-4 left-0 right-0 flex justify-between items-center px-8">

@@ -91,7 +91,7 @@ export default function SelectionComponents() {
         backHref="/practice"
       />
       <section className="flex flex-col w-full h-screen items-center">
-        <div className="w-full max-w-2xl px-4 mb-6 mt-12">
+        <div className="w-full max-w-2xl px-4 mb-6">
           <Input className="flex flex-row rounded-3xl border-2 py-6 px-8" placeholder="Search"
             type="text" value={search} onChange={(e) => setSearch(e.target.value)}/>
         </div>
@@ -133,25 +133,13 @@ else{
   const lockedItems = filteredItems.slice(maxFree);
   return (
     <main className="h-screen flex flex-col items-center justify-center">
-      <div className="flex flex-col text-center">
-        <div className="flex w-screen items-center">
-          <div className="flex basis-1/3 justify-start pl-16">  
-            <Link href="/practice">
-              <ArrowLeftFromLine className=""/>
-            </Link>
-          </div>
-          <div className="flex basis-1/3 justify-center"> 
-            <h1 className="text-2xl font-bold">Welcome to Your Practice</h1>
-          </div>
-          <div className="flex basis-1/3">
-          </div>
-        </div>
-        <p className="text-muted-foreground mt-2">
-          Start your yoga journey with AI-powered guidance
-        </p>
-      </div>
+      <PageTopBar
+        title="Welcome to Your Practice"
+        description="Start your yoga journey with AI-powered guidance"
+        backHref="/practice"
+      />
 
-      <div className="w-full max-w-2xl px-4 mb-6 mt-12">
+      <div className="w-full max-w-2xl px-4 mb-6">
         <Input className="flex flex-row rounded-3xl border-2 py-6 px-8" placeholder="Search"
           type="text" value={search} onChange={(e) => setSearch(e.target.value)}/>
       </div>

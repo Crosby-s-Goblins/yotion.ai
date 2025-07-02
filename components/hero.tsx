@@ -14,7 +14,7 @@ export function Hero() {
   
   useEffect(() => {
     setMounted(true);
-    setIsLoggedIn(!!user);
+        setIsLoggedIn(!!user);
   }, [user]);
 
   const handleStartTraining = () => {

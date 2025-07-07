@@ -8,6 +8,7 @@ import {
 } from '@mediapipe/tasks-vision';
 import { useEffect, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { useTTS } from '@/context/TextToSpeechContext';
 
 type PoseAngle = {
     joint: string;
@@ -17,14 +18,21 @@ type PoseAngle = {
 type PoseAngles = PoseAngle[];
 
 function useTextToSpeech(text: string) {
+    const { ttsEnabled } = useTTS();
+    
     useEffect(() => {
         if (text) {
             const synth = window.speechSynthesis;
             synth.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            synth.speak(utterance);
+            if(ttsEnabled){
+                const utterance = new SpeechSynthesisUtterance(text);
+                synth.speak(utterance);
+            } else {
+                console.log ("Text to speech is currently disabled, change in settings");
+            }
+            
         }
-    }, [text]);
+    }, [text, ttsEnabled]);
 }
 
 export function usePoseCorrection(selectedPose: number, timerStartedRef: React.RefObject<number>) {
@@ -57,6 +65,38 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
 
     // score system
     const [score, setScore] = useState<number>(100);
+
+    const animationFrameRef = useRef<number | null>(null);
+    const runningRef = useRef(true); // control loop state
+
+    useEffect(() => {
+        runningRef.current = true;
+
+        const detectLoop = () => {
+        if (!runningRef.current) return;
+
+        // your pose detection logic...
+        animationFrameRef.current = requestAnimationFrame(detectLoop);
+        };
+
+        detectLoop();
+
+        return () => {
+        runningRef.current = false;
+        if (animationFrameRef.current) {
+            cancelAnimationFrame(animationFrameRef.current);
+        }
+        closePose(); // Optional: close detector on unmount
+        };
+    }, []);
+
+    const stop = () => {
+        runningRef.current = false;
+        if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        }
+        closePose(); // or cleanup logic here
+    };
 
     useEffect(() => {
         selectedPoseRef.current = poseAngles;
@@ -467,5 +507,6 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
         setFormText,
         closePose,
         correctPose,
+        stop,
     };
 }

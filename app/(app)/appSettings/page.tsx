@@ -1,8 +1,5 @@
-import { Input } from "@/components/ui/input";
-import { ArrowLeftFromLine, Settings } from 'lucide-react';
-import { ScrollArea } from "@/components/ui/scroll-area";
-import Link from "next/link";
 import PageTopBar from "@/components/page-top-bar";
+import SettingsPane from "@/components/appSettingPane";
 
 export default function AppSettingsPage() {
   return (
@@ -12,6 +9,7 @@ export default function AppSettingsPage() {
         description="Customize and manage your experience"
         backHref="/practice"
       />
+      <SettingsPane />
     </main>
   );
 } 

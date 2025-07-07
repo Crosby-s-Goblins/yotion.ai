@@ -21,15 +21,17 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem("timerSeconds");
-    if (stored) {
-      setTimerSeconds(parseInt(stored, 10));
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem("timerSeconds");
+      if (stored !== null) {  // safer check in case '0' or 'false'
+        setTimerSeconds(parseInt(stored, 10));
+      }
+      setIsLoaded(true);
     }
-    setIsLoaded(true);
   }, []);
 
   useEffect(() => {
-    if (isLoaded) {
+    if (isLoaded && typeof window !== 'undefined') {
       localStorage.setItem("timerSeconds", timerSeconds.toString());
     }
   }, [timerSeconds, isLoaded]);

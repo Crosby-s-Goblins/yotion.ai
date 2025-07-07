@@ -47,6 +47,7 @@ function SkelePageContent() {
     closePose,
     correctPose,
     score,
+    stop,
   } = usePoseCorrection(selectedPose, timerStartedRef);
 
   const [resetFlag, setResetFlag] = useState(false);
@@ -87,26 +88,39 @@ function SkelePageContent() {
   }, [timerStarted]);  
 
   useEffect(() => {
-
-    if (timerSecondMove && timerSecondMove <= 0 && go) {
-      setGo(false);
-      stopCameraAndPose().then(() => {
+    if (typeof timerSecondMove === 'number' && timerSecondMove <= 0 && go) {
+    setGo(false);
+    (async () => {
+      try {
+        // await stopCameraAndPose();
+        await stop();
         router.push('/post_workout');
-      });
+      } catch (err) {
+        console.error("Cleanup failed:", err);
+      }
+    })();
     }
   }, [timerSecondMove, go]);
 
   const stopCameraAndPose = async () => {
-    closePose();
-    if (videoRef.current) {
-      videoRef.current.pause();
-      videoRef.current.srcObject = null;
+    try {
+      await closePose(); // ensure it’s awaited
+
+      if (videoRef.current) {
+        videoRef.current.pause();
+        videoRef.current.srcObject = null;
+      }
+
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+      }
+      
+    } catch (err) {
+      console.error("Error in stopCameraAndPose:", err);
+      throw err; // bubble up to catch in useEffect
     }
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
-    }
-  }
+  };
 
   useEffect(() => {
     const fetchPose = async () => {
@@ -237,6 +251,7 @@ function SkelePageContent() {
     const timerInterval = setInterval(() => {
       setTimerSecondMove(prevSeconds => {
         if (prevSeconds && prevSeconds > 0) {
+          console.log(prevSeconds);
           return prevSeconds - 1;
         }
         clearInterval(timerInterval);

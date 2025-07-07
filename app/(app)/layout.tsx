@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { TimerProviderWrapper } from "@/components/TimerProviderWrapper";
+import { TTSProvider } from "@/context/TextToSpeechContext";
 
 export default async function AppLayout({
   children,
@@ -17,5 +18,10 @@ export default async function AppLayout({
     redirect("/auth/login");
   }
 
-  return <TimerProviderWrapper>{children}</TimerProviderWrapper>;
+  return (
+    <TimerProviderWrapper>
+      <TTSProvider>
+        {children}
+      </TTSProvider>
+    </TimerProviderWrapper>);
 }

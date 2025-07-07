@@ -13,7 +13,7 @@ export default function poseDetection() {
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
-    
+
     // Store previous landmarks for smoothing
     const previousLandmarksRef = useRef<any[]>([]);
 

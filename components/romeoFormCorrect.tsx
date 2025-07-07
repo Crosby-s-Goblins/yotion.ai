@@ -23,7 +23,7 @@ export default function formCorrect() {
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
-    
+
     // Store previous landmarks for smoothing
     const previousLandmarksRef = useRef<any[]>([]);
 

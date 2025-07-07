@@ -8,7 +8,7 @@ export default function CommunityPage() {
     <main className="h-screen flex flex-col items-center">
       <PageTopBar 
         title="Community"
-        description="Engage and compete with fellow yogi!"
+        description="Engage and compete with fellow yogis!"
         backHref="/practice"
       />
     </main>

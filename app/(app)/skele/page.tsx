@@ -1,4 +1,3 @@
-// Skele/page.tsx
 'use client';
 
 import { Info, Play, RotateCcw, Camera, CameraOff, X } from "lucide-react";
@@ -11,7 +10,7 @@ import { usePoseCorrection } from "@/components/poseCorrection";
 import { BreathIndication } from "@/components/breathingIndicatorLineBall";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-// import { Timestamp } from "next/dist/server/lib/cache-handlers/types";
+import { useTimer } from "@/context/TimerContext";
 
 function SkelePageContent() {
   const [isCameraOn, setIsCameraOn] = useState<boolean>(false);
@@ -21,7 +20,8 @@ function SkelePageContent() {
   const [pose, setPose] = useState<Pose | null>(null);
   const [isLoadingPose, setIsLoadingPose] = useState<boolean>(true);
   const [dbError, setDbError] = useState<string | null>(null);
-  const [timerSeconds, setTimerSeconds] = useState<number>(30);
+  const {timerSeconds, isLoaded} = useTimer();
+  const [timerSecondMove, setTimerSecondMove] = useState<number | null>(null);
   const [poseStartTimer, setPoseStartTimer] = useState<number>(3);
   const [timerStarted, setTimerStarted] = useState<number>(0);
   const timerStartedRef = useRef(timerStarted);
@@ -67,14 +67,20 @@ function SkelePageContent() {
       }, []);
 
   useEffect(() => {
-    if (resetFlag) {
+  if (isLoaded && timerSecondMove === null) {
+    setTimerSecondMove(timerSeconds);
+  }
+}, [isLoaded, timerSeconds, timerSecondMove]);
+
+  useEffect(() => {
+    if (resetFlag && isLoaded) {
       setTimerStarted(0); //Force the timer to be paused
-      setTimerSeconds(60); // Reset your logic here
+      setTimerSecondMove(timerSeconds); // Reset your logic here
       setPoseStartTimer(3); //Reset pre-pose recording countdown
       setResetFlag(false); // Important: Reset the fla
       // console.log(poseStart);
     }
-  }, [resetFlag]);
+  }, [resetFlag, isLoaded, timerSeconds]);
 
   useEffect(() => {
     timerStartedRef.current = timerStarted;
@@ -82,13 +88,13 @@ function SkelePageContent() {
 
   useEffect(() => {
 
-    if (timerSeconds <= 0 && go) {
+    if (timerSecondMove && timerSecondMove <= 0 && go) {
       setGo(false);
       stopCameraAndPose().then(() => {
         router.push('/post_workout');
       });
     }
-  }, [timerSeconds, go]);
+  }, [timerSecondMove, go]);
 
   const stopCameraAndPose = async () => {
     closePose();
@@ -226,11 +232,11 @@ function SkelePageContent() {
 
   // Timer logic
   useEffect(() => {
-    if (timerStarted !== 2) return;
+    if (timerStarted !== 2 || !isLoaded || timerSecondMove === null) return;
  
     const timerInterval = setInterval(() => {
-      setTimerSeconds(prevSeconds => {
-        if (prevSeconds > 0) {
+      setTimerSecondMove(prevSeconds => {
+        if (prevSeconds && prevSeconds > 0) {
           return prevSeconds - 1;
         }
         clearInterval(timerInterval);
@@ -328,8 +334,12 @@ function SkelePageContent() {
               </div>
             </Link>
           </div>
-          <div className="bg-black/75 text-white px-6 py-4 rounded-full min-w-[120px] text-center">
-            <p className="text-2xl font-medium">{formatTime(timerSeconds)}</p>
+          <div className="min-w-[120px] text-center bg-black/75 text-white px-6 py-4 rounded-full">
+            {timerSecondMove !== null && isLoaded ? (
+              <p className="text-2xl font-medium">{formatTime(timerSecondMove)}</p>
+            ) : (
+              <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" />
+            )}
           </div>
           <div className="flex text-white py-2 rounded-lg w-1/3 justify-end">
             <div 

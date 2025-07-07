@@ -4,8 +4,7 @@ import React, { useState, useEffect } from "react";
 import { AnimatePresence } from 'framer-motion';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
-import { ArrowLeftFromLine } from 'lucide-react';
-import Link from "next/link";
+import {Select, SelectTrigger, SelectValue, SelectContent, SelectItem} from '@/components/ui/select';
 import { PoseItem } from "@/components/selectorCardComponents/poseItem";
 import { ExpandedPoseCard } from "@/components/selectorCardComponents/expandedPoseCard";
 import { createClient } from "@/lib/supabase/client";
@@ -14,6 +13,8 @@ import { difficultyColors } from "@/components/selectorCardComponents/poseItem";
 import { motion } from "framer-motion";
 import { useUser } from '@/components/user-provider';
 import PageTopBar from "@/components/page-top-bar";
+import TimerSelect from "@/components/TimerSelect";
+import { useTimer } from "@/context/TimerContext";
 
 export default function SelectionComponents() {
   const user = useUser();
@@ -21,13 +22,30 @@ export default function SelectionComponents() {
   const [search, setSearch] = useState('');
   const [expandedPose, setExpandedPose] = useState<number | null>(null);
   const [paidStatus, setPaidStatus] = useState<boolean | null>(null);
+  const [difficultyFilter, setDifficultyFilter] = useState<string | null>(null);
+  const { setTimerSeconds } = useTimer();
+
 
   useEffect(() => {
-    async function fetchPoses() {
-      const { data, error } = await supabase.from("poseLibrary").select('*');
-      error ? console.error('Error fetching poses:', error) : setPoses(data);
+  const fetchFilteredPoses = async () => {
+    let query = supabase.from("poseLibrary").select("*");
+
+    if (difficultyFilter) {
+      query = query.eq("difficulty", difficultyFilter);
     }
-    fetchPoses();
+
+    const { data, error } = await query;
+
+    error ?
+      (console.error("Error fetching poses:", error)) : (setPoses(data));
+    
+  };
+
+  fetchFilteredPoses();
+}, [difficultyFilter]);
+
+  useEffect(() => {
+    setTimerSeconds(60); // Reset to 60 on page load
   }, []);
 
   useEffect(() => {
@@ -75,7 +93,7 @@ export default function SelectionComponents() {
   };
 
   //Search filter functionality
-  const filteredItems = poses.filter((item) =>
+  const searchedItems = poses.filter((item) =>
     item.name.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -92,42 +110,91 @@ export default function SelectionComponents() {
       />
       <section className="flex flex-col w-full flex-1 items-center">
         <div className="w-full max-w-2xl px-4 mb-6">
-          <Input className="flex flex-row rounded-3xl border-2 py-6 px-8" placeholder="Search"
-            type="text" value={search} onChange={(e) => setSearch(e.target.value)}/>
+          <Input 
+          className="w-full rounded-3xl border-2 py-6 px-8" 
+          placeholder="Search"
+          type="text" 
+          value={search} 
+          onChange={(e) => setSearch(e.target.value)}/>
         </div>
-        <div className="w-full max-w-2xl px-4">
-          <ScrollArea className="rounded-3xl border-2 h-[100px] h-full w-full flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-300px)]">
+      {/* Horizontal Layout for Filter + Scroll Area */}
+      <div className="w-full max-w-6xl px-4 flex flex-row gap-6">
+        {/* Filter Panel */}
+        <div className="min-w-[200px] p-4 rounded-3xl border-2 h-fit flex flex-col gap-6">
+          {/* Difficulty Filter */}
+           <div>
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="font-semibold">Difficulty</h3>
+              {difficultyFilter && (
+                <button
+                  onClick={() => setDifficultyFilter(null)}
+                  className="text-xs text-blue-600 hover:underline"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            <Select onValueChange={(value) => setDifficultyFilter(value)} value={difficultyFilter ?? ""}>
+              <SelectTrigger className="w-full rounded-xl border">
+                <SelectValue placeholder="Select difficulty" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Easy">Easy</SelectItem>
+                <SelectItem value="Medium">Medium</SelectItem>
+                <SelectItem value="Hard">Hard</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Placeholder Filter 1 */}
+          <div>
+            <h3 className="font-semibold mb-2">Filter Option 1</h3>
+            <div className="rounded-xl border p-2 text-sm text-gray-500">Coming Soon</div>
+          </div>
+
+          {/* Placeholder Filter 2 */}
+          <div>
+            <h3 className="font-semibold mb-2">Filter Option 2</h3>
+            <div className="rounded-xl border p-2 text-sm text-gray-500">Coming Soon</div>
+          </div>
+
+          {/* Timer Filter */}
+           <TimerSelect />
+        </div>
+
+        {/* Scroll Area */}
+        <div className="w-full">
+          <ScrollArea className="rounded-3xl border-2 h-full w-full flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-240px)]">
             <div className="pr-4 -mr-4">
-              {filteredItems.length === 0 ? (
-            <p className="text-gray-500 items-center justify-center flex mt-10">No items found.</p>
+              {searchedItems.length === 0 ? (
+                <p className="text-gray-500 items-center justify-center flex mt-10">No items found.</p>
               ) : (
-              filteredItems.map((pose, index) => (
-                <div key={index} className="relative">
-                  <PoseItem 
-                    {...pose} 
-                    onClick={() => handlePoseClick(index)}
-                    isExpanded={expandedPose === index}
-                  />
-                  <AnimatePresence>
-                    {expandedPose === index && (
-                      <ExpandedPoseCard 
-                        pose={pose} 
-                        onClose={handleClose}
-                      />
-                    )}
-                  </AnimatePresence>
-                </div>
-              )))}
+                searchedItems.map((pose, index) => (
+                  <div key={index} className="relative">
+                    <PoseItem
+                      {...pose}
+                      onClick={() => handlePoseClick(index)}
+                      isExpanded={expandedPose === index}
+                    />
+                    <AnimatePresence>
+                      {expandedPose === index && (
+                        <ExpandedPoseCard pose={pose} onClose={handleClose} />
+                      )}
+                    </AnimatePresence>
+                  </div>
+                ))
+              )}
             </div>
           </ScrollArea>
         </div>
-      </section>
-    </main>    
+      </div>
+    </section>
+  </main>  
   );
 }
 else{
   const maxFree = 3; //Set maximum number of free poses
-  const lockedItems = filteredItems.slice(maxFree);
+  const lockedItems = searchedItems.slice(maxFree);
   return (
     <main className="h-screen flex flex-col items-center justify-center">
       <PageTopBar
@@ -152,10 +219,10 @@ else{
         <div className="bg-white rounded-3xl border-2 h-full overflow-hidden">
           <ScrollArea className="h-[700px] rounded-3xl">
             <div className="pr-4 -mr-4">
-              {filteredItems.length === 0 ? (
+              {searchedItems.length === 0 ? (
             <p className="text-gray-500 items-center justify-center flex mt-10">No items found.</p>
               ) : (
-              filteredItems.filter(pose => pose.isFree).map((pose, index) => (
+              searchedItems.filter(pose => pose.isFree).map((pose, index) => (
                 <div key={index} className="relative">
                   <PoseItem 
                     {...pose} 
@@ -196,7 +263,7 @@ else{
                 </div>
 
                 {/* Frosted glass overlay with lock */}
-                <div className="absolute inset-0 rounded-3xl z-10 flex items-center justify-center bg-white/40 backdrop-blur-md text-black font-semibold text-center -mt-4">
+                <div className="absolute inset-0 rounded-3xl z-10 flex pt-10 justify-center bg-white/40 backdrop-blur-md text-black font-semibold text-center -mt-4">
                   <div>
                     🔒 <br />
                     These poses are premium. <br />

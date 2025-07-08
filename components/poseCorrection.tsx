@@ -63,7 +63,7 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
 
     const selectedPoseRef = useRef<PoseAngles | null>(null);
 
-    // score system
+    // score system - accuracy
     const [score, setScore] = useState<number>(100);
 
     const animationFrameRef = useRef<number | null>(null);
@@ -337,7 +337,7 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
                           
                     }
 
-                    // calculate the score for each joint
+                    // calculate the accuracy score for each joint
                     const joints = [
                         { ref: rightElbowAngleRef, name: "rightElbow" },
                         { ref: leftElbowAngleRef, name: "leftElbow" },
@@ -358,11 +358,10 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
                                 typeof expected === "number" &&
                                 typeof tolerance === "number"
                             ) {
-                                scoreCalc(current, expected, tolerance);
+                                scoreCalcAccuracy(current, expected, tolerance);
                             }
                         }
                     }
-
                     
                     // Get current pose data
                     const currentPose = selectedPoseRef.current;
@@ -478,13 +477,12 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
         return true;
     }
 
-    function scoreCalc(current: number, expected: number, tol: number) {
+    function scoreCalcAccuracy(current: number, expected: number, tol: number) {
         const para = expected - current;
         let pointLoss = 0;
         if (((para < -tol) || (para > tol)) && timerStartedRef.current == 2) {
             pointLoss = 0.000001 * (para ** 2);
         }
-        console.log(timerStartedRef.current)
         if (typeof pointLoss === 'number' && !isNaN(pointLoss)) {
             setScore(prev => Math.max(0, prev - pointLoss));
         }

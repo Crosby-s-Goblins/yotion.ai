@@ -11,6 +11,7 @@ import { BreathIndication } from "@/components/breathingIndicatorLineBall";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useTimer } from "@/context/TimerContext";
+import { useStopwatch } from "react-timer-hook";
 
 function SkelePageContent() {
   const [isCameraOn, setIsCameraOn] = useState<boolean>(false);
@@ -22,16 +23,20 @@ function SkelePageContent() {
   const [dbError, setDbError] = useState<string | null>(null);
   const {timerSeconds, isLoaded} = useTimer();
   const [timerSecondMove, setTimerSecondMove] = useState<number | null>(null);
+  const [initialTimerSeconds, setInitialTimerSeconds] = useState<number | null>(null);
   const [poseStartTimer, setPoseStartTimer] = useState<number>(3);
   const [timerStarted, setTimerStarted] = useState<number>(0);
   const timerStartedRef = useRef(timerStarted);
-
+  
   const searchParams = useSearchParams();
   const poseId = searchParams.get('poseId');
-
+  
   const [selectedPose, setSelectedPose] = useState(Number(poseId));
   const [go, setGo] = useState(true);
   
+  const stopwatch = useStopwatch({ autoStart: false, interval: 20 });
+  const [consistencyScore, setConsistencyScore] = useState<number>()
+
   const {
     rightElbowAngleRef,
     leftElbowAngleRef,
@@ -55,23 +60,30 @@ function SkelePageContent() {
   const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
-          const alreadyReloaded = sessionStorage.getItem('reloaded');
-  
-          if (!alreadyReloaded) {
-          sessionStorage.setItem('reloaded', 'true');
-          window.location.reload();
-          } //Force reload to allow MediaPipe Startup?
-          
-          return () => {
-          sessionStorage.removeItem('reloaded');
-          };
-      }, []);
+    const alreadyReloaded = sessionStorage.getItem('reloaded');
+
+    if (!alreadyReloaded) {
+      sessionStorage.setItem('reloaded', 'true');
+      window.location.reload();
+    } //Force reload to allow MediaPipe Startup?
+
+    return () => {
+      sessionStorage.removeItem('reloaded');
+    };
+  }, []);
 
   useEffect(() => {
-  if (isLoaded && timerSecondMove === null) {
-    setTimerSecondMove(timerSeconds);
-  }
-}, [isLoaded, timerSeconds, timerSecondMove]);
+    if (isLoaded && timerSecondMove === null) {
+      setTimerSecondMove(timerSeconds);
+      setInitialTimerSeconds(timerSeconds);
+    }
+    if (correctPose() && !stopwatch.isRunning){
+      stopwatch.start()
+    } 
+    if (!correctPose() && stopwatch.isRunning) {
+      stopwatch.pause()
+    }
+  }, [isLoaded, timerSeconds, timerSecondMove]);
 
   useEffect(() => {
     if (resetFlag && isLoaded) {
@@ -85,7 +97,7 @@ function SkelePageContent() {
 
   useEffect(() => {
     timerStartedRef.current = timerStarted;
-  }, [timerStarted]);  
+  }, [timerStarted]);
 
   useEffect(() => {
     if (typeof timerSecondMove === 'number' && timerSecondMove <= 0 && go) {
@@ -204,10 +216,10 @@ function SkelePageContent() {
 
   useEffect(() => {
     if (!isCameraOn) return;
-  
+
     const poseCheckInterval = setInterval(() => {
       if (timerStartedRef.current !== 0) return;
-  
+
       if (correctPose()) {
         setTimerStarted(1);
       } else {
@@ -215,10 +227,10 @@ function SkelePageContent() {
         setPoseStartTimer(3);
       }
     }, 200);
-  
+
     return () => clearInterval(poseCheckInterval);
   }, [isCameraOn, correctPose]);
-  
+
 
   //Timer before the "recording" timer
   useEffect(() => {
@@ -242,12 +254,12 @@ function SkelePageContent() {
     }, 1000);
 
     return () => clearInterval(timerInterval);
-    }, [timerStarted])
+  }, [timerStarted])
 
   // Timer logic
   useEffect(() => {
     if (timerStarted !== 2 || !isLoaded || timerSecondMove === null) return;
- 
+
     const timerInterval = setInterval(() => {
       setTimerSecondMove(prevSeconds => {
         if (prevSeconds && prevSeconds > 0) {
@@ -283,6 +295,13 @@ function SkelePageContent() {
         console.error("Failed to parse pose benefits:", e);
       }
     }
+  }
+
+  // Calculate total held seconds and percentage
+  const totalHeldSeconds = stopwatch.minutes * 60 + stopwatch.seconds + stopwatch.milliseconds / 1000;
+  let heldPercentage = 0;
+  if (initialTimerSeconds && initialTimerSeconds > 0) {
+    heldPercentage = (totalHeldSeconds / initialTimerSeconds) * 100;
   }
 
   // console.log("POSE OBJECT:", pose);
@@ -340,7 +359,7 @@ function SkelePageContent() {
       {/* UI Overlay - Absolute positioned on top */}
       <div className="absolute inset-0 z-10 px-8">
         {/* Breathing Indicator - Left Side */}
-        <BreathIndication duration={10}/>
+        <BreathIndication duration={10} />
 
         {/* Top UI Bar */}
         <div className="absolute top-4 left-0 right-0 flex justify-between items-center px-8">
@@ -413,7 +432,7 @@ function SkelePageContent() {
             <button onClick={() => setShowInfoModal(false)} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors">
               <X className="w-6 h-6" />
             </button>
-            
+
             <div className="flex-grow">
               {isLoadingPose ? (
                 <div className="flex items-center justify-center h-full">
@@ -430,7 +449,7 @@ function SkelePageContent() {
                     </h2>
                     <p className="text-muted-foreground">{pose.description || "No description available."}</p>
                   </div>
-                  
+
                   <div className="space-y-6">
                     {benefitsArray.length > 0 && (
                       <div className="space-y-3">
@@ -478,6 +497,16 @@ function SkelePageContent() {
           <div className="bg-card.glass backdrop-blur-md rounded-2xl px-6 py-3 mb-4 shadow-glass border border-border/50 text-2xl font-bold text-foreground">
             Score: {Math.round(score * 100) / 100}
           </div>
+          <div className="bg-white/90">
+            Timer: {`${stopwatch.minutes}:${stopwatch.seconds}:${stopwatch.milliseconds}`}<br/>
+            isRunning: {`${stopwatch.isRunning}`}<br/>
+            isPoseCorrect: {`${correctPose()}`}<br/>
+            {initialTimerSeconds && initialTimerSeconds > 0 && (
+              <span>
+                Held Pose: {heldPercentage.toFixed(1)}%
+              </span>
+            )}
+          </div>
         </div>
         <div className="flex flex-col mr-10 bg-card.glass backdrop-blur-md p-8 rounded-2xl w-56 shadow-glass border border-border/50">
           <span className="text-foreground">Right Elbow: {rightElbowAngleRef.current}</span>
@@ -498,7 +527,7 @@ function SkelePageContent() {
           timerStarted === 1 ? (
             <h1 className="m-3 text-white text-9xl font-bold opacity-75 drop-shadow-lg">{poseStartTimer}</h1>
           ) : (
-            <h1 className="m-3 text-white text-4xl font-bold"> {/* Literally just an else condition, LEAVE EMPTY */} </h1> 
+            <h1 className="m-3 text-white text-4xl font-bold"> {/* Literally just an else condition, LEAVE EMPTY */} </h1>
           )
         )}
       </div>

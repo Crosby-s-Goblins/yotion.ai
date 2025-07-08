@@ -147,7 +147,7 @@ function SkelePageContent() {
       try {
         const { data, error } = await supabase
           .from("poseLibrary")
-          .select('id, name, difficulty, description, benefits, images')
+          .select('id, name, difficulty, description, images')
           .eq('id', poseId)
           .single();
 
@@ -281,21 +281,21 @@ function SkelePageContent() {
   };
 
   // Safely parse benefits
-  let benefitsArray: string[] = [];
-  if (pose?.benefits) {
-    if (Array.isArray(pose.benefits)) {
-      benefitsArray = pose.benefits;
-    } else if (typeof pose.benefits === 'string') {
-      try {
-        const parsed = JSON.parse(pose.benefits);
-        if (Array.isArray(parsed)) {
-          benefitsArray = parsed;
-        }
-      } catch (e) {
-        console.error("Failed to parse pose benefits:", e);
-      }
-    }
-  }
+  // let benefitsArray: string[] = [];
+  // if (pose?.benefits) {
+  //   if (Array.isArray(pose.benefits)) {
+  //     benefitsArray = pose.benefits;
+  //   } else if (typeof pose.benefits === 'string') {
+  //     try {
+  //       const parsed = JSON.parse(pose.benefits);
+  //       if (Array.isArray(parsed)) {
+  //         benefitsArray = parsed;
+  //       }
+  //     } catch (e) {
+  //       console.error("Failed to parse pose benefits:", e);
+  //     }
+  //   }
+  // }
 
   // Calculate total held seconds and percentage
   const totalHeldSeconds = stopwatch.minutes * 60 + stopwatch.seconds + stopwatch.milliseconds / 1000;
@@ -451,14 +451,14 @@ function SkelePageContent() {
                   </div>
 
                   <div className="space-y-6">
-                    {benefitsArray.length > 0 && (
+                    {/* {benefitsArray.length > 0 && (
                       <div className="space-y-3">
                         <h3 className="font-semibold text-foreground">Benefits</h3>
                         <ul className="space-y-2 text-sm text-muted-foreground list-disc list-inside">
                           {benefitsArray.map((benefit, index) => <li key={index}>{benefit}</li>)}
                         </ul>
                       </div>
-                    )}
+                    )} */}
                     <div className="space-y-3">
                       <h3 className="font-semibold text-foreground">Instructions</h3>
                       <div className="text-sm text-muted-foreground space-y-2">

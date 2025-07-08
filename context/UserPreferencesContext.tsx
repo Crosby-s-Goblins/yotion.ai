@@ -5,10 +5,10 @@ import { createClient } from '@/lib/supabase/client';
 import { fetchUserPreferences } from '@/lib/supabase/fetchUserPreferences';
 
 type UserPreferences = {
-  default_timer: number;
-  tts_enabled: boolean;
-  reminders: boolean;
-  motivation: boolean;
+  default_timer: number | undefined;
+  tts_enabled: boolean | undefined;
+  reminders: boolean | undefined;
+  motivation: boolean | undefined;
 };
 
 type PreferencesContextType = {
@@ -36,7 +36,7 @@ export const PreferencesProvider = ({ children }: { children: React.ReactNode })
         .eq('id', user.id)
         .single();
 
-      if (data) {
+      if (!error && data) {
         setPreferences(data);
       }
 

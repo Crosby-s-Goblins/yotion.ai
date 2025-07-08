@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { TimerProviderWrapper } from "@/components/TimerProviderWrapper";
 import { TTSProvider } from "@/context/TextToSpeechContext";
+import { PreferencesProvider } from "@/context/UserPreferencesContext";
 
 export default async function AppLayout({
   children,
@@ -19,10 +20,12 @@ export default async function AppLayout({
   }
 
   return (
-    <TimerProviderWrapper>
-      <TTSProvider>
-        {children}
-      </TTSProvider>
-    </TimerProviderWrapper>
+    <PreferencesProvider>
+      <TimerProviderWrapper>
+        <TTSProvider>
+          {children}
+        </TTSProvider>
+      </TimerProviderWrapper>
+    </PreferencesProvider>
   );
 }

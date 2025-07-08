@@ -16,29 +16,70 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useTimer } from '@/context/TimerContext';
 import { useTTS } from '@/context/TextToSpeechContext';
+import { createClient } from '@/lib/supabase/client';
+import { useUserPreferences } from '@/context/UserPreferencesContext';
+
+const supabase = createClient();
 
 export default function SettingsPane() {
-  const {timerSeconds, setTimerSeconds} = useTimer();
-  const { ttsEnabled, setTTSEnabled } = useTTS();
+  const { preferences, loading, setPreferences } = useUserPreferences();
+  const { setTimerSeconds } = useTimer();
+  const { setTTSEnabled } = useTTS();
 
-  const [localTimer, setLocalTimer] = useState(timerSeconds.toString());
-  const [localTTS, setLocalTTS] = useState(ttsEnabled);
-  const [reminders, setReminders] = useState(true);
-  const [motivation, setMotivation] = useState(false);
+  // Local states initialized to null for safe conditional rendering
+  const [localTimer, setLocalTimer] = useState<string | null>(null);
+  const [localTTS, setLocalTTS] = useState<boolean | null>(null);
+  const [reminders, setReminders] = useState<boolean | null>(null);
+  const [motivation, setMotivation] = useState<boolean | null>(null);
 
-  const handleSave = () => {
-    setTimerSeconds(Number(localTimer)); // safely cast from string to number
-    setTTSEnabled(localTTS);
-    alert(`Settings saved!`);
+  // Load values from Supabase context preferences
+  useEffect(() => {
+    if (!loading && preferences && localTimer === null) {
+      setLocalTimer(preferences.default_timer.toString());
+      setLocalTTS(preferences.tts_enabled);
+      setReminders(preferences.reminders);
+      setMotivation(preferences.motivation ?? false);
+    }
+  }, [loading, preferences]);
+
+  // Don't render until preferences are fully loaded
+  if (
+    loading 
+  ) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <span className="text-lg font-medium">Loading preferences...</span>
+      </div>
+    );
+  }
+
+  const handleSave = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const newPrefs = {
+      id: user.id,
+      default_timer: Number(localTimer),
+      tts_enabled: localTTS,
+      reminders,
+      motivation,
+    };
+
+    const { error } = await supabase
+      .from('user_preferences')
+      .upsert(newPrefs);
+
+    if (error) {
+      console.error('Failed to save:', error);
+    } else {
+      // Update context providers
+      setPreferences(newPrefs);
+      setTimerSeconds(newPrefs.default_timer);
+      setTTSEnabled(newPrefs.tts_enabled);
+
+      alert('Preferences saved!');
+    }
   };
-
-  useEffect(() => {
-    setLocalTTS(ttsEnabled);
-  }, [ttsEnabled]);
-
-  useEffect(() => {
-    setLocalTimer(timerSeconds.toString());
-  }, [timerSeconds])
 
   return (
     <div className="max-w-xl mx-auto p-6 bg-white rounded-2xl shadow-lg space-y-8">
@@ -62,48 +103,62 @@ export default function SettingsPane() {
 
       <section className="space-y-8">
         <div className="flex items-center justify-between gap-6">
-            <Label htmlFor="reminders" className="font-semibold text-lg">
+          <Label htmlFor="reminders" className="font-semibold text-lg">
             Workout Reminders
-            </Label>
-            <div className="px-4">
-            <Switch id="reminders" checked={reminders} onCheckedChange={setReminders} />
-            </div>
-        </div>
-
-        <div className="flex items-center justify-between gap-6">
-            <Label htmlFor="motivation" className="font-semibold text-lg">
-            Motivational Messages
-            </Label>
-            <div className="px-4">
-            <Switch id="motivation" checked={motivation} onCheckedChange={setMotivation} />
-            </div>
-        </div>
-    </section>
-
-
-    <section className="space-y-8">
-        <div className="flex items-center justify-between gap-6">
-            <Label htmlFor="audio-feedback" className="font-semibold text-lg">
-            Audio Feedback
-            </Label>
-            <div className="px-4">
+          </Label>
+          <div className="px-4">
             <Switch
-                id="audio-feedback"
-                checked={localTTS}
-                onCheckedChange={setLocalTTS}
+              id="reminders"
+              checked={reminders}
+              onCheckedChange={setReminders}
             />
-            </div>
+          </div>
         </div>
-    </section>
+
+        <div className="flex items-center justify-between gap-6">
+          <Label htmlFor="motivation" className="font-semibold text-lg">
+            Motivational Messages
+          </Label>
+          <div className="px-4">
+            <Switch
+              id="motivation"
+              checked={motivation}
+              onCheckedChange={setMotivation}
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="space-y-8">
+        <div className="flex items-center justify-between gap-6">
+          <Label htmlFor="audio-feedback" className="font-semibold text-lg">
+            Audio Feedback
+          </Label>
+          <div className="px-4">
+            <Switch
+              id="audio-feedback"
+              checked={localTTS}
+              onCheckedChange={setLocalTTS}
+            />
+          </div>
+        </div>
+      </section>
 
       <Separator />
 
-      <Button className="w-full py-4 font-semibold rounded-xl" onClick={handleSave}>
+      <Button
+        className="w-full py-4 font-semibold rounded-xl"
+        onClick={handleSave}
+      >
         Save Settings
       </Button>
     </div>
   );
 }
+
+// TODO: Connect functionality (Make default timer persistent)
+// Reminders/Messages are sent via email?
+
 
 // TODO: Connect functionality (Make default timer persistent)
 // Reminders/Messages are sent via email?

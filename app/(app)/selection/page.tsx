@@ -34,6 +34,7 @@ export default function SelectionComponents() {
         const { data, error } = await supabase
           .from('poseLibrary')
           .select('*')
+          .order('isFree', {ascending: false})
           .order('name');
 
         if (error) {

@@ -7,6 +7,8 @@ import React, {
   useState,
   ReactNode,
 } from "react";
+import { useUserPreferences } from "./UserPreferencesContext";
+
 
 type TimerContextType = {
   timerSeconds: number;
@@ -19,6 +21,13 @@ const TimerContext = createContext<TimerContextType | undefined>(undefined);
 export const TimerProvider = ({ children }: { children: ReactNode }) => {
   const [timerSeconds, setTimerSeconds] = useState<number>(60);
   const [isLoaded, setIsLoaded] = useState(false);
+  const { preferences, loading } = useUserPreferences();
+
+  useEffect(() => {
+  if (!loading && preferences) {
+    setTimerSeconds(preferences.default_timer ?? 60);
+  }
+}, [loading, preferences]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {

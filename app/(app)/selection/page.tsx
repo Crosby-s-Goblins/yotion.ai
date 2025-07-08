@@ -15,6 +15,9 @@ import { useUser } from '@/components/user-provider';
 import PageTopBar from "@/components/page-top-bar";
 import TimerSelect from "@/components/TimerSelect";
 import { useTimer } from "@/context/TimerContext";
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { Filter } from 'lucide-react';
 
 export default function SelectionComponents() {
   const user = useUser();
@@ -102,96 +105,106 @@ export default function SelectionComponents() {
   }
   if(paidStatus){
     return (
-    <main className="h-screen flex flex-col items-center">
-      <PageTopBar
-        title="Welcome to Your Practice"
-        description="Start your yoga journey with AI-powered guidance"
-        backHref="/practice"
-      />
-      <section className="flex flex-col w-full flex-1 items-center">
-        <div className="w-full max-w-2xl px-4 mb-6">
-          <Input 
-          className="w-full rounded-3xl border-2 py-6 px-8" 
-          placeholder="Search"
-          type="text" 
-          value={search} 
-          onChange={(e) => setSearch(e.target.value)}/>
-        </div>
-      {/* Horizontal Layout for Filter + Scroll Area */}
-      <div className="w-full max-w-6xl px-4 flex flex-row gap-6">
-        {/* Filter Panel */}
-        <div className="min-w-[200px] p-4 rounded-3xl border-2 h-fit flex flex-col gap-6">
-          {/* Difficulty Filter */}
-           <div>
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="font-semibold">Difficulty</h3>
-              {difficultyFilter && (
-                <button
-                  onClick={() => setDifficultyFilter(null)}
-                  className="text-xs text-blue-600 hover:underline"
-                >
-                  Clear
-                </button>
-              )}
-            </div>
-            <Select onValueChange={(value) => setDifficultyFilter(value)} value={difficultyFilter ?? ""}>
-              <SelectTrigger className="w-full rounded-xl border">
-                <SelectValue placeholder="Select difficulty" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Easy">Easy</SelectItem>
-                <SelectItem value="Medium">Medium</SelectItem>
-                <SelectItem value="Hard">Hard</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Placeholder Filter 1 */}
-          <div>
-            <h3 className="font-semibold mb-2">Filter Option 1</h3>
-            <div className="rounded-xl border p-2 text-sm text-gray-500">Coming Soon</div>
-          </div>
-
-          {/* Placeholder Filter 2 */}
-          <div>
-            <h3 className="font-semibold mb-2">Filter Option 2</h3>
-            <div className="rounded-xl border p-2 text-sm text-gray-500">Coming Soon</div>
-          </div>
-
-          {/* Timer Filter */}
-           <TimerSelect />
-        </div>
-
-        {/* Scroll Area */}
-        <div className="w-full">
-          <ScrollArea className="rounded-3xl border-2 h-full w-full flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-240px)]">
-            <div className="pr-4 -mr-4">
-              {searchedItems.length === 0 ? (
-                <p className="text-gray-500 items-center justify-center flex mt-10">No items found.</p>
-              ) : (
-                searchedItems.map((pose, index) => (
-                  <div key={index} className="relative">
-                    <PoseItem
-                      {...pose}
-                      onClick={() => handlePoseClick(index)}
-                      isExpanded={expandedPose === index}
-                    />
-                    <AnimatePresence>
-                      {expandedPose === index && (
-                        <ExpandedPoseCard pose={pose} onClose={handleClose} />
-                      )}
-                    </AnimatePresence>
+      <main className="h-screen flex flex-col items-center">
+        <PageTopBar
+          title="Welcome to Your Practice"
+          description="Start your yoga journey with AI-powered guidance"
+          backHref="/practice"
+        />
+        <section className="flex flex-col w-full flex-1 items-center">
+          <div className="w-full max-w-2xl mx-auto">
+            {/* Search bar with filter popover */}
+            <div className="relative flex items-center w-full">
+              <Input
+                className="w-full rounded-3xl border-2 py-6 px-8 pr-14"
+                placeholder="Search"
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full hover:bg-accent focus:outline-none"
+                  >
+                    <Filter className="w-5 h-5" />
+                    <span className="sr-only">Open filters</span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-80 p-4">
+                  <div className="flex flex-col gap-4">
+                    {/* Difficulty Filter */}
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <h3 className="font-semibold">Difficulty</h3>
+                        {difficultyFilter && (
+                          <button
+                            onClick={() => setDifficultyFilter(null)}
+                            className="text-xs text-blue-600 hover:underline"
+                          >
+                            Clear
+                          </button>
+                        )}
+                      </div>
+                      <Select onValueChange={(value) => setDifficultyFilter(value)} value={difficultyFilter ?? ""}>
+                        <SelectTrigger className="w-full rounded-xl border">
+                          <SelectValue placeholder="Select difficulty" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Easy">Easy</SelectItem>
+                          <SelectItem value="Medium">Medium</SelectItem>
+                          <SelectItem value="Hard">Hard</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {/* Placeholder Filter 1 */}
+                    <div>
+                      <h3 className="font-semibold mb-2">Filter Option 1</h3>
+                      <div className="rounded-xl border p-2 text-sm text-gray-500">Coming Soon</div>
+                    </div>
+                    {/* Placeholder Filter 2 */}
+                    <div>
+                      <h3 className="font-semibold mb-2">Filter Option 2</h3>
+                      <div className="rounded-xl border p-2 text-sm text-gray-500">Coming Soon</div>
+                    </div>
+                    {/* Timer Filter */}
+                    <TimerSelect />
                   </div>
-                ))
-              )}
+                </PopoverContent>
+              </Popover>
             </div>
-          </ScrollArea>
-        </div>
-      </div>
-    </section>
-  </main>  
-  );
-}
+            {/* Scroll area, perfectly aligned and same width */}
+            <div className="w-full mt-6">
+              <ScrollArea className="rounded-3xl border-2 w-full [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-300px)]">
+                <div className="pr-4 -mr-4">
+                  {searchedItems.length === 0 ? (
+                    <p className="text-gray-500 items-center justify-center flex mt-5 mb-5">No items found.</p>
+                  ) : (
+                    searchedItems.map((pose, index) => (
+                      <div key={index} className="relative">
+                        <PoseItem
+                          {...pose}
+                          onClick={() => handlePoseClick(index)}
+                          isExpanded={expandedPose === index}
+                        />
+                        <AnimatePresence>
+                          {expandedPose === index && (
+                            <ExpandedPoseCard pose={pose} onClose={handleClose} />
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </ScrollArea>
+            </div>
+          </div>
+        </section>
+      </main>
+    );
+  }
 else{
   const maxFree = 3; //Set maximum number of free poses
   const lockedItems = searchedItems.slice(maxFree);
@@ -203,7 +216,7 @@ else{
         backHref="/practice"
       />
 
-      <div className="w-full max-w-2xl px-4 mb-6">
+      <div className="w-full max-w-2xl px-4 mb-6 mx-auto">
         <Input className="flex flex-row rounded-3xl border-2 py-6 px-8" placeholder="Search"
           type="text" value={search} onChange={(e) => setSearch(e.target.value)}/>
       </div>
@@ -215,7 +228,7 @@ else{
         Make sure functionality continues to work
       */}
       {/* Need to filter down to free poses - Attribute in Supabase */}
-      <div className="w-full max-w-2xl px-4">
+      <div className="w-full max-w-2xl px-4 mx-auto">
         <div className="bg-white rounded-3xl border-2 h-full overflow-hidden">
           <ScrollArea className="h-[700px] rounded-3xl">
             <div className="pr-4 -mr-4">

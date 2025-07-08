@@ -94,7 +94,7 @@ export default function SelectionComponents() {
   const handleStartSession = () => {
     if (!selectedPose) return;
     setTimerSeconds(modalTimer);
-    window.location.href = `/skele?pose=${encodeURIComponent(JSON.stringify(selectedPose))}&duration=${modalTimer}`;
+    window.location.href = `/skele?poseId=${selectedPose.id}`;
   };
 
   //Search filter functionality

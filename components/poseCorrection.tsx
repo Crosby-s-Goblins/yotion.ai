@@ -401,8 +401,11 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
                             if (jointMap[originalIndex]) {
                                 const { joint, angle } = jointMap[originalIndex];
                                 const angleData = currentPose?.find(a => a.joint === joint);
-                                const isCorrect = isAngleCorrect(angle, angleData?.expected ?? 0, angleData?.tolerance ?? 0);
-                                return isCorrect ? '#00ff00' : '#ff0000';
+                                
+                                if (angleData) {
+                                    const isCorrect = isAngleCorrect(angle, angleData.expected, angleData.tolerance);
+                                    return isCorrect ? '#00ff00' : '#ff0000';
+                                }
                             }
 
                             if (originalIndex === 15 || originalIndex === 16) {

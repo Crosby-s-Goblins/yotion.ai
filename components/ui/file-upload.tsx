@@ -110,7 +110,7 @@ export const FileUpload = ({
                   damping: 20,
                 }}
                 className={cn(
-                  "relative group-hover/file:shadow-2xl z-40 bg-white dark:bg-neutral-900 flex items-center justify-center h-32 mt-4 w-full rounded-md",
+                  "relative group-hover/file:shadow-2xl z-40 bg-black dark:bg-neutral-900 flex items-center justify-center h-32 mt-4 w-full rounded-md",
                   "shadow-[0px_10px_50px_rgba(0,0,0,0.1)]"
                 )}
               >
@@ -125,11 +125,11 @@ export const FileUpload = ({
                   </motion.p>
                 ) : (
                   <div className="flex flex-col items-center gap-2 p-3">
-                    <IconUpload className="h-4 w-4 text-neutral-600 dark:text-neutral-300" />
-                    <p className="text-white font-regular text-xs opacity-50 text-center">
+                    <IconUpload className="h-4 w-4 text-neutral-300 dark:text-neutral-300" />
+                    <p className="text-white font-regular text-xs opacity-75 text-center">
                       Drag & drop or tap here to upload
                     </p>
-                    <p className="text-white text-xs opacity-50 font-light italic">
+                    <p className="text-white text-xs opacity-75 font-light italic">
                       Max: 5MB
                     </p>
                   </div>

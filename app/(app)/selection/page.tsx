@@ -1,298 +1,292 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
-import { AnimatePresence } from 'framer-motion';
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { AnimatePresence, motion } from 'framer-motion';
 import { Input } from "@/components/ui/input";
 import {Select, SelectTrigger, SelectValue, SelectContent, SelectItem} from '@/components/ui/select';
-import { PoseItem } from "@/components/selectorCardComponents/poseItem";
-import { ExpandedPoseCard } from "@/components/selectorCardComponents/expandedPoseCard";
 import { createClient } from "@/lib/supabase/client";
 import Loading from "@/components/loading";
 import { difficultyColors } from "@/components/selectorCardComponents/poseItem";
-import { motion } from "framer-motion";
 import { useUser } from '@/components/user-provider';
 import PageTopBar from "@/components/page-top-bar";
 import TimerSelect from "@/components/TimerSelect";
 import { useTimer } from "@/context/TimerContext";
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { Filter } from 'lucide-react';
+import { Filter, Search, Target } from 'lucide-react';
+import { Pose } from "@/components/selectorCardComponents/types";
 
 export default function SelectionComponents() {
+  const [poses, setPoses] = useState<Pose[]>([]);
+  const [search, setSearch] = useState("");
+  const [selectedDifficulty, setSelectedDifficulty] = useState("all");
+  const [selectedPose, setSelectedPose] = useState<Pose | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const user = useUser();
-  const [poses, setPoses] = useState<any[]>([]);
-  const [search, setSearch] = useState('');
-  const [expandedPose, setExpandedPose] = useState<number | null>(null);
+  const { setTimerSeconds, timerSeconds } = useTimer();
   const [paidStatus, setPaidStatus] = useState<boolean | null>(null);
-  const [difficultyFilter, setDifficultyFilter] = useState<string | null>(null);
-  const { setTimerSeconds } = useTimer();
-
+  const [modalTimer, setModalTimer] = useState<number>(timerSeconds);
 
   useEffect(() => {
-  const fetchFilteredPoses = async () => {
-    let query = supabase.from("poseLibrary").select("*");
+    const fetchPoses = async () => {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from('poseLibrary')
+          .select('*')
+          .order('name');
 
-    if (difficultyFilter) {
-      query = query.eq("difficulty", difficultyFilter);
-    }
+        if (error) {
+          console.error('Error fetching poses:', error);
+        } else {
+          setPoses(data || []);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    const { data, error } = await query;
-
-    error ?
-      (console.error("Error fetching poses:", error)) : (setPoses(data));
-    
-  };
-
-  fetchFilteredPoses();
-}, [difficultyFilter]);
-
-  useEffect(() => {
-    setTimerSeconds(60); // Reset to 60 on page load
-  }, []);
-
-  useEffect(() => {
-    if (user) {
-      const supabase = createClient();
-      supabase
-        .from('profiles')
-        .select('paidUser')
-        .eq('id', user.id)
-        .single()
-        .then(({ data: profileData }) => {
-          if (profileData) setPaidStatus(profileData.paidUser);
-        });
-    } else {
-      setPaidStatus(null);
-    }
-  }, [user]);
-
-  useEffect(() => {
-          const alreadyReloaded = sessionStorage.getItem('reloaded');
-  
-          if (!alreadyReloaded) {
-          sessionStorage.setItem('reloaded', 'true');
-          window.location.reload();
-          } //Force reload
-  
+    const checkPaidStatus = async () => {
+      try {
+        const supabase = createClient();
+        
+        if (user) {
+          const { data: allProfileData, error: allError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
           
-          return () => {
-          sessionStorage.removeItem('reloaded');
-          };
-      }, []);
+          // Try different possible column names
+          const paidUser = allProfileData?.paidUser;
+          const paid_status = allProfileData?.paid_status;
+          const isPaid = allProfileData?.isPaid;
+          const premium = allProfileData?.premium;
+          
+          // Use the first truthy value we find
+          const finalPaidStatus = paidUser || paid_status || isPaid || premium || false;
+          
+          setPaidStatus(finalPaidStatus);
+        } else {
+          setPaidStatus(false);
+        }
+      } catch (error) {
+        console.error('Error checking paid status:', error);
+        setPaidStatus(false);
+      }
+    };
 
-  const supabase = createClient();
+    fetchPoses();
+    checkPaidStatus();
+  }, [user]); // Add user as dependency
 
-  const handlePoseClick = (index: number) => {
-    if (expandedPose === index) {
-      setExpandedPose(null);
-    } else {
-      setExpandedPose(index);
-    }
+  const handlePoseSelect = (pose: Pose) => {
+    setSelectedPose(pose);
+    setModalTimer(timerSeconds); // default to current timer
   };
 
-  const handleClose = () => {
-    setExpandedPose(null);
+  const handleCloseExpanded = () => {
+    setSelectedPose(null);
+  };
+
+  const handleStartSession = () => {
+    if (!selectedPose) return;
+    setTimerSeconds(modalTimer);
+    window.location.href = `/skele?pose=${encodeURIComponent(JSON.stringify(selectedPose))}&duration=${modalTimer}`;
   };
 
   //Search filter functionality
-  const searchedItems = poses.filter((item) =>
-    item.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const searchedItems = poses.filter((item) => {
+    const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase());
+    const matchesDifficulty =
+      selectedDifficulty === 'all' ||
+      item.difficulty.toLowerCase() === selectedDifficulty;
+    return matchesSearch && matchesDifficulty;
+  });
 
   if(paidStatus === null){
     return <Loading />;
   }
-  if(paidStatus){
-    return (
-      <main className="h-screen flex flex-col items-center">
-        <PageTopBar
-          title="Welcome to Your Practice"
-          description="Start your yoga journey with AI-powered guidance"
-          backHref="/practice"
-        />
-        <section className="flex flex-col w-full flex-1 items-center">
-          <div className="w-full max-w-2xl mx-auto">
-            {/* Search bar with filter popover */}
-            <div className="relative flex items-center w-full">
+
+  // --- Pose Card ---
+  const PoseCard = ({ pose, locked }: { pose: Pose, locked?: boolean }) => (
+    <motion.div
+      key={pose.id}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+      className="relative"
+    >
+      <div
+        className={`bg-card.glass rounded-2xl border border-border/50 shadow-card hover:shadow-glass transition-all duration-200 cursor-pointer ${locked ? 'opacity-60 pointer-events-none' : ''}`}
+        onClick={() => !locked && handlePoseSelect(pose)}
+      >
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-lg">{pose.name}</h3>
+            <div className={`px-3 py-1 rounded-full text-xs font-medium text-white ${difficultyColors[pose.difficulty]}`}>
+              {pose.difficulty}
+            </div>
+          </div>
+          {pose.description && (
+            <p className="text-sm text-muted-foreground line-clamp-2">
+              {pose.description}
+            </p>
+          )}
+        </div>
+      </div>
+      {locked && (
+        <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center">
+          <div className="text-center text-white">
+            <Target className="w-8 h-8 mx-auto mb-2" />
+            <p className="text-sm font-medium">Premium</p>
+            <p className="text-xs opacity-80">Upgrade to unlock</p>
+          </div>
+        </div>
+      )}
+    </motion.div>
+  );
+
+  return (
+    <main className="min-h-screen bg-gradient-to-br from-background via-background to-background/95 flex flex-col">
+      <PageTopBar
+        title="Choose Your Practice"
+        description={paidStatus ? "Select from our curated collection of AI-powered yoga poses" : "Start your yoga journey with AI-powered guidance"}
+        backHref="/practice"
+      />
+      <section className="flex-1 w-full max-w-7xl mx-auto px-6 pb-8">
+        {/* Search and Filter Section */}
+        <div className="bg-card.glass rounded-2xl p-6 border border-border/50 shadow-card mb-8">
+          <div className="flex flex-col lg:flex-row gap-4 items-center">
+            {/* Search Bar */}
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
               <Input
-                className="w-full rounded-3xl border-2 py-6 px-8 pr-14"
-                placeholder="Search"
+                className="w-full pl-12 pr-4 h-12 rounded-full border-2 bg-background/50 backdrop-blur-sm"
+                placeholder="Search poses..."
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full hover:bg-accent focus:outline-none"
-                  >
-                    <Filter className="w-5 h-5" />
-                    <span className="sr-only">Open filters</span>
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent align="end" className="w-80 p-4">
-                  <div className="flex flex-col gap-4">
-                    {/* Difficulty Filter */}
-                    <div>
-                      <div className="flex justify-between items-center mb-2">
-                        <h3 className="font-semibold">Difficulty</h3>
-                        {difficultyFilter && (
-                          <button
-                            onClick={() => setDifficultyFilter(null)}
-                            className="text-xs text-blue-600 hover:underline"
-                          >
-                            Clear
-                          </button>
-                        )}
-                      </div>
-                      <Select onValueChange={(value) => setDifficultyFilter(value)} value={difficultyFilter ?? ""}>
-                        <SelectTrigger className="w-full rounded-xl border">
-                          <SelectValue placeholder="Select difficulty" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Easy">Easy</SelectItem>
-                          <SelectItem value="Medium">Medium</SelectItem>
-                          <SelectItem value="Hard">Hard</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    {/* Placeholder Filter 1 */}
-                    <div>
-                      <h3 className="font-semibold mb-2">Filter Option 1</h3>
-                      <div className="rounded-xl border p-2 text-sm text-gray-500">Coming Soon</div>
-                    </div>
-                    {/* Placeholder Filter 2 */}
-                    <div>
-                      <h3 className="font-semibold mb-2">Filter Option 2</h3>
-                      <div className="rounded-xl border p-2 text-sm text-gray-500">Coming Soon</div>
-                    </div>
-                    {/* Timer Filter */}
-                    <TimerSelect />
-                  </div>
-                </PopoverContent>
-              </Popover>
             </div>
-            {/* Scroll area, perfectly aligned and same width */}
-            <div className="w-full mt-6">
-              <ScrollArea className="rounded-3xl border-2 w-full [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-300px)]">
-                <div className="pr-4 -mr-4">
-                  {searchedItems.length === 0 ? (
-                    <p className="text-gray-500 items-center justify-center flex mt-5 mb-5">No items found.</p>
-                  ) : (
-                    searchedItems.map((pose, index) => (
-                      <div key={index} className="relative">
-                        <PoseItem
-                          {...pose}
-                          onClick={() => handlePoseClick(index)}
-                          isExpanded={expandedPose === index}
-                        />
-                        <AnimatePresence>
-                          {expandedPose === index && (
-                            <ExpandedPoseCard pose={pose} onClose={handleClose} />
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    ))
+            {/* Filter Popover */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="h-12 px-6 rounded-full">
+                  <Filter className="w-4 h-4 mr-2" />
+                  Filter
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-4 bg-white border border-border/50 shadow-glass">
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                      Difficulty Level
+                    </label>
+                    <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select difficulty" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white">
+                        <SelectItem value="all">All Levels</SelectItem>
+                        <SelectItem value="easy">Easy</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="hard">Hard</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+
+        {/* Poses Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <AnimatePresence>
+            {(() => {
+              if (paidStatus) {
+                return searchedItems.map((pose) => <PoseCard key={pose.id} pose={pose} />);
+              } else {
+                return searchedItems.map((pose) => {
+                  // Treat null as false for isFree
+                  const isFree = pose.isFree === true;
+                  return isFree
+                    ? <PoseCard key={pose.id} pose={pose} />
+                    : <PoseCard key={pose.id} pose={pose} locked />;
+                });
+              }
+            })()}
+          </AnimatePresence>
+        </div>
+      </section>
+
+      {/* Expanded Pose Modal */}
+      <AnimatePresence>
+        {selectedPose && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={handleCloseExpanded}
+          >
+            <motion.div
+              className="bg-white border border-border/50 rounded-2xl p-8 max-w-lg w-full mx-4 shadow-glass flex flex-col"
+              initial={{ scale: 0.8, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0, y: 20 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button onClick={handleCloseExpanded} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors">
+                ×
+              </button>
+              <div className="flex-grow">
+                <div className="text-center mb-6">
+                  <h2 className="text-2xl font-bold bg-gradient-to-tr from-primary to-accent bg-clip-text text-transparent mb-2">
+                    {selectedPose.name}
+                  </h2>
+                  <p className="text-muted-foreground mb-2">{selectedPose.description || "No description available."}</p>
+                  {selectedPose.images && (
+                    <img
+                      src={selectedPose.images}
+                      alt={`${selectedPose.name} reference`}
+                      className="w-full h-48 object-contain rounded-xl border-2 border-white/20 mx-auto mb-4"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
                   )}
                 </div>
-              </ScrollArea>
-            </div>
-          </div>
-        </section>
-      </main>
-    );
-  }
-else{
-  const maxFree = 3; //Set maximum number of free poses
-  const lockedItems = searchedItems.slice(maxFree);
-  return (
-    <main className="h-screen flex flex-col items-center justify-center">
-      <PageTopBar
-        title="Welcome to Your Practice"
-        description="Start your yoga journey with AI-powered guidance"
-        backHref="/practice"
-      />
-
-      <div className="w-full max-w-2xl px-4 mb-6 mx-auto">
-        <Input className="flex flex-row rounded-3xl border-2 py-6 px-8" placeholder="Search"
-          type="text" value={search} onChange={(e) => setSearch(e.target.value)}/>
-      </div>
-
-
-      {/* TODO:
-        Determine which 3 exercises to allow & how to show those
-        How to cover up the other exercises and if someone tries to click those, "Link" them to payment
-        Make sure functionality continues to work
-      */}
-      {/* Need to filter down to free poses - Attribute in Supabase */}
-      <div className="w-full max-w-2xl px-4 mx-auto">
-        <div className="bg-white rounded-3xl border-2 h-full overflow-hidden">
-          <ScrollArea className="h-[700px] rounded-3xl">
-            <div className="pr-4 -mr-4">
-              {searchedItems.length === 0 ? (
-            <p className="text-gray-500 items-center justify-center flex mt-10">No items found.</p>
-              ) : (
-              searchedItems.filter(pose => pose.isFree).map((pose, index) => (
-                <div key={index} className="relative">
-                  <PoseItem 
-                    {...pose} 
-                    onClick={() => handlePoseClick(index)}
-                    isExpanded={expandedPose === index}
-                  />
-                  <AnimatePresence>
-                    {expandedPose === index && (
-                      <ExpandedPoseCard 
-                        pose={pose} 
-                        onClose={handleClose}
-                      />
-                    )}
-                  </AnimatePresence>
-                </div>
-              )))}
-                <div className="relative mt-4">
-                {/* Fake locked cards */}
-                  <div className="space-y-2 pointer-events-none select-none">
-                    {lockedItems.map((pose, i) => (
-                      <motion.div
-                        key={i}
-                        className="flex flex-col bg-white/70 rounded-2xl shadow cursor-not-allowed"
-                        whileHover={{ backgroundColor: 'rgba(0,0,0,0.02)' }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <div className="flex flex-row py-4 px-8 items-center justify-between opacity-40">
-                          <p className="font-medium">{pose.name}</p>
-                          <div
-                            className={`flex flex-row ${difficultyColors[pose.difficulty as keyof typeof difficultyColors]} px-6 py-2 rounded-full w-28 justify-center items-center`}
-                          >
-                            <p className="text-white text-sm font-medium">{pose.difficulty}</p>
-                          </div>
-                        </div>
-                        <hr className="border-gray-200 -mx-8 opacity-40" />
-                      </motion.div>
+                {/* Timer Selection */}
+                <div className="mb-4">
+                  <label className="font-semibold mb-2 block">Timer Length</label>
+                  <select
+                    value={modalTimer}
+                    onChange={(e) => setModalTimer(Number(e.target.value))}
+                    className="w-full rounded-xl border py-2 px-3 cursor-pointer"
+                  >
+                    {[30, 60, 90, 120, 150].map((sec) => (
+                      <option key={sec} value={sec}>
+                        {sec} seconds
+                      </option>
                     ))}
+                  </select>
                 </div>
-
-                {/* Frosted glass overlay with lock */}
-                <div className="absolute inset-0 rounded-3xl z-10 flex pt-10 justify-center bg-white/40 backdrop-blur-md text-black font-semibold text-center -mt-4">
-                  <div>
-                    🔒 <br />
-                    These poses are premium. <br />
-                    <button
-                      onClick={console.log("Implement Payment later")} //TODO: Implement proper logic later
-                      className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                    >
-                      Unlock Premium
-                    </button>
-                  </div>
-                </div> 
-              </div>           
-            </div>
-          </ScrollArea>
-        </div>
-      </div>
-    </main> );
-  }
+                {/* Start Session Button */}
+                <Button className="w-full h-12 rounded-2xl text-lg mt-2" onClick={handleStartSession}>
+                  Start Session
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </main>
+  );
 }

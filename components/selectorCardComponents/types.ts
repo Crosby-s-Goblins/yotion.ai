@@ -5,4 +5,5 @@ export interface Pose {
   description?: string;
   benefits?: string[] | string;
   images?: string;
+  isFree?: boolean;
 }

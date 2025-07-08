@@ -3,13 +3,15 @@ import SettingsPane from "@/components/appSettingPane";
 
 export default function AppSettingsPage() {
   return (
-    <main className="h-screen flex flex-col items-center">
+    <main className="min-h-screen bg-gradient-to-br from-background via-background to-background/95 flex flex-col">
       <PageTopBar
-        title="Settings"
-        description="Customize and manage your experience"
+        title="Settings & Preferences"
+        description="Customize your experience and manage your account"
         backHref="/practice"
       />
-      <SettingsPane />
+      <section className="flex-1 w-full max-w-4xl mx-auto px-6 pb-8">
+        <SettingsPane />
+      </section>
     </main>
   );
 } 

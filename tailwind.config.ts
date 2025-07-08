@@ -1,62 +1,62 @@
 import type { Config } from "tailwindcss";
+import { fontFamily } from 'tailwindcss/defaultTheme';
 
-export default {
+/** @type {import('tailwindcss').Config} */
+module.exports = {
   content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['"Plus Jakarta Sans"', 'Inter', ...fontFamily.sans],
+      },
       colors: {
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
-        card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
-        },
-        popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
-        },
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
-        },
-        secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
-        },
-        muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
+          DEFAULT: '#4F8CFF', // Calming blue
+          dark: '#2B5FC7',
+          light: '#A3C8FF',
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+          DEFAULT: '#A259FF', // Energetic purple
+          light: '#D1B3FF',
         },
-        destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
+        premium: {
+          DEFAULT: '#FFD700', // Gold
+          dark: '#BFA100',
         },
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        chart: {
-          "1": "hsl(var(--chart-1))",
-          "2": "hsl(var(--chart-2))",
-          "3": "hsl(var(--chart-3))",
-          "4": "hsl(var(--chart-4))",
-          "5": "hsl(var(--chart-5))",
+        success: '#4ADE80', // Green
+        background: {
+          DEFAULT: '#F7FAFC',
+          dark: '#181A20',
+          glass: 'rgba(255,255,255,0.7)',
+        },
+        card: {
+          DEFAULT: '#FFFFFF',
+          dark: '#23272F',
+          glass: 'rgba(255,255,255,0.5)',
+        },
+        border: {
+          DEFAULT: '#E5E7EB',
+          dark: '#2D2F36',
         },
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        lg: '1.5rem',
+        xl: '2rem',
+        full: '9999px',
+      },
+      boxShadow: {
+        glass: '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
+        card: '0 2px 16px 0 rgba(80, 112, 255, 0.08)',
+      },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+        'gradient-glass': 'linear-gradient(135deg, rgba(79,140,255,0.12) 0%, rgba(162,89,255,0.10) 100%)',
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
-} satisfies Config;
+  plugins: [require('@tailwindcss/forms'), require('@tailwindcss/typography')],
+};

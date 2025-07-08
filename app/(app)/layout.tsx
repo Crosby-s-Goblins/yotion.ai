@@ -23,5 +23,6 @@ export default async function AppLayout({
       <TTSProvider>
         {children}
       </TTSProvider>
-    </TimerProviderWrapper>);
+    </TimerProviderWrapper>
+  );
 }

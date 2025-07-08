@@ -163,7 +163,7 @@ const Settings = ({ user }: SettingsProps) => {
                     defaultValue="profile"
                     className="flex items-center w-[80%] max-w-[450px] mb-10"
                 >
-                    <TabsList>
+                    <TabsList className="bg-gray-200 rounded-md">
                         <TabsTrigger value="profile">Profile</TabsTrigger>
                         <TabsTrigger value="details">Details</TabsTrigger>
                     </TabsList>

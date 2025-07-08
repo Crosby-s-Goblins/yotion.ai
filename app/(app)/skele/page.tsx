@@ -104,7 +104,7 @@ function SkelePageContent() {
 
   const stopCameraAndPose = async () => {
     try {
-      await closePose(); // ensure it’s awaited
+      await closePose(); // ensure it's awaited
 
       if (videoRef.current) {
         videoRef.current.pause();
@@ -305,29 +305,31 @@ function SkelePageContent() {
 
         {/* Loading/Error overlay */}
         {!isCameraOn && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
             <div className="text-center text-white">
               {isLoading ? (
                 <>
-                  <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                  <p className="text-lg">Accessing camera...</p>
+                  <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                  <p className="text-lg font-medium">Accessing camera...</p>
                 </>
               ) : (
                 <>
-                  <Camera className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                  <p className="text-lg mb-4">Camera not available</p>
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-primary/10 to-accent/10 flex items-center justify-center mx-auto mb-4">
+                    <Camera className="w-8 h-8 text-primary" />
+                  </div>
+                  <p className="text-lg mb-4 font-medium">Camera not available</p>
                   {error && (
-                    <p className="text-red-400 text-sm mb-4 max-w-md mx-auto">
+                    <p className="text-red-400 text-sm mb-6 max-w-md mx-auto">
                       {error}
                     </p>
                   )}
-                  <button
+                  <Button
                     onClick={startCamera}
-                    className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg flex items-center gap-2 mx-auto"
+                    className="bg-gradient-to-tr from-primary to-accent text-white px-8 py-4 rounded-full flex items-center gap-2 mx-auto shadow-glass hover:from-primary/90 hover:to-accent/90"
                   >
                     <Camera className="w-4 h-4" />
                     Try Again
-                  </button>
+                  </Button>
                 </>
               )}
             </div>
@@ -344,21 +346,23 @@ function SkelePageContent() {
         <div className="absolute top-4 left-0 right-0 flex justify-between items-center px-8">
           <div className="flex text-white py-2 rounded-lg w-1/3 justify-start">
            <Link href='/selection'>
-              <div className="bg-black/75 text-white px-4 py-4 rounded-full">
+              <div className="bg-black/75 backdrop-blur-md text-white px-4 py-4 rounded-full shadow-glass hover:bg-black/90 transition-all duration-200">
                 <X className="w-8 h-8" />
               </div>
             </Link>
           </div>
-          <div className="min-w-[120px] text-center bg-black/75 text-white px-6 py-4 rounded-full">
+          <div className="min-w-[120px] text-center bg-black/75 backdrop-blur-md text-white px-6 py-4 rounded-full shadow-glass">
             {timerSecondMove !== null && isLoaded ? (
-              <p className="text-2xl font-medium">{formatTime(timerSecondMove)}</p>
+              <p className="text-2xl font-bold bg-gradient-to-tr from-primary to-accent bg-clip-text text-transparent">
+                {formatTime(timerSecondMove)}
+              </p>
             ) : (
-              <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" />
+              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
             )}
           </div>
           <div className="flex text-white py-2 rounded-lg w-1/3 justify-end">
             <div 
-              className="bg-black/75 text-white px-4 py-4 rounded-full cursor-pointer hover:bg-black/90 transition-colors"
+              className="bg-black/75 backdrop-blur-md text-white px-4 py-4 rounded-full cursor-pointer hover:bg-black/90 transition-all duration-200 shadow-glass"
               onClick={() => setShowInfoModal(true)}
             >
               <Info className="w-8 h-8" />
@@ -374,25 +378,25 @@ function SkelePageContent() {
           <div className="w-1/3 flex justify-center">
             <Button
               onClick={() => setResetFlag(true)}
-              className="bg-black/75 text-white px-12 py-8 rounded-full flex items-center justify-center gap-4"
+              className="bg-black/75 backdrop-blur-md text-white px-12 py-8 rounded-full flex items-center justify-center gap-4 shadow-glass hover:bg-black/90 transition-all duration-200"
             >
-              <p className="text-2xl font-medium">Reset</p>
+              <p className="text-2xl font-bold">Reset</p>
               <RotateCcw className="w-8 h-8" />
             </Button>
           </div>
           {/* Pose Reference Image (Right) */}
           <div className="w-1/3 flex justify-end">
             {pose?.images && (
-              <div className="bg-black/75 rounded-lg p-2 shadow-lg">
+              <div className="bg-black/75 backdrop-blur-md rounded-2xl p-3 shadow-glass border border-white/10">
                 <img
                   src={pose.images}
                   alt={`${pose.name} reference`}
-                  className="w-48 h-48 object-contain rounded-lg border-2 border-white/20"
+                  className="w-48 h-48 object-contain rounded-xl border-2 border-white/20"
                   onError={(e) => {
                     e.currentTarget.parentElement!.style.display = 'none';
                   }}
                 />
-                <p className="text-white text-xs text-center mt-1 font-medium">{pose.name}</p>
+                <p className="text-white text-sm text-center mt-2 font-semibold">{pose.name}</p>
               </div>
             )}
           </div>
@@ -403,10 +407,10 @@ function SkelePageContent() {
       {showInfoModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowInfoModal(false)}>
           <div 
-            className="relative bg-white rounded-2xl p-8 max-w-lg w-full mx-4 shadow-2xl flex flex-col min-h-[480px]" 
+            className="relative bg-card.glass border border-border/50 rounded-2xl p-8 max-w-lg w-full mx-4 shadow-glass flex flex-col min-h-[480px]" 
             onClick={(e) => e.stopPropagation()}
           >
-            <button onClick={() => setShowInfoModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+            <button onClick={() => setShowInfoModal(false)} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors">
               <X className="w-6 h-6" />
             </button>
             
@@ -414,29 +418,31 @@ function SkelePageContent() {
               {isLoadingPose ? (
                 <div className="flex items-center justify-center h-full">
                   <div className="text-center">
-                    <div className="w-12 h-12 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                    <p className="text-gray-600">Loading Pose Information...</p>
+                    <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                    <p className="text-muted-foreground">Loading Pose Information...</p>
                   </div>
                 </div>
               ) : pose ? (
                 <>
                   <div className="text-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">{pose.name}</h2>
-                    <p className="text-gray-600">{pose.description || "No description available."}</p>
+                    <h2 className="text-2xl font-bold bg-gradient-to-tr from-primary to-accent bg-clip-text text-transparent mb-2">
+                      {pose.name}
+                    </h2>
+                    <p className="text-muted-foreground">{pose.description || "No description available."}</p>
                   </div>
                   
                   <div className="space-y-6">
                     {benefitsArray.length > 0 && (
                       <div className="space-y-3">
-                        <h3 className="font-semibold text-gray-900">Benefits</h3>
-                        <ul className="space-y-2 text-sm text-gray-600 list-disc list-inside">
+                        <h3 className="font-semibold text-foreground">Benefits</h3>
+                        <ul className="space-y-2 text-sm text-muted-foreground list-disc list-inside">
                           {benefitsArray.map((benefit, index) => <li key={index}>{benefit}</li>)}
                         </ul>
                       </div>
                     )}
                     <div className="space-y-3">
-                      <h3 className="font-semibold text-gray-900">Instructions</h3>
-                      <div className="text-sm text-gray-600 space-y-2">
+                      <h3 className="font-semibold text-foreground">Instructions</h3>
+                      <div className="text-sm text-muted-foreground space-y-2">
                         <p>• Follow the visual indicator on the left side.</p>
                         <p>• Breathe in as the ball moves up.</p>
                         <p>• Breathe out as the ball moves down.</p>
@@ -448,19 +454,19 @@ function SkelePageContent() {
                 <div className="flex items-center justify-center h-full">
                   <div className="text-center">
                     <p className="font-semibold text-red-500">Unable to load pose information.</p>
-                    {dbError && <p className="text-sm text-gray-500 mt-2">{dbError}</p>}
+                    {dbError && <p className="text-sm text-muted-foreground mt-2">{dbError}</p>}
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="mt-8 pt-6 border-t border-gray-200">
-              <button
+            <div className="mt-8 pt-6 border-t border-border">
+              <Button
                 onClick={() => setShowInfoModal(false)}
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-6 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200"
+                className="w-full bg-gradient-to-tr from-primary to-accent text-white py-3 px-6 rounded-full font-semibold shadow-glass hover:from-primary/90 hover:to-accent/90 transition-all duration-200"
               >
                 Got it
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -469,28 +475,28 @@ function SkelePageContent() {
       {/* Omit pre-production; testing only */}
       <div className="absolute flex flex-col justify-center items-end w-full h-full"> {/* z-50 */}
         <div>
-          <div className="bg-white/90 rounded-lg px-6 py-3 mb-4 shadow text-2xl font-bold text-gray-800">
+          <div className="bg-card.glass backdrop-blur-md rounded-2xl px-6 py-3 mb-4 shadow-glass border border-border/50 text-2xl font-bold text-foreground">
             Score: {Math.round(score * 100) / 100}
           </div>
         </div>
-        <div className="flex flex-col mr-10 bg-white p-8 rounded-lg w-56">
-          <span>Right Elbow: {rightElbowAngleRef.current}</span>
-          <span>Left Elbow: {leftElbowAngleRef.current}</span>
-          <span>Right Knee: {rightKneeAngleRef.current}</span>
-          <span>Left Knee: {leftKneeAngleRef.current}</span>
-          <span>Right Hip: {rightHipAngleRef.current}</span>
-          <span>Left Hip: {leftHipAngleRef.current}</span>
-          <span>Right Shoulder: {rightShoulderAngleRef.current}</span>
-          <span>Left Shoulder: {leftShoulderAngleRef.current}</span>
+        <div className="flex flex-col mr-10 bg-card.glass backdrop-blur-md p-8 rounded-2xl w-56 shadow-glass border border-border/50">
+          <span className="text-foreground">Right Elbow: {rightElbowAngleRef.current}</span>
+          <span className="text-foreground">Left Elbow: {leftElbowAngleRef.current}</span>
+          <span className="text-foreground">Right Knee: {rightKneeAngleRef.current}</span>
+          <span className="text-foreground">Left Knee: {leftKneeAngleRef.current}</span>
+          <span className="text-foreground">Right Hip: {rightHipAngleRef.current}</span>
+          <span className="text-foreground">Left Hip: {leftHipAngleRef.current}</span>
+          <span className="text-foreground">Right Shoulder: {rightShoulderAngleRef.current}</span>
+          <span className="text-foreground">Left Shoulder: {leftShoulderAngleRef.current}</span>
         </div>
       </div>
 
       <div className="absolute flex justify-center top-48 w-full h-full">
         {formText !== "" ? (
-          <h1 className="m-3 text-white text-4xl font-bold">{formText}</h1>
+          <h1 className="m-3 text-white text-4xl font-bold drop-shadow-lg">{formText}</h1>
         ) : (
           timerStarted === 1 ? (
-            <h1 className="m-3 text-white text-9xl font-bold opactiy-75">{poseStartTimer}</h1>
+            <h1 className="m-3 text-white text-9xl font-bold opacity-75 drop-shadow-lg">{poseStartTimer}</h1>
           ) : (
             <h1 className="m-3 text-white text-4xl font-bold"> {/* Literally just an else condition, LEAVE EMPTY */} </h1> 
           )
@@ -503,9 +509,9 @@ function SkelePageContent() {
 export default function SkelePage() {
   return (
     <Suspense fallback={
-      <div className="w-screen h-screen bg-gray-900 flex flex-col items-center justify-center text-white">
-        <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-lg">Loading Session...</p>
+      <div className="w-screen h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex flex-col items-center justify-center text-white">
+        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
+        <p className="text-lg font-medium">Loading Session...</p>
       </div>
     }>
       <SkelePageContent />

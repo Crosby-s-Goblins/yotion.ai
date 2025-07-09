@@ -1,6 +1,6 @@
 'use client';
 
-import { Info, Play, RotateCcw, Camera, CameraOff, X } from "lucide-react";
+import { Info, Play, RotateCcw, Camera, CameraOff, X, InfoIcon, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
@@ -27,6 +27,7 @@ function SkelePageContent() {
   const [poseStartTimer, setPoseStartTimer] = useState<number>(3);
   const [timerStarted, setTimerStarted] = useState<number>(0);
   const timerStartedRef = useRef(timerStarted);
+  const [showImageRef, setShowImageRef] = useState(false);
   
   const searchParams = useSearchParams();
   const poseId = searchParams.get('poseId');
@@ -357,66 +358,114 @@ function SkelePageContent() {
       </div>
 
       {/* UI Overlay - Absolute positioned on top */}
-      <div className="absolute inset-0 z-10 px-8">
-        {/* Breathing Indicator - Left Side */}
-        <BreathIndication duration={10} />
-
-        {/* Top UI Bar */}
-        <div className="absolute top-4 left-0 right-0 flex justify-between items-center px-8">
-          <div className="flex text-white py-2 rounded-lg w-1/3 justify-start">
-           <Link href='/selection'>
-              <div className="bg-black/75 backdrop-blur-md text-white px-4 py-4 rounded-full shadow-glass hover:bg-black/90 transition-all duration-200">
-                <X className="w-8 h-8" />
-              </div>
-            </Link>
-          </div>
-          <div className="min-w-[120px] text-center bg-black/75 backdrop-blur-md text-white px-6 py-4 rounded-full shadow-glass">
-            {timerSecondMove !== null && isLoaded ? (
-              <p className="text-2xl font-bold bg-gradient-to-tr from-primary to-accent bg-clip-text text-transparent">
-                {formatTime(timerSecondMove)}
-              </p>
-            ) : (
-              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-            )}
-          </div>
-          <div className="flex text-white py-2 rounded-lg w-1/3 justify-end">
-            <div 
-              className="bg-black/75 backdrop-blur-md text-white px-4 py-4 rounded-full cursor-pointer hover:bg-black/90 transition-all duration-200 shadow-glass"
-              onClick={() => setShowInfoModal(true)}
+      <div className="absolute inset-0 z-10 flex flex-col justify-between pointer-events-none">
+        {/* Top Bar */}
+        <div className="flex justify-center items-center gap-4 px-10 pt-4 pb-4 w-full max-w-6xl mx-auto pointer-events-auto">
+          {/* Top Left Exit Button */}
+          <div className="absolute top-4 left-10 z-20 h-24 flex items-center pointer-events-auto">
+            <Button
+              onClick={() => router.push('/selection')}
+              size="icon"
+              className="w-16 h-16 bg-white/80 backdrop-blur-lg border border-white/40 shadow-2xl text-black hover:bg-white/90 focus-visible:ring-2 focus-visible:ring-primary/60"
+              aria-label="Exit session"
             >
-              <Info className="w-8 h-8" />
+              <X className="w-10 h-10" />
+            </Button>
+          </div>
+          {/* Top Right Info Button */}
+          <div className="absolute top-4 right-10 z-20 h-24 flex items-center pointer-events-auto">
+            <Button
+              onClick={() => setShowInfoModal(true)}
+              size="icon"
+              className="w-16 h-16 bg-white/80 backdrop-blur-lg border border-white/40 shadow-2xl text-black hover:bg-white/90 focus-visible:ring-2 focus-visible:ring-primary/60"
+              aria-label="Show info"
+            >
+              <InfoIcon className="w-10 h-10" />
+            </Button>
+          </div>
+          {/* Top Bar (centered row) */}
+          <div className="flex justify-center items-center gap-4 px-10 h-24 w-full max-w-6xl mx-auto pointer-events-auto">
+            {/* Image Ref Toggle Button (left of timer) */}
+            <Button
+              onClick={() => setShowImageRef((v) => !v)}
+              size="icon"
+              className="w-16 h-16 bg-white/80 backdrop-blur-lg border border-white/40 shadow-2xl text-black hover:bg-white/90 focus-visible:ring-2 focus-visible:ring-primary/60"
+              aria-label={showImageRef ? "Hide pose reference" : "Show pose reference"}
+            >
+              <ImageIcon className="w-10 h-10" />
+            </Button>
+            {/* Timer */}
+            <div className="px-10 py-4 rounded-full bg-white/80 backdrop-blur-lg border border-white/40 shadow-2xl flex items-center justify-center">
+              {timerSecondMove !== null && isLoaded ? (
+                <p className="text-6xl font-extrabold bg-gradient-to-tr from-primary to-accent bg-clip-text text-transparent tracking-widest">
+                  {formatTime(timerSecondMove)}
+                </p>
+              ) : (
+                <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+              )}
+            </div>
+            {/* Reset Button (right of timer) */}
+            <Button
+              onClick={() => setResetFlag(true)}
+              size="icon"
+              className="w-16 h-16 bg-white/80 backdrop-blur-lg border border-white/40 shadow-2xl text-black hover:bg-white/90 focus-visible:ring-2 focus-visible:ring-primary/60"
+              aria-label="Reset session"
+            >
+              <RotateCcw className="w-10 h-10" />
+            </Button>
+          </div>
+        </div>
+        {/* Breathing Indicator - Left Side */}
+        <div className="absolute left-10 top-1/2 -translate-y-1/2 pointer-events-auto">
+          <div className=" bg-white/80 rounded-full shadow-2xl border border-white/40">
+            <div className="w-16 h-96 drop-shadow-2xl flex items-center justify-center">
+              <BreathIndication duration={10} />
             </div>
           </div>
         </div>
 
-        {/* Bottom UI Bar */}
-        <div className="absolute bottom-4 left-0 w-full flex items-end justify-between px-8 z-20">
-          {/* Left Spacer */}
+        {/* Bottom Bar */}
+        <div className="flex items-end justify-between px-10 pb-8 w-full max-w-6xl mx-auto pointer-events-auto">
           <div className="w-1/3" />
-          {/* Centered Reset Button */}
-          <div className="w-1/3 flex justify-center">
-            <Button
-              onClick={() => setResetFlag(true)}
-              className="bg-black/75 backdrop-blur-md text-white px-12 py-8 rounded-full flex items-center justify-center gap-4 shadow-glass hover:bg-black/90 transition-all duration-200"
+          {/* Pose Reference Image moved to bottom right */}
+        </div>
+        {/* Animated Pose Reference Image - truly vertically centered */}
+        <div className="absolute inset-0 pointer-events-none z-30">
+          {pose?.images && (
+            <div
+              className={`
+                absolute top-1/2 right-8 -translate-y-1/2 pointer-events-auto
+                transition-all duration-300
+                ${showImageRef
+                  ? 'opacity-100 scale-100 translate-x-0'
+                  : 'opacity-0 scale-95 translate-x-full'}
+              `}
+              style={{ transitionProperty: 'opacity, transform' }}
             >
-              <p className="text-2xl font-bold">Reset</p>
-              <RotateCcw className="w-8 h-8" />
-            </Button>
-          </div>
-          {/* Pose Reference Image (Right) */}
-          <div className="w-1/3 flex justify-end">
-            {pose?.images && (
-              <div className="bg-black/75 backdrop-blur-md rounded-2xl p-3 shadow-glass border border-white/10">
+              {/* image card */}
+              <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-4 shadow-2xl border border-white/40 flex flex-col items-center">
                 <img
                   src={pose.images}
                   alt={`${pose.name} reference`}
-                  className="w-48 h-48 object-contain rounded-xl border-2 border-white/20"
+                  className="w-56 h-56 object-contain rounded-xl border-2 border-white/40 shadow-lg"
                   onError={(e) => {
                     e.currentTarget.parentElement!.style.display = 'none';
                   }}
                 />
-                <p className="text-white text-sm text-center mt-2 font-semibold">{pose.name}</p>
+                <p className="text-black text-lg text-center mt-2 font-semibold drop-shadow">{pose.name}</p>
               </div>
+            </div>
+          )}
+        </div>
+        {/* Score/Debug Panel - low opacity, non-intrusive */}
+        <div className="fixed bottom-8 left-8 z-40 pointer-events-none opacity-25">
+          <div className="bg-white/80 backdrop-blur-lg rounded-2xl px-8 py-6 shadow-2xl border border-white/40 text-2xl font-bold text-black flex flex-col items-end gap-2">
+            <span>Score: {Math.round(score * 10) / 100}</span>
+            <span className="text-base font-normal">Timer: {`${stopwatch.minutes}:${stopwatch.seconds}:${stopwatch.milliseconds}`}</span>
+            <span className="text-base font-normal">isRunning: {`${stopwatch.isRunning}`}</span>
+            <span className="text-base font-normal">isPoseCorrect: {`${correctPose()}`}</span>
+            {initialTimerSeconds && initialTimerSeconds > 0 && (
+              <span className="text-base font-normal">Held Pose: {heldPercentage.toFixed(1)}%</span>
             )}
           </div>
         </div>
@@ -424,44 +473,39 @@ function SkelePageContent() {
 
       {/* Info Modal */}
       {showInfoModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowInfoModal(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm pointer-events-auto" onClick={() => setShowInfoModal(false)}>
           <div 
-            className="relative bg-card.glass border border-border/50 rounded-2xl p-8 max-w-lg w-full mx-4 shadow-glass flex flex-col min-h-[480px]" 
+            className="relative bg-white/90 border border-white/40 rounded-2xl p-10 max-w-lg w-full mx-4 shadow-2xl flex flex-col min-h-[480px]"
             onClick={(e) => e.stopPropagation()}
           >
-            <button onClick={() => setShowInfoModal(false)} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors">
-              <X className="w-6 h-6" />
-            </button>
-
-            <div className="flex-grow">
+            <Button
+              size="icon"
+              aria-label="Close info modal"
+              className="absolute top-6 right-6 w-12 h-12 bg-white/80 text-black border border-white/40 shadow-lg hover:bg-white"
+              onClick={() => setShowInfoModal(false)}
+            >
+              <X className="w-8 h-8" />
+            </Button>
+            <div className="flex-grow flex flex-col justify-center">
               {isLoadingPose ? (
                 <div className="flex items-center justify-center h-full">
                   <div className="text-center">
-                    <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                    <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                     <p className="text-muted-foreground">Loading Pose Information...</p>
                   </div>
                 </div>
               ) : pose ? (
                 <>
-                  <div className="text-center mb-6">
-                    <h2 className="text-2xl font-bold bg-gradient-to-tr from-primary to-accent bg-clip-text text-transparent mb-2">
+                  <div className="text-center mb-8">
+                    <h2 className="text-3xl font-extrabold bg-gradient-to-tr from-primary to-accent bg-clip-text text-transparent mb-2 drop-shadow">
                       {pose.name}
                     </h2>
-                    <p className="text-muted-foreground">{pose.description || "No description available."}</p>
+                    <p className="text-lg text-black/80 mb-4">{pose.description || "No description available."}</p>
                   </div>
-
                   <div className="space-y-6">
-                    {/* {benefitsArray.length > 0 && (
-                      <div className="space-y-3">
-                        <h3 className="font-semibold text-foreground">Benefits</h3>
-                        <ul className="space-y-2 text-sm text-muted-foreground list-disc list-inside">
-                          {benefitsArray.map((benefit, index) => <li key={index}>{benefit}</li>)}
-                        </ul>
-                      </div>
-                    )} */}
                     <div className="space-y-3">
-                      <h3 className="font-semibold text-foreground">Instructions</h3>
-                      <div className="text-sm text-muted-foreground space-y-2">
+                      <h3 className="font-semibold text-black">Instructions</h3>
+                      <div className="text-base text-black/80 space-y-2">
                         <p>• Follow the visual indicator on the left side.</p>
                         <p>• Breathe in as the ball moves up.</p>
                         <p>• Breathe out as the ball moves down.</p>
@@ -478,11 +522,10 @@ function SkelePageContent() {
                 </div>
               )}
             </div>
-
-            <div className="mt-8 pt-6 border-t border-border">
+            <div className="mt-10 pt-6 border-t border-white/40">
               <Button
                 onClick={() => setShowInfoModal(false)}
-                className="w-full bg-gradient-to-tr from-primary to-accent text-white py-3 px-6 rounded-full font-semibold shadow-glass hover:from-primary/90 hover:to-accent/90 transition-all duration-200"
+                className="w-full bg-gradient-to-tr from-primary to-accent text-white py-4 px-8 rounded-full font-semibold shadow-lg hover:from-primary/90 hover:to-accent/90 transition-all duration-200"
               >
                 Got it
               </Button>
@@ -490,35 +533,6 @@ function SkelePageContent() {
           </div>
         </div>
       )}
-
-      {/* Omit pre-production; testing only */}
-      <div className="absolute flex flex-col justify-center items-end w-full h-full"> {/* z-50 */}
-        <div>
-          <div className="bg-card.glass backdrop-blur-md rounded-2xl px-6 py-3 mb-4 shadow-glass border border-border/50 text-2xl font-bold text-foreground">
-            Score: {Math.round(score * 100) / 100}
-          </div>
-          <div className="bg-white/90">
-            Timer: {`${stopwatch.minutes}:${stopwatch.seconds}:${stopwatch.milliseconds}`}<br/>
-            isRunning: {`${stopwatch.isRunning}`}<br/>
-            isPoseCorrect: {`${correctPose()}`}<br/>
-            {initialTimerSeconds && initialTimerSeconds > 0 && (
-              <span>
-                Held Pose: {heldPercentage.toFixed(1)}%
-              </span>
-            )}
-          </div>
-        </div>
-        <div className="flex flex-col mr-10 bg-card.glass backdrop-blur-md p-8 rounded-2xl w-56 shadow-glass border border-border/50">
-          <span className="text-foreground">Right Elbow: {rightElbowAngleRef.current}</span>
-          <span className="text-foreground">Left Elbow: {leftElbowAngleRef.current}</span>
-          <span className="text-foreground">Right Knee: {rightKneeAngleRef.current}</span>
-          <span className="text-foreground">Left Knee: {leftKneeAngleRef.current}</span>
-          <span className="text-foreground">Right Hip: {rightHipAngleRef.current}</span>
-          <span className="text-foreground">Left Hip: {leftHipAngleRef.current}</span>
-          <span className="text-foreground">Right Shoulder: {rightShoulderAngleRef.current}</span>
-          <span className="text-foreground">Left Shoulder: {leftShoulderAngleRef.current}</span>
-        </div>
-      </div>
 
       <div className="absolute flex justify-center top-48 w-full h-full">
         {formText !== "" ? (

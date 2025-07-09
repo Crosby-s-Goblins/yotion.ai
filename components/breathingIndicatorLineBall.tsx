@@ -13,29 +13,20 @@ export function BreathIndication({ duration } : timingInd) {
   }), [duration]);
 
   return (
-    <main className="absolute left-16 top-1/2 transform -translate-y-1/2">
-      <div className="flex flex-col items-center">
-            {/* Vertical Line with Ball */}
-            <div className="relative" style={{ height: '300px' }}>
-              {/* Vertical line */}
-              <div 
-                className="absolute left-1/2 transform -translate-x-1/2 w-2 bg-white/60 rounded-full"
-                style={{ height: '300px', top: '0px' }}
-              />
-              
-              {/* Moving ball */}
-              <div 
-                className="absolute left-1/2 w-4 h-4 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full shadow-lg transition-all ease-in-out -translate-x-1/2"
-                style={animationStyle}   
-              />
-              
-              {/* Top and bottom markers --Unnecessary? */}
-              {/* <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-white/20 rounded-full" />
-              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-white/20 rounded-full" /> */}
-            </div>
-          
-        </div> {/* May want to change style choices here */}
-
+    <div className="flex flex-col items-center justify-center w-full h-full">
+      {/* Vertical Line with Ball */}
+      <div className="relative" style={{ height: '300px' }}>
+        {/* Vertical line */}
+        <div 
+          className="absolute left-1/2 transform -translate-x-1/2 w-2 bg-white/60 rounded-full"
+          style={{ height: '300px', top: '0px' }}
+        />
+        {/* Moving ball */}
+        <div 
+          className="absolute left-1/2 w-4 h-4 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full shadow-lg transition-all ease-in-out -translate-x-1/2"
+          style={animationStyle}   
+        />
+      </div>
       {/* Tailwind custom keyframes */}
       <style jsx>{`
         @keyframes bounce-vertical {
@@ -50,8 +41,6 @@ export function BreathIndication({ duration } : timingInd) {
           }
         }
       `}</style>
-    </main>
+    </div>
   );
-
-  
 }

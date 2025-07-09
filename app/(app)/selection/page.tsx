@@ -31,11 +31,15 @@ export default function SelectionComponents() {
     const fetchPoses = async () => {
       try {
         const supabase = createClient();
-        const { data, error } = await supabase
+        let poseCall =  supabase
           .from('poseLibrary')
-          .select('*')
-          .order('isFree', {ascending: false})
-          .order('name');
+          .select('*');
+        if(paidStatus === false){
+          poseCall = poseCall.order('isFree', {ascending: false});
+        }
+        poseCall = poseCall.order('name');
+
+        const { data, error } = await poseCall;
 
         if (error) {
           console.error('Error fetching poses:', error);
@@ -67,8 +71,16 @@ export default function SelectionComponents() {
           const premium = allProfileData?.premium;
           
           // Use the first truthy value we find
-          const finalPaidStatus = paidUser || paid_status || isPaid || premium || false;
+          // const finalPaidStatus = paidUser || paid_status || isPaid || premium || false;
           
+          const parseBool = (v: any) => v === true || v === 'true';
+
+          const finalPaidStatus =
+            parseBool(paidUser) ||
+            parseBool(paid_status) ||
+            parseBool(isPaid) ||
+            parseBool(premium);
+
           setPaidStatus(finalPaidStatus);
         } else {
           setPaidStatus(false);
@@ -81,7 +93,7 @@ export default function SelectionComponents() {
 
     fetchPoses();
     checkPaidStatus();
-  }, [user]); // Add user as dependency
+  }, [paidStatus, user]); // Add user and paidstatus as dependency
 
   const handlePoseSelect = (pose: Pose) => {
     setSelectedPose(pose);

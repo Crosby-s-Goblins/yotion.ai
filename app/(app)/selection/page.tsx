@@ -28,72 +28,61 @@ export default function SelectionComponents() {
   const [modalTimer, setModalTimer] = useState<number>(timerSeconds);
 
   useEffect(() => {
-    const fetchPoses = async () => {
-      try {
-        const supabase = createClient();
-        let poseCall =  supabase
-          .from('poseLibrary')
-          .select('*');
-        if(paidStatus === false){
-          poseCall = poseCall.order('isFree', {ascending: false});
-        }
-        poseCall = poseCall.order('name');
+  const fetchEverything = async () => {
+    try {
+      const supabase = createClient();
 
-        const { data, error } = await poseCall;
+      // Check paid status first (Resolving unintentional race codition)
+      let finalPaidStatus = false;
 
-        if (error) {
-          console.error('Error fetching poses:', error);
-        } else {
-          setPoses(data || []);
-        }
-      } catch (error) {
-        console.error('Error:', error);
-      } finally {
-        setIsLoading(false);
+      if (user) {
+        const { data: allProfileData, error: allError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+        const parseBool = (v: any) => v === true || v === 'true';
+
+        finalPaidStatus =
+          parseBool(allProfileData?.paidUser) ||
+          parseBool(allProfileData?.paid_status) ||
+          parseBool(allProfileData?.isPaid) ||
+          parseBool(allProfileData?.premium);
+
+        setPaidStatus(finalPaidStatus);
       }
-    };
 
-    const checkPaidStatus = async () => {
-      try {
-        const supabase = createClient();
-        
-        if (user) {
-          const { data: allProfileData, error: allError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', user.id)
-            .single();
-          
-          // Try different possible column names
-          const paidUser = allProfileData?.paidUser;
-          const paid_status = allProfileData?.paid_status;
-          const isPaid = allProfileData?.isPaid;
-          const premium = allProfileData?.premium;
-          
-          // Use the first truthy value we find
-          // const finalPaidStatus = paidUser || paid_status || isPaid || premium || false;
-          
-          const parseBool = (v: any) => v === true || v === 'true';
+      // Fetch poses using correct paid status
+      let poseCall = supabase
+        .from('poseLibrary')
+        .select('*');
 
-          const finalPaidStatus =
-            parseBool(paidUser) ||
-            parseBool(paid_status) ||
-            parseBool(isPaid) ||
-            parseBool(premium);
-
-          setPaidStatus(finalPaidStatus);
-        } else {
-          setPaidStatus(false);
-        }
-      } catch (error) {
-        console.error('Error checking paid status:', error);
-        setPaidStatus(false);
+      if (!finalPaidStatus) {
+        poseCall = poseCall.order('isFree', { ascending: false });
       }
-    };
 
-    fetchPoses();
-    checkPaidStatus();
-  }, [paidStatus, user]); // Add user and paidstatus as dependency
+      poseCall = poseCall.order('name');
+
+      const { data, error } = await poseCall;
+
+      if (error) {
+        console.error('Error fetching poses:', error);
+      } else {
+        setPoses(data || []);
+      }
+    } catch (error) {
+      console.error('Error during fetch:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (user) {
+    fetchEverything();
+  }
+}, [user]);
+
 
   const handlePoseSelect = (pose: Pose) => {
     setSelectedPose(pose);

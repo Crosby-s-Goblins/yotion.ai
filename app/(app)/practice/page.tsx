@@ -1,13 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Settings, Users, ChartNoAxesCombined, Flame } from 'lucide-react';
+import Link from "next/link";
 
 export default function PracticePage() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-background via-background to-background/95 flex flex-col items-center justify-center p-8">
       {/* Hero Section */}
       <div className="text-center mb-12">
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold bg-gradient-to-tr from-primary to-accent bg-clip-text text-transparent drop-shadow-lg mb-4">
-          <a href='/' className="hover:opacity-80 transition-opacity">yotion.ai</a>
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold bg-gradient-to-tr from-primary to-accent bg-clip-text text-transparent drop-shadow-lg mb-4 hover:opacity-50">
+          <Link href='/'>
+            <h1 className="hover:opacity">yotion.ai</h1>
+          </Link>
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
           Your AI-powered yoga journey starts here. Choose your path to mindfulness and strength.

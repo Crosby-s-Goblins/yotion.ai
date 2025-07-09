@@ -8,9 +8,7 @@ export default function PracticePage() {
       {/* Hero Section */}
       <div className="text-center mb-12">
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold bg-gradient-to-tr from-primary to-accent bg-clip-text text-transparent drop-shadow-lg mb-4 hover:opacity-50">
-          <Link href='/'>
-            <h1 className="hover:opacity">yotion.ai</h1>
-          </Link>
+          <Link href="/">yotion.ai</Link>
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
           Your AI-powered yoga journey starts here. Choose your path to mindfulness and strength.

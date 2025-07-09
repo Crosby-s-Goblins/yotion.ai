@@ -29,6 +29,7 @@ export default function SettingsPane() {
   const [localTTS, setLocalTTS] = useState<boolean | undefined>(undefined);
   const [reminders, setReminders] = useState<boolean | undefined>(undefined);
   const [motivation, setMotivation] = useState<boolean | undefined>(undefined);
+  const [load, setLoad] = useState(true);
 
   const {setPreferences, loading, preferences} = useUserPreferences();
 
@@ -40,6 +41,52 @@ export default function SettingsPane() {
       setMotivation(preferences.motivation ?? false);
     }
   }, [loading, preferences]);
+
+  useEffect(() => {
+    const fetchOrInitPreferences = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('user_preferences')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (error && error.code === 'PGRST116') {
+        // No preferences found, create defaults
+        const defaultPrefs = {
+          id: user.id,
+          default_timer: 60,
+          tts_enabled: true,
+          reminders: false,
+          motivation: false,
+        };
+        const { error: insertError } = await supabase
+          .from('user_preferences')
+          .insert(defaultPrefs);
+
+        if (!insertError) {
+          setPreferences(defaultPrefs);
+          setLocalTimer('60');
+          setLocalTTS(true);
+          setReminders(false);
+          setMotivation(false);
+        }
+      } else if (data) {
+        // Preferences exist
+        setPreferences(data);
+        setLocalTimer((data.default_timer ?? 60).toString());
+        setLocalTTS(data.tts_enabled ?? true);
+        setReminders(data.reminders ?? false);
+        setMotivation(data.motivation ?? false);
+      }
+
+      setLoad(false);
+    };
+
+    fetchOrInitPreferences();
+  }, [setPreferences]);
 
   const handleSave = async () => {
     const user = await supabase.auth.getUser();

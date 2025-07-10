@@ -61,19 +61,6 @@ function SkelePageContent() {
   const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
-    const alreadyReloaded = sessionStorage.getItem('reloaded');
-
-    if (!alreadyReloaded) {
-      sessionStorage.setItem('reloaded', 'true');
-      window.location.reload();
-    } //Force reload to allow MediaPipe Startup?
-
-    return () => {
-      sessionStorage.removeItem('reloaded');
-    };
-  }, []);
-
-  useEffect(() => {
     if (isLoaded && timerSecondMove === null) {
       setTimerSecondMove(timerSeconds);
       setInitialTimerSeconds(timerSeconds);

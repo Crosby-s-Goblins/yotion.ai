@@ -1,8 +1,26 @@
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Settings, Users, ChartNoAxesCombined, Flame } from 'lucide-react';
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useNavigationDirection } from "@/context/NavigationDirectionContext";
+import { flushSync } from "react-dom";
 
 export default function PracticePage() {
+  const router = useRouter();
+  const { setDirection } = useNavigationDirection();
+
+  const handleNav = (href: string) => {
+    flushSync(() => {
+      setDirection("forward");
+    });
+    // Small delay to ensure context propagates
+    setTimeout(() => {
+      router.push(href);
+    }, 10);
+  };
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-background via-background to-background/95 flex flex-col items-center justify-center p-8">
       {/* Hero Section */}
@@ -19,7 +37,11 @@ export default function PracticePage() {
       <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-6 max-w-7xl w-full">
         {/* Train Card */}
         <Card className="group relative overflow-hidden bg-card.glass border-border/50 shadow-card hover:shadow-glass transition-all duration-300 hover:scale-105 cursor-pointer">
-          <a href="/selection" className="w-full h-full flex flex-col justify-center items-center p-8">
+          <button
+            onClick={() => handleNav("/selection")}
+            className="w-full h-full flex flex-col justify-center items-center p-8 bg-transparent border-none outline-none"
+            style={{ cursor: "pointer" }}
+          >
             <CardHeader className="flex flex-col justify-center items-center text-center">
               <div className="w-24 h-24 rounded-2xl bg-gradient-to-tr from-primary/10 to-accent/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 <Flame className="w-12 h-12 text-primary" />
@@ -33,12 +55,16 @@ export default function PracticePage() {
                 Choose from our curated list of poses and get real-time feedback on your form with AI-powered guidance.
               </p>
             </CardContent>
-          </a>
+          </button>
         </Card>
 
         {/* Performance Card */}
         <Card className="group relative overflow-hidden bg-card.glass border-border/50 shadow-card hover:shadow-glass transition-all duration-300 hover:scale-105 cursor-pointer">
-          <a href="/performance" className="w-full h-full flex flex-col justify-center items-center p-8">
+          <button
+            onClick={() => handleNav("/performance")}
+            className="w-full h-full flex flex-col justify-center items-center p-8 bg-transparent border-none outline-none"
+            style={{ cursor: "pointer" }}
+          >
             <CardHeader className="flex flex-col justify-center items-center text-center">
               <div className="w-24 h-24 rounded-2xl bg-gradient-to-tr from-accent/10 to-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 <ChartNoAxesCombined className="w-12 h-12 text-accent" />
@@ -52,12 +78,16 @@ export default function PracticePage() {
                 Track your progress with detailed analytics, insights, and personalized recommendations.
               </p>
             </CardContent>
-          </a>
+          </button>
         </Card>
 
         {/* Community Card */}
         <Card className="group relative overflow-hidden bg-card.glass border-border/50 shadow-card hover:shadow-glass transition-all duration-300 hover:scale-105 cursor-pointer">
-          <a href="/community" className="w-full h-full flex flex-col justify-center items-center p-8">
+          <button
+            onClick={() => handleNav("/community")}
+            className="w-full h-full flex flex-col justify-center items-center p-8 bg-transparent border-none outline-none"
+            style={{ cursor: "pointer" }}
+          >
             <CardHeader className="flex flex-col justify-center items-center text-center">
               <div className="w-24 h-24 rounded-2xl bg-gradient-to-tr from-premium/10 to-yellow-200/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 <Users className="w-12 h-12 text-premium" />
@@ -71,12 +101,16 @@ export default function PracticePage() {
                 Connect with fellow yogis, share achievements, and participate in challenges together.
               </p>
             </CardContent>
-          </a>
+          </button>
         </Card>
 
         {/* Settings Card */}
         <Card className="group relative overflow-hidden bg-card.glass border-border/50 shadow-card hover:shadow-glass transition-all duration-300 hover:scale-105 cursor-pointer">
-          <a href="/appSettings" className="w-full h-full flex flex-col justify-center items-center p-8">
+          <button
+            onClick={() => handleNav("/appSettings")}
+            className="w-full h-full flex flex-col justify-center items-center p-8 bg-transparent border-none outline-none"
+            style={{ cursor: "pointer" }}
+          >
             <CardHeader className="flex flex-col justify-center items-center text-center">
               <div className="w-24 h-24 rounded-2xl bg-gradient-to-tr from-gray-500/10 to-gray-400/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 <Settings className="w-12 h-12 text-gray-500" />
@@ -90,7 +124,7 @@ export default function PracticePage() {
                 Customize your experience, manage preferences, and control your account settings.
               </p>
             </CardContent>
-          </a>
+          </button>
         </Card>
       </div>
     </main>

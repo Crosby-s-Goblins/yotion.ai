@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { TimerProviderWrapper } from "@/components/TimerProviderWrapper";
 import { TTSProvider } from "@/context/TextToSpeechContext";
 import { PreferencesProvider } from "@/context/UserPreferencesContext";
+import { NavigationDirectionProvider } from "@/context/NavigationDirectionContext";
 
 export default async function AppLayout({
   children,
@@ -23,7 +24,9 @@ export default async function AppLayout({
     <PreferencesProvider>
       <TimerProviderWrapper>
         <TTSProvider>
-          {children}
+          <NavigationDirectionProvider>
+            {children}
+          </NavigationDirectionProvider>
         </TTSProvider>
       </TimerProviderWrapper>
     </PreferencesProvider>

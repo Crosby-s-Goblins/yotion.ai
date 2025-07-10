@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useDeferredValue, useMemo } from "react";
 import { AnimatePresence, motion } from 'framer-motion';
 import { Input } from "@/components/ui/input";
 import {Select, SelectTrigger, SelectValue, SelectContent, SelectItem} from '@/components/ui/select';
@@ -19,6 +19,7 @@ import { Pose } from "@/components/selectorCardComponents/types";
 export default function SelectionComponents() {
   const [poses, setPoses] = useState<Pose[]>([]);
   const [search, setSearch] = useState("");
+  const deferredSearch = useDeferredValue(search);
   const [selectedDifficulty, setSelectedDifficulty] = useState("all");
   const [selectedPose, setSelectedPose] = useState<Pose | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,6 +27,16 @@ export default function SelectionComponents() {
   const { setTimerSeconds, timerSeconds } = useTimer();
   const [paidStatus, setPaidStatus] = useState<boolean | null>(null);
   const [modalTimer, setModalTimer] = useState<number>(timerSeconds);
+  const [isFilterReady, setIsFilterReady] = useState(false);
+  const [hasPageEntered, setHasPageEntered] = useState(false);
+
+  // Simulate page transition to account for page change animations
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setHasPageEntered(true);
+    }, 400); // make sure time matches the naimation duration (ms)
+    return () => clearTimeout(timeout);
+  }, []);
 
   useEffect(() => {
   const fetchEverything = async () => {
@@ -99,14 +110,29 @@ export default function SelectionComponents() {
     window.location.href = `/skele?poseId=${selectedPose.id}`;
   };
 
+
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      setIsFilterReady(true);
+    }, 50); // tweak delay as needed for perceived smoothness (ms)
+
+    return () => {
+      clearTimeout(delay);
+      setIsFilterReady(false); // reset if search changes
+    };
+  }, [deferredSearch]);
+
+
   //Search filter functionality
-  const searchedItems = poses.filter((item) => {
-    const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase());
+  const searchedItems = useMemo(() => {
+  return poses.filter((item) => {
+    const matchesSearch = item.name.toLowerCase().includes(deferredSearch.toLowerCase());
     const matchesDifficulty =
       selectedDifficulty === 'all' ||
       item.difficulty.toLowerCase() === selectedDifficulty;
     return matchesSearch && matchesDifficulty;
   });
+}, [poses, deferredSearch, selectedDifficulty]);
 
   if(paidStatus === null){
     return <Loading />;
@@ -151,7 +177,7 @@ export default function SelectionComponents() {
       )}
     </motion.div>
   );
-
+  if (paidStatus === null || isLoading) return <Loading />; //When all conditions are not properly loaded, have a wait
   return (
     <main className="min-h-screen bg-gradient-to-br from-background via-background to-background/95 flex flex-col">
       <PageTopBar
@@ -207,23 +233,54 @@ export default function SelectionComponents() {
         </div>
 
         {/* Poses Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          <AnimatePresence>
-            {(() => {
-              if (paidStatus) {
-                return searchedItems.map((pose) => <PoseCard key={pose.id} pose={pose} />);
-              } else {
-                return searchedItems.map((pose) => {
-                  // Treat null as false for isFree
-                  const isFree = pose.isFree === true;
-                  return isFree
-                    ? <PoseCard key={pose.id} pose={pose} />
-                    : <PoseCard key={pose.id} pose={pose} locked />;
-                });
-              }
-            })()}
-          </AnimatePresence>
-        </div>
+        <motion.div
+          className="min-h-[400px]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: isFilterReady ? 1 : 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {hasPageEntered ? (
+              <AnimatePresence mode="popLayout" initial={false}>
+                {isFilterReady ? (
+                  searchedItems.length > 0 ? (
+                    searchedItems.map((pose) => (
+                      <motion.div
+                        key={pose.id}
+                        layout
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <PoseCard pose={pose} locked={!paidStatus && !pose.isFree} />
+                      </motion.div>
+                    ))
+                  ) : (
+                    <motion.div
+                      key="no-poses"
+                      className="col-span-full text-center text-muted-foreground italic"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      No poses found for "<span className="font-medium">{search}</span>"
+                    </motion.div>
+                  )
+                ) : null}
+              </AnimatePresence>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {searchedItems.map((pose) => (
+                  <div key={pose.id}>
+                    <PoseCard pose={pose} locked={!paidStatus && !pose.isFree} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </motion.div>
       </section>
 
       {/* Expanded Pose Modal */}
@@ -238,7 +295,7 @@ export default function SelectionComponents() {
             onClick={handleCloseExpanded}
           >
             <motion.div
-              className="bg-white border border-border/50 rounded-2xl p-8 max-w-lg w-full mx-4 shadow-glass flex flex-col"
+              className="relative bg-white border border-border/50 rounded-2xl p-8 max-w-lg w-full mx-4 shadow-glass flex flex-col"
               initial={{ scale: 0.8, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.8, opacity: 0, y: 20 }}

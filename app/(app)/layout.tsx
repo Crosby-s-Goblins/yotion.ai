@@ -23,13 +23,15 @@ export default async function AppLayout({
 
   return (
     <PreferencesProvider>
-      <TimerProviderWrapper>
-        <TTSProvider>
-          <UserProvider>
-            {children}
-          </UserProvider>
-        </TTSProvider>
-      </TimerProviderWrapper>
+      <NavigationDirectionProvider>
+        <TimerProviderWrapper>
+          <TTSProvider>
+            <UserProvider>
+              {children}
+            </UserProvider>
+          </TTSProvider>
+        </TimerProviderWrapper>
+      </NavigationDirectionProvider>
     </PreferencesProvider>
   );
 }

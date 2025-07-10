@@ -11,6 +11,19 @@ export default function PostWorkoutPage() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        const alreadyReloaded = sessionStorage.getItem('reloaded');
+
+        if (!alreadyReloaded) {
+            sessionStorage.setItem('reloaded', 'true');
+            window.location.reload();
+        } //Force reload to allow MediaPipe Startup?
+
+        return () => {
+            sessionStorage.removeItem('reloaded');
+        };
+    }, []);
+
+    useEffect(() => {
         const fetchPerformance = async () => {
             if (!user?.id) return;
             setLoading(true);
@@ -43,7 +56,7 @@ export default function PostWorkoutPage() {
             <div className="mt-12 mb-8">
                 <h1 className="text-3xl font-semibold">Congratulations!</h1>
             </div>
-            
+
             <section className="w-full max-w-xl bg-gray-100 rounded-2xl shadow p-8 flex flex-col items-center">
                 <h2 className="text-xl font-bold mb-4">Your Workout Statistics</h2>
                 <div className="w-full flex flex-col gap-4">

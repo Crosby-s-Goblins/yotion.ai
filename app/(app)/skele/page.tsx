@@ -107,8 +107,8 @@ function SkelePageContent() {
         .insert({
           user_id: user?.id,
           exercises_performed: [selectedPose],
-          accuracy_score: Math.round(score*100),
-          consistency_score: Math.round(heldPercentage*100),
+          accuracy_score: Math.round(score * 100),
+          consistency_score: Math.round(heldPercentage * 100),
           duration_s: initialTimerSeconds,
         });
 

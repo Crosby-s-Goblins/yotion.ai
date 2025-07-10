@@ -12,7 +12,6 @@ export default function PracticePage() {
   const { setDirection } = useNavigationDirection();
 
   const handleNav = (href: string) => {
-    console.log('PRACTICE PAGE: Setting direction to forward and navigating to:', href);
     flushSync(() => {
       setDirection("forward");
     });

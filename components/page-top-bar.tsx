@@ -12,7 +12,6 @@ export default function PageTopBar({ title, description, backHref }: { title: st
 
   const handleBack = (e: React.MouseEvent) => {
     e.preventDefault();
-    console.log('PAGE TOP BAR: Setting direction to backward and navigating to:', backHref);
     flushSync(() => {
       setDirection("backward");
     });

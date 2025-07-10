@@ -26,15 +26,6 @@ export default function Template({ children }: { children: React.ReactNode }) {
   // Use sweep animation for main routes when direction is set
   const shouldUseSweep = isMainRoute && (direction === "forward" || direction === "backward");
 
-  // Debug logging
-  console.log('TEMPLATE DEBUG:', {
-    pathname,
-    direction,
-    isMainRoute,
-    isExcluded,
-    shouldUseSweep
-  });
-
   let initial, animate, exit, transition, style;
   
   if (isExcluded) {
@@ -45,7 +36,6 @@ export default function Template({ children }: { children: React.ReactNode }) {
     transition = { duration: 0 };
     style = { height: "100%" };
   } else if (shouldUseSweep) {
-    console.log('USING SWEEP ANIMATION with direction:', direction);
     if (direction === "forward") {
       initial = { x: "100vw", rotateY: -45, opacity: 0 };
       animate = { x: 0, rotateY: 0, opacity: 1 };
@@ -58,7 +48,6 @@ export default function Template({ children }: { children: React.ReactNode }) {
     transition = { duration: 0.7 };
     style = { height: "100%", perspective: 1200 };
   } else {
-    console.log('USING FADE ANIMATION');
     // Default fade for everything else
     initial = { opacity: 0 };
     animate = { opacity: 1 };

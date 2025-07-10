@@ -1,10 +1,11 @@
+// skele page 
 'use client';
 
 import { Info, Play, RotateCcw, Camera, CameraOff, X, InfoIcon, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, createClientComponent } from "@/lib/supabase/client";
 import { Pose } from "@/components/selectorCardComponents/types";
 import { usePoseCorrection } from "@/components/poseCorrection";
 import { BreathIndication } from "@/components/breathingIndicatorLineBall";
@@ -13,7 +14,10 @@ import { useRouter } from "next/navigation";
 import { useTimer } from "@/context/TimerContext";
 import { useStopwatch } from "react-timer-hook";
 
+import { useUser } from "@/components/user-provider";
+
 function SkelePageContent() {
+  const user = useUser();
   const [isCameraOn, setIsCameraOn] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,22 +25,23 @@ function SkelePageContent() {
   const [pose, setPose] = useState<Pose | null>(null);
   const [isLoadingPose, setIsLoadingPose] = useState<boolean>(true);
   const [dbError, setDbError] = useState<string | null>(null);
-  const {timerSeconds, isLoaded} = useTimer();
+  const { timerSeconds, isLoaded } = useTimer();
   const [timerSecondMove, setTimerSecondMove] = useState<number | null>(null);
   const [initialTimerSeconds, setInitialTimerSeconds] = useState<number | null>(null);
-  const [poseStartTimer, setPoseStartTimer] = useState<number>(3);
+  const [poseStartTimer, setPoseStartTimer] = useState<number>(1); // changed from 3 to 1 for testing purposes
   const [timerStarted, setTimerStarted] = useState<number>(0);
   const timerStartedRef = useRef(timerStarted);
   const [showImageRef, setShowImageRef] = useState(false);
-  
+  const hasSubmittedRef = useRef(false);
+
   const searchParams = useSearchParams();
   const poseId = searchParams.get('poseId');
-  
+
   const [selectedPose, setSelectedPose] = useState(Number(poseId));
   const [go, setGo] = useState(true);
-  
+
   const stopwatch = useStopwatch({ autoStart: false, interval: 20 });
-  const [consistencyScore, setConsistencyScore] = useState<number>()
+  const [hasSubmitted, setHasSubmitted] = useState<boolean>(false);
 
   const {
     rightElbowAngleRef,
@@ -65,9 +70,9 @@ function SkelePageContent() {
       setTimerSecondMove(timerSeconds);
       setInitialTimerSeconds(timerSeconds);
     }
-    if (correctPose() && !stopwatch.isRunning){
+    if (correctPose() && !stopwatch.isRunning) {
       stopwatch.start()
-    } 
+    }
     if (!correctPose() && stopwatch.isRunning) {
       stopwatch.pause()
     }
@@ -79,7 +84,6 @@ function SkelePageContent() {
       setTimerSecondMove(timerSeconds); // Reset your logic here
       setPoseStartTimer(3); //Reset pre-pose recording countdown
       setResetFlag(false); // Important: Reset the fla
-      // console.log(poseStart);
     }
   }, [resetFlag, isLoaded, timerSeconds]);
 
@@ -87,20 +91,57 @@ function SkelePageContent() {
     timerStartedRef.current = timerStarted;
   }, [timerStarted]);
 
+  // Calculate total held seconds and percentage
+  const totalHeldSeconds = stopwatch.minutes * 60 + stopwatch.seconds + stopwatch.milliseconds / 1000;
+  let heldPercentage = 0;
+  if (initialTimerSeconds && initialTimerSeconds > 0) {
+    heldPercentage = (totalHeldSeconds / initialTimerSeconds) * 100;
+  }
+
   useEffect(() => {
-    if (typeof timerSecondMove === 'number' && timerSecondMove <= 0 && go) {
-    setGo(false);
-    (async () => {
-      try {
-        // await stopCameraAndPose();
-        await stop();
-        router.push('/post_workout');
-      } catch (err) {
-        console.error("Cleanup failed:", err);
+    const pushData = async () => {
+      const supabase = createClient();
+
+      const { error } = await supabase
+        .from('post_performance')
+        .insert({
+          user_id: user?.id,
+          exercises_performed: [selectedPose],
+          accuracy_score: Math.round(score*100),
+          consistency_score: Math.round(heldPercentage*100),
+          duration_s: initialTimerSeconds,
+        });
+
+      if (error) {
+        console.error('Failed to insert performance data:', error);
+      } else {
+        console.log('Performance data inserted!');
+        hasSubmittedRef.current = true; // Set immediately to prevent further inserts
       }
-    })();
+    };
+
+
+    if (
+      typeof timerSecondMove === 'number' &&
+      timerSecondMove <= 0 &&
+      go &&
+      !hasSubmittedRef.current
+    ) {
+      hasSubmittedRef.current = true; // Set immediately to prevent further inserts
+
+      pushData();
+
+      (async () => {
+        try {
+          // await stopCameraAndPose();
+          await stop();
+          router.push('/post_workout');
+        } catch (err) {
+          console.error("Cleanup failed:", err);
+        }
+      })();
     }
-  }, [timerSecondMove, go]);
+  }, [timerSecondMove, go, initialTimerSeconds, selectedPose, score, heldPercentage, user?.id]);
 
   const stopCameraAndPose = async () => {
     try {
@@ -115,7 +156,7 @@ function SkelePageContent() {
         streamRef.current.getTracks().forEach(track => track.stop());
         streamRef.current = null;
       }
-      
+
     } catch (err) {
       console.error("Error in stopCameraAndPose:", err);
       throw err; // bubble up to catch in useEffect
@@ -251,7 +292,6 @@ function SkelePageContent() {
     const timerInterval = setInterval(() => {
       setTimerSecondMove(prevSeconds => {
         if (prevSeconds && prevSeconds > 0) {
-          console.log(prevSeconds);
           return prevSeconds - 1;
         }
         clearInterval(timerInterval);
@@ -268,31 +308,6 @@ function SkelePageContent() {
     return `${m}:${String(s).padStart(2, '0')}`;
   };
 
-  // Safely parse benefits
-  // let benefitsArray: string[] = [];
-  // if (pose?.benefits) {
-  //   if (Array.isArray(pose.benefits)) {
-  //     benefitsArray = pose.benefits;
-  //   } else if (typeof pose.benefits === 'string') {
-  //     try {
-  //       const parsed = JSON.parse(pose.benefits);
-  //       if (Array.isArray(parsed)) {
-  //         benefitsArray = parsed;
-  //       }
-  //     } catch (e) {
-  //       console.error("Failed to parse pose benefits:", e);
-  //     }
-  //   }
-  // }
-
-  // Calculate total held seconds and percentage
-  const totalHeldSeconds = stopwatch.minutes * 60 + stopwatch.seconds + stopwatch.milliseconds / 1000;
-  let heldPercentage = 0;
-  if (initialTimerSeconds && initialTimerSeconds > 0) {
-    heldPercentage = (totalHeldSeconds / initialTimerSeconds) * 100;
-  }
-
-  // console.log("POSE OBJECT:", pose);
 
   return (
     <div className="relative w-screen h-screen overflow-hidden">
@@ -461,7 +476,7 @@ function SkelePageContent() {
       {/* Info Modal */}
       {showInfoModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm pointer-events-auto" onClick={() => setShowInfoModal(false)}>
-          <div 
+          <div
             className="relative bg-white/90 border border-white/40 rounded-2xl p-10 max-w-lg w-full mx-4 shadow-2xl flex flex-col min-h-[480px]"
             onClick={(e) => e.stopPropagation()}
           >

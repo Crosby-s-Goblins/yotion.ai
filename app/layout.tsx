@@ -1,3 +1,4 @@
+// layout.tsx
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
@@ -27,9 +28,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className="h-full">
       <body className={`${geistSans.className} antialiased overscroll-none touch-none h-full`}>
-        <UserProvider>
-          {children}
-        </UserProvider>
+          <UserProvider>
+            {children}
+          </UserProvider>
       </body>
     </html>
   );

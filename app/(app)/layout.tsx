@@ -4,6 +4,7 @@ import { TimerProviderWrapper } from "@/components/TimerProviderWrapper";
 import { TTSProvider } from "@/context/TextToSpeechContext";
 import { PreferencesProvider } from "@/context/UserPreferencesContext";
 import { NavigationDirectionProvider } from "@/context/NavigationDirectionContext";
+import { UserProvider } from '@/components/user-provider';
 
 export default async function AppLayout({
   children,
@@ -24,9 +25,9 @@ export default async function AppLayout({
     <PreferencesProvider>
       <TimerProviderWrapper>
         <TTSProvider>
-          <NavigationDirectionProvider>
+          <UserProvider>
             {children}
-          </NavigationDirectionProvider>
+          </UserProvider>
         </TTSProvider>
       </TimerProviderWrapper>
     </PreferencesProvider>

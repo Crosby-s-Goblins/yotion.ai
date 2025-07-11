@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { ChartBarWeeklyProgress } from "@/components/ui/chart-bar-label";
 import PageTopBar from "@/components/page-top-bar";
-import { ChartPieLabel } from "@/components/ui/chart-pie-label";
-import { ChartLineDefault } from "@/components/ui/chart-line-default";
+import { ChartPiePoseDistribution } from "@/components/ui/chart-pie-label";
+import { ChartLineConsistency } from "@/components/ui/chart-line-default";
 import { useUser } from '@/components/user-provider';
 
 type PerformanceSession = {
@@ -13,6 +13,7 @@ type PerformanceSession = {
   accuracy_score: number;
   date: string;
   exercises_performed: number[];
+  consistency_score: number;
 };
 
 type Pose = {
@@ -245,7 +246,7 @@ export default function PerformancePage() {
               Pose Distribution
             </h3>
             <div className="w-full">
-              <ChartPieLabel sessions={sessions} poses={poses}/>
+              <ChartPiePoseDistribution sessions={sessions} poses={poses}/>
             </div>
           </div>
           
@@ -255,7 +256,7 @@ export default function PerformancePage() {
               Consistency Trend
             </h3>
             <div className="w-full">
-              <ChartLineDefault />
+              <ChartLineConsistency sessions={sessions} />
             </div>
           </div>
           

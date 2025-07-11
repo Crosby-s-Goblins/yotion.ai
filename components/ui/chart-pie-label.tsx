@@ -119,7 +119,7 @@ function calculateChange(todayCount: number, yesterdayCount: number) {
   }
 }
 
-export function ChartPieLabel({ sessions, poses }: Props) {
+export function ChartPiePoseDistribution({ sessions, poses }: Props) {
   const chartData = useMemo(() => buildChartDataLastMonth(sessions, poses), [sessions, poses])
   const chartConfig = useMemo(() => buildChartConfig(chartData), [chartData])
 

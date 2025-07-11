@@ -41,7 +41,7 @@ function SkelePageContent() {
   const [go, setGo] = useState(true);
 
   const stopwatch = useStopwatch({ autoStart: false, interval: 20 });
-  const [hasSubmitted, setHasSubmitted] = useState<boolean>(false);
+  const [analyzing, setAnalyzing] = useState(false);
 
   const {
     rightElbowAngleRef,
@@ -64,6 +64,10 @@ function SkelePageContent() {
   const [resetFlag, setResetFlag] = useState(false);
   const router = useRouter();
   const streamRef = useRef<MediaStream | null>(null);
+
+  useEffect(() => {
+    router.prefetch('/post_workout');
+  }, []);
 
   useEffect(() => {
     if (isLoaded && timerSecondMove === null) {
@@ -128,40 +132,22 @@ function SkelePageContent() {
       !hasSubmittedRef.current
     ) {
       hasSubmittedRef.current = true; // Set immediately to prevent further inserts
-
-      pushData();
+      setAnalyzing(true);
 
       (async () => {
         try {
           // await stopCameraAndPose();
-          await stop();
-          router.push('/post_workout');
+          await pushData();
+          stop();
+          await new Promise((resolve) => setTimeout(resolve, 300));
+          router.replace('/post_workout'); // faster than push
         } catch (err) {
           console.error("Cleanup failed:", err);
+          setAnalyzing(false);
         }
       })();
     }
   }, [timerSecondMove, go, initialTimerSeconds, selectedPose, score, heldPercentage, user?.id]);
-
-  const stopCameraAndPose = async () => {
-    try {
-      await closePose(); // ensure it's awaited
-
-      if (videoRef.current) {
-        videoRef.current.pause();
-        videoRef.current.srcObject = null;
-      }
-
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-        streamRef.current = null;
-      }
-
-    } catch (err) {
-      console.error("Error in stopCameraAndPose:", err);
-      throw err; // bubble up to catch in useEffect
-    }
-  };
 
   useEffect(() => {
     const fetchPose = async () => {
@@ -547,6 +533,17 @@ function SkelePageContent() {
           )
         )}
       </div>
+      
+      {analyzing && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/80 backdrop-blur-sm text-white">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-6" />
+            <h2 className="text-2xl font-semibold">Analyzing your results...</h2>
+            <p className="text-sm text-muted-foreground mt-2">This will only take a moment.</p>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
@@ -563,3 +560,23 @@ export default function SkelePage() {
     </Suspense>
   );
 }
+
+  // const stopCameraAndPose = async () => {
+  //   try {
+  //     await closePose(); // ensure it's awaited
+
+  //     if (videoRef.current) {
+  //       videoRef.current.pause();
+  //       videoRef.current.srcObject = null;
+  //     }
+
+  //     if (streamRef.current) {
+  //       streamRef.current.getTracks().forEach(track => track.stop());
+  //       streamRef.current = null;
+  //     }
+
+  //   } catch (err) {
+  //     console.error("Error in stopCameraAndPose:", err);
+  //     throw err; // bubble up to catch in useEffect
+  //   }
+  // };

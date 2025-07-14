@@ -1,7 +1,15 @@
 "use client"
 
+import { useMemo, useState } from "react"
 import { TrendingUp, TrendingDown } from "lucide-react"
-import { CartesianGrid, Line, LineChart, XAxis } from "recharts"
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  XAxis,
+} from "recharts"
+
 import {
   Card,
   CardContent,
@@ -14,31 +22,33 @@ import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
 } from "@/components/ui/chart"
-import { useMemo } from "react"
-import { TooltipProps } from "recharts";
+import { TooltipProps } from "recharts"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 function CustomTooltip({ active, payload }: TooltipProps<number, any>) {
   if (active && payload && payload.length) {
-    const score = payload[0].value as number;
-    const percent = (score / 100).toFixed(1);
+    const score = payload[0].value as number
+    const percent = (score / 100).toFixed(1)
     return (
       <div className="bg-white p-2 rounded border shadow">
-        <p className="text-sm font-semibold">
-          Consistency Score: {percent}%
-        </p>
+        <p className="text-sm font-semibold">Consistency Score: {percent}%</p>
       </div>
-    );
+    )
   }
-  return null;
+  return null
 }
 
-
-export const description = "A line chart showing consistency scores over the past 6 hours today"
+export const description = "A line chart showing consistency scores"
 
 interface Session {
-  date: string // ISO string with time
+  date: string
   consistency_score: number
 }
 
@@ -75,107 +85,136 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export function ChartLineConsistency({ sessions }: Props) {
-  const todayStr = getDateStr(0)
-  const yesterdayStr = getDateStr(1)
+  const [timeRange, setTimeRange] = useState<"6h" | "24h">("6h")
+
+  const now = new Date()
+  const rangeHours = timeRange === "6h" ? 6 : 24
+
+  const recentHours = Array.from({ length: rangeHours }, (_, i) => {
+    const h = new Date(now.getTime() - (rangeHours - 1 - i) * 60 * 60 * 1000)
+    return h.getHours()
+  })
 
   const sessionsToday = useMemo(
-    () => sessions.filter((s) => s.date.slice(0, 10) === todayStr),
-    [sessions, todayStr]
+    () =>
+      sessions.filter((s) => {
+        const sessionDate = new Date(s.date)
+        return (
+          sessionDate >= new Date(now.getTime() - rangeHours * 60 * 60 * 1000) &&
+          sessionDate <= now
+        )
+      }),
+    [sessions, now, rangeHours]
   )
-  const sessionsYesterday = useMemo(
-    () => sessions.filter((s) => s.date.slice(0, 10) === yesterdayStr),
-    [sessions, yesterdayStr]
+
+  const pastComparisonStart = new Date(now.getTime() - rangeHours * 60 * 60 * 1000 * 2)
+  const pastComparisonEnd = new Date(now.getTime() - rangeHours * 60 * 60 * 1000)
+
+  const sessionsComparison = useMemo(
+    () =>
+      sessions.filter((s) => {
+        const d = new Date(s.date)
+        return d >= pastComparisonStart && d < pastComparisonEnd
+      }),
+    [sessions, pastComparisonStart, pastComparisonEnd]
   )
 
-  // Current local hour (0-23)
-  const now = new Date()
-  const currentHour = now.getHours()
 
-  // Calculate last 6 hours (including current hour), e.g. if now=14, hours = [9,10,11,12,13,14]
-  const past6Hours = Array.from({ length: 6 }, (_, i) => (currentHour - 5 + i + 24) % 24)
-
-  // Group scores by hour for sessions today
   const scoresByHour = useMemo(() => {
     const map: Record<number, number[]> = {}
-    past6Hours.forEach((h) => (map[h] = []))
+    recentHours.forEach((h) => (map[h] = []))
 
     sessionsToday.forEach((s) => {
-      const date = new Date(s.date)
-      const hour = date.getHours()
-      if (past6Hours.includes(hour)) {
+      const hour = new Date(s.date).getHours()
+      if (map[hour]) {
         map[hour].push(s.consistency_score)
       }
     })
 
     return map
-  }, [sessionsToday, past6Hours])
+  }, [sessionsToday, recentHours])
 
-  // Average score per hour in the past 6 hours
   const chartData = useMemo(() => {
-    return past6Hours.map((hour) => {
+    return recentHours.map((hour) => {
       const scores = scoresByHour[hour]
-      const avg = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : 0
+      const avg =
+        scores.length > 0
+          ? scores.reduce((sum, s) => sum + s, 0) / scores.length
+          : 0
       return {
         time: formatHour(hour),
         consistency_score: avg,
       }
     })
-  }, [scoresByHour, past6Hours])
+  }, [scoresByHour, recentHours])
 
-  const avgConsistencyToday = useMemo(() => {
+  const avgToday = useMemo(() => {
     if (sessionsToday.length === 0) return 0
-    const sum = sessionsToday.reduce((acc, s) => acc + s.consistency_score, 0)
-    return sum / sessionsToday.length
+    const total = sessionsToday.reduce((sum, s) => sum + s.consistency_score, 0)
+    return total / sessionsToday.length
   }, [sessionsToday])
 
-  const avgConsistencyYesterday = useMemo(() => {
-    if (sessionsYesterday.length === 0) return 0
-    const sum = sessionsYesterday.reduce((acc, s) => acc + s.consistency_score, 0)
-    return sum / sessionsYesterday.length
-  }, [sessionsYesterday])
+  const avgComparison = useMemo(() => {
+    if (sessionsComparison.length === 0) return 0
+    const total = sessionsComparison.reduce((sum, s) => sum + s.consistency_score, 0)
+    return total / sessionsComparison.length
+  }, [sessionsComparison])
 
-  const { changePercent, isIncrease } = calculateChange(avgConsistencyToday, avgConsistencyYesterday)
+  const { changePercent, isIncrease } = calculateChange(avgToday, avgComparison)
 
-  // Use past6Hours formatted for X axis ticks
-  const xTicks = past6Hours.map(formatHour)
+  const xTicks = recentHours.filter((_, i) => rangeHours === 24 ? i % 4 === 0 : true).map(formatHour)
 
   return (
     <Card className="h-full">
-      <CardHeader>
-        <CardTitle>Consistency Score (Past 6 Hours)</CardTitle>
-        <CardDescription>Scores over the last 6 hours</CardDescription>
+      <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div>
+          <CardTitle>Consistency Score</CardTitle>
+          <CardDescription>
+            {timeRange === "6h"
+              ? "Past 6 hours"
+              : "Past 24 hours"}
+          </CardDescription>
+        </div>
+        <div className="mt-2 md:mt-0 w-40">
+          <Select value={timeRange} onValueChange={(val) => setTimeRange(val as "6h" | "24h")}>
+            <SelectTrigger>
+              <SelectValue placeholder="Time Range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="6h">Last 6 Hours</SelectItem>
+              <SelectItem value="24h">Last 24 Hours</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
       <CardContent>
         {chartData.length === 0 ? (
-          <div className="text-center text-muted-foreground mt-10">No data for today</div>
+          <div className="text-center text-muted-foreground mt-10">No data available</div>
         ) : (
           <ChartContainer config={chartConfig}>
-            <LineChart
-              accessibilityLayer
-              data={chartData}
-              margin={{ left: 12, right: 12 }}
-              width={600}
-              height={300}
-            >
-              <CartesianGrid vertical={false} />
-              <XAxis
-                dataKey="time"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                ticks={xTicks}
-                interval={0}
-              />
-              <ChartTooltip cursor={false} content={<CustomTooltip />}  />
-              <Line
-                dataKey="consistency_score"
-                type="monotone"
-                stroke="#3B82F6"
-                strokeWidth={2}
-                dot={false}
-                connectNulls={false}
-              />
-            </LineChart>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={chartData} margin={{ top: 10, left: 24, right: 24, bottom: 10 }}>
+                <CartesianGrid vertical={false} />
+                <XAxis
+                  dataKey="time"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  ticks={xTicks}
+                  interval={0}
+                  minTickGap={16}
+                />
+                <ChartTooltip cursor={false} content={<CustomTooltip />} />
+                <Line
+                  dataKey="consistency_score"
+                  type="monotone"
+                  stroke="#3B82F6"
+                  strokeWidth={2}
+                  dot={false}
+                  connectNulls={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
           </ChartContainer>
         )}
       </CardContent>
@@ -183,16 +222,18 @@ export function ChartLineConsistency({ sessions }: Props) {
         <div className="flex gap-2 leading-none font-medium">
           {isIncrease ? (
             <>
-              Trending up by {changePercent.toFixed(1)}% <TrendingUp className="h-4 w-4" />
+              Trending up by {changePercent.toFixed(1)}%{" "}
+              <TrendingUp className="h-4 w-4" />
             </>
           ) : (
             <>
-              Trending down by {Math.abs(changePercent).toFixed(1)}% <TrendingDown className="h-4 w-4" />
+              Trending down by {Math.abs(changePercent).toFixed(1)}%{" "}
+              <TrendingDown className="h-4 w-4" />
             </>
           )}
         </div>
         <div className="text-muted-foreground leading-none">
-          Average consistency score today compared to yesterday
+            Average consistency score (last {rangeHours} hours) compared to previous {rangeHours} hours
         </div>
       </CardFooter>
     </Card>

@@ -9,7 +9,6 @@ import Loading from "@/components/loading";
 import { difficultyColors } from "@/components/selectorCardComponents/poseItem";
 import { useUser } from '@/components/user-provider';
 import PageTopBar from "@/components/page-top-bar";
-import TimerSelect from "@/components/TimerSelect";
 import { useTimer } from "@/context/TimerContext";
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';

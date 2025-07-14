@@ -23,11 +23,15 @@ export default function SelectionComponents() {
   const [selectedPose, setSelectedPose] = useState<Pose | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const user = useUser();
-  const { setTimerSeconds, timerSeconds } = useTimer();
+  const { timerSeconds, setTimerSeconds, resetTimerToDefault } = useTimer();
   const [paidStatus, setPaidStatus] = useState<boolean | null>(null);
   const [modalTimer, setModalTimer] = useState<number>(timerSeconds);
   const [isFilterReady, setIsFilterReady] = useState(false);
   const [hasPageEntered, setHasPageEntered] = useState(false);
+
+  useEffect(() => {
+    resetTimerToDefault();
+  }, []);
 
   // Simulate page transition to account for page change animations
   useEffect(() => {
@@ -326,7 +330,8 @@ export default function SelectionComponents() {
                   <label className="font-semibold mb-2 block">Timer Length</label>
                   <select
                     value={modalTimer}
-                    onChange={(e) => setModalTimer(Number(e.target.value))}
+                    onChange={(e) => {setModalTimer(Number(e.target.value)); 
+                      setTimerSeconds(Number(e.target.value));}}
                     className="w-full rounded-xl border py-2 px-3 cursor-pointer"
                   >
                     {[30, 60, 90, 120, 150].map((sec) => (

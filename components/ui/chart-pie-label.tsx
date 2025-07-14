@@ -78,9 +78,15 @@ function buildChartDataLastMonth(sessions: Session[], poses:Pose[]) {
     })
 
   const colors = [
-    "#3B82F6", "#1D4ED8", "#60A5FA", "#93C5FD",
-    "#2563EB", "#F59E0B", "#10B981", "#EF4444",
-  ]
+  "#5F9EEB", // soft blue
+  "#6F8FEA", // blue-violet
+  "#7E80E9", // light indigo
+  "#8E71E7", // indigo-violet
+  "#9D63E4", // violet
+  "#A55BDF", // violet-purple
+  "#AC53D9", // warm violet
+  "#A259D3", // softened target purple
+]
 
   return Array.from(poseCountMap.entries()).map(([poseName, count], i) => ({
     name: poseName,

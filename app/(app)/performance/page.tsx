@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { ChartBarWeeklyProgress } from "@/components/ui/chart-bar-label";
 import PageTopBar from "@/components/page-top-bar";
 import { ChartPiePoseDistribution } from "@/components/ui/chart-pie-label";
-import { ChartLineConsistency } from "@/components/ui/chart-line-default";
+import { ChartLineAccuracy, ChartLineConsistency } from "@/components/ui/chart-line-default";
 import { useUser } from '@/components/user-provider';
 
 type PerformanceSession = {
@@ -220,7 +220,7 @@ export default function PerformancePage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Streak</p>
-                <p className="text-3xl font-bold bg-gradient-to-tr from-premium to-yellow-200 bg-clip-text text-transparent">{streak} {streak === 1 ? "day" : "days"}</p>
+                <p className="text-3xl font-bold bg-gradient-to-t from-yellow-300 to-red-400 bg-clip-text text-transparent">{streak} {streak === 1 ? "day" : "days"}</p>
               </div>
               <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-premium/10 to-yellow-200/10 flex items-center justify-center">
                 <span className="text-premium text-xl">🔥</span>
@@ -252,7 +252,7 @@ export default function PerformancePage() {
           
           {/* Bottom Row */}
           <div className="bg-card.glass rounded-2xl p-6 border border-border/50 shadow-card">
-            <h3 className="text-lg font-semibold mb-4 bg-gradient-to-tr from-premium to-yellow-200 bg-clip-text text-transparent">
+            <h3 className="text-lg font-semibold mb-4 bg-gradient-to-tr from-green-300 to-sky-400 bg-clip-text text-transparent">
               Consistency Trend
             </h3>
             <div className="w-full">
@@ -261,11 +261,11 @@ export default function PerformancePage() {
           </div>
           
           <div className="bg-card.glass rounded-2xl p-6 border border-border/50 shadow-card">
-            <h3 className="text-lg font-semibold mb-4 bg-gradient-to-tr from-gray-600 to-gray-500 bg-clip-text text-transparent">
-              Monthly Overview
+            <h3 className="text-lg font-semibold mb-4 bg-gradient-to-tr from-green-600 to-green-500 bg-clip-text text-transparent">
+              Accuracy Trend
             </h3>
             <div className="w-full">
-              <ChartBarWeeklyProgress sessions={sessions}/> {/* Make changes */}
+              <ChartLineAccuracy sessions={sessions}/>
             </div>
           </div>
         </div>

@@ -145,7 +145,7 @@ export function ChartBarWeeklyProgress({ sessions }: Props) {
               tickFormatter={(value) => value.slice(0, 3)}
             />
             <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-            <Bar dataKey="desktop" fill="#3B82F6" radius={8}>
+            <Bar dataKey="desktop" fill="#647FFF" radius={8}>
               <LabelList
                 position="top"
                 offset={12}

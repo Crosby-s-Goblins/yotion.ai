@@ -256,7 +256,7 @@ export default function PerformancePage() {
               Consistency Trend
             </h3>
             <div className="w-full">
-              <ChartLineConsistency sessions={sessions} />
+              <ChartLineConsistency sessions={sessions}/>
             </div>
           </div>
           
@@ -265,7 +265,7 @@ export default function PerformancePage() {
               Monthly Overview
             </h3>
             <div className="w-full">
-              <ChartBarWeeklyProgress sessions={sessions}/>
+              <ChartBarWeeklyProgress sessions={sessions}/> {/* Make changes */}
             </div>
           </div>
         </div>

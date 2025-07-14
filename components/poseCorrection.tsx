@@ -505,6 +505,7 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
         videoRef,
         canvasRef,
         score,
+        setScore,
         setFormText,
         closePose,
         correctPose,

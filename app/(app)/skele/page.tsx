@@ -1,11 +1,9 @@
-// skele page 
-'use client';
+'use client'
 
-import { Info, Play, RotateCcw, Camera, CameraOff, X, InfoIcon, Image as ImageIcon } from "lucide-react";
-import Link from "next/link";
+import { RotateCcw, Camera, X, InfoIcon, Image as ImageIcon } from "lucide-react";
 import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { createClient, createClientComponent } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/client";
 import { Pose } from "@/components/selectorCardComponents/types";
 import { usePoseCorrection } from "@/components/poseCorrection";
 import { BreathIndication } from "@/components/breathingIndicatorLineBall";
@@ -44,26 +42,17 @@ function SkelePageContent() {
   const [analyzing, setAnalyzing] = useState(false);
 
   const {
-    rightElbowAngleRef,
-    leftElbowAngleRef,
-    rightKneeAngleRef,
-    leftKneeAngleRef,
-    rightHipAngleRef,
-    leftHipAngleRef,
-    rightShoulderAngleRef,
-    leftShoulderAngleRef,
     formText,
     videoRef,
     canvasRef,
-    closePose,
-    correctPose,
     score,
+    setScore,
+    correctPose,
     stop,
   } = usePoseCorrection(selectedPose, timerStartedRef);
 
   const [resetFlag, setResetFlag] = useState(false);
   const router = useRouter();
-  const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
     router.prefetch('/post_workout');
@@ -87,7 +76,8 @@ function SkelePageContent() {
       setTimerStarted(0); //Force the timer to be paused
       setTimerSecondMove(timerSeconds); // Reset your logic here
       setPoseStartTimer(3); //Reset pre-pose recording countdown
-      setResetFlag(false); // Important: Reset the fla
+      setScore(100);
+      setResetFlag(false); // Important: Reset the flag
     }
   }, [resetFlag, isLoaded, timerSeconds]);
 
@@ -352,7 +342,9 @@ function SkelePageContent() {
           {/* Top Left Exit Button */}
           <div className="absolute top-4 left-10 z-20 h-24 flex items-center pointer-events-auto">
             <Button
-              onClick={() => router.push('/selection')}
+              onClick={() => {
+                stop();
+                router.push('/selection');}}
               size="icon"
               className="w-16 h-16 bg-white/80 backdrop-blur-lg border border-white/40 shadow-2xl text-black hover:bg-white/90 focus-visible:ring-2 focus-visible:ring-primary/60"
               aria-label="Exit session"

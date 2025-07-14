@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeftFromLine, Users, Trophy, TrendingUp, MessageCircle, Heart, Share2 } from "lucide-react";
+import { Users, Trophy, TrendingUp, MessageCircle, Heart, Share2 } from "lucide-react";
 
 export default function CommunityPage() {
   return (

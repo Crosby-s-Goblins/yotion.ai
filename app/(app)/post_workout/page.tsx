@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { useUser } from "@/components/user-provider";
 import PageTopBar from "@/components/page-top-bar";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import { 
   Clock, 
@@ -15,7 +16,8 @@ import {
   Zap,
   BarChart3,
   Lightbulb,
-  RefreshCw
+  RefreshCw,
+  Dumbbell
 } from "lucide-react";
 
 interface InsightResponse {
@@ -32,6 +34,8 @@ export default function PostWorkoutPage() {
     const [insights, setInsights] = useState<InsightResponse | null>(null);
     const [insightsLoading, setInsightsLoading] = useState(false);
     const [insightsError, setInsightsError] = useState<string | null>(null);
+    const [weight, setWeight] = useState<number | null>(null);
+    const [poseDifficulties, setPoseDifficulties] = useState<string[]>([]);
 
     useEffect(() => {
         const alreadyReloaded = sessionStorage.getItem('reloaded');
@@ -52,7 +56,7 @@ export default function PostWorkoutPage() {
             setLoading(true);
             setError(null);
             try {
-                const supabase = (await import("@/lib/supabase/client")).createClient();
+                const supabase = await createClient();
                 const { data, error } = await supabase
                     .from('post_performance')
                     .select('*')
@@ -74,11 +78,72 @@ export default function PostWorkoutPage() {
         fetchPerformance();
     }, [user?.id]);
 
+    useEffect(() => {
+        if (!performance || !user?.id) return;
+        const fetchWeightAndDifficulties = async () => {
+            const supabase = await createClient();
+
+            // Fetch weight
+            const { data: userPref, error: weightError, status, statusText } = await supabase
+                .from('user_preferences')
+                .select('weight')
+                .eq('id', user.id)
+                .single();
+            console.log('[DEBUG] user_preferences fetch:', { userPref, weightError, status, statusText, userId: user.id });
+            setWeight(userPref?.weight ?? null);
+
+            // Fetch pose difficulties
+            if (performance.exercises_performed?.length) {
+                const { data: poses } = await supabase
+                    .from('poseLibrary')
+                    .select('difficulty, id, name')
+                    .in('id', performance.exercises_performed);
+                console.log('[DEBUG] poseLibrary fetch result:', poses);
+                setPoseDifficulties(poses?.map((p: any) => p.difficulty) ?? []);
+                if (poses) {
+                    poses.forEach((p: any, idx: number) => {
+                        console.log(`[DEBUG] Pose #${idx + 1}:`, p);
+                    });
+                }
+            }
+        };
+
+        fetchWeightAndDifficulties();
+    }, [performance, user?.id]);
+
     // Format duration nicely
     const formatDuration = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
         return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    const getAverageMET = () => {
+        if (!poseDifficulties.length) return null;
+        const metMap: Record<string, number> = { easy: 2.5, medium: 5.5, hard: 7.0 };
+        const mets = poseDifficulties.map(d => metMap[d?.toLowerCase?.()] ?? 2.5);
+        return mets.reduce((a, b) => a + b, 0) / mets.length;
+    };
+    getAverageMET()
+
+    const getCaloriesBurned = () => {
+        console.log('[DEBUG] getCaloriesBurned called with:', { performance, weight, poseDifficulties });
+        if (!performance || !weight || !poseDifficulties.length) {
+            console.log('[DEBUG] Missing data for calories:', { performance, weight, poseDifficulties });
+            return '--';
+        }
+        const durationMin = performance.duration_s / 60;
+        const perExerciseDuration = durationMin / poseDifficulties.length;
+        const metMap: Record<string, number> = { easy: 2.5, medium: 5.5, hard: 7.0 };
+        let totalCalories = 0;
+        poseDifficulties.forEach((difficulty, idx) => {
+            const met = metMap[difficulty?.toLowerCase?.()] ?? 2.5;
+            const cal = perExerciseDuration * met * (weight / 60);
+            totalCalories += cal;
+            console.log(`[DEBUG] Exercise #${idx + 1} difficulty: ${difficulty}, MET: ${met}, per-exercise calories: ${cal}`);
+        });
+        console.log('[DEBUG] Total calories:', totalCalories);
+        return Math.round(totalCalories);
     };
 
     // Fetch insights from Gemini API
@@ -170,7 +235,7 @@ export default function PostWorkoutPage() {
                     <Card className="group relative overflow-hidden bg-card.glass border-border/50 shadow-card hover:shadow-glass transition-all duration-300 hover:scale-105">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium text-muted-foreground">
-                                Accuracy Score
+                                Overall Score
                             </CardTitle>
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-accent/10 to-success/10 flex items-center justify-center">
                                 <Target className="w-4 h-4 text-accent" />
@@ -178,7 +243,7 @@ export default function PostWorkoutPage() {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-accent">
-                                {loading ? '--' : performance ? `${Math.round(performance.accuracy_score > 100 ? performance.accuracy_score / 100 : performance.accuracy_score)}%` : '--'}
+                                {loading ? '--' : performance ? `${Math.round(((performance.accuracy_score / 100) + (performance.consistency_score / 100))/2)}%` : '--'}
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
                                 Pose form accuracy
@@ -190,15 +255,15 @@ export default function PostWorkoutPage() {
                     <Card className="group relative overflow-hidden bg-card.glass border-border/50 shadow-card hover:shadow-glass transition-all duration-300 hover:scale-105">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium text-muted-foreground">
-                                Consistency Score
+                                Calories Burned
                             </CardTitle>
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-success/10 to-primary/10 flex items-center justify-center">
-                                <TrendingUp className="w-4 h-4 text-success" />
+                                <Dumbbell className="w-4 h-4 text-success" />
                             </div>
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-success">
-                                {loading ? '--' : performance ? `${Math.round(performance.consistency_score > 100 ? performance.consistency_score / 100 : performance.consistency_score)}%` : '--'}
+                                {loading ? '--' : getCaloriesBurned()}
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
                                 Movement stability

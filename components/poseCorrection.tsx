@@ -19,8 +19,15 @@ type PoseAngles = PoseAngle[];
 
 function useTextToSpeech(text: string) {
     const { ttsEnabled } = useTTS();
+    const [hasMounted, setHasMounted] = useState(false);
+
+    useEffect(() => {
+        // Set hasMounted to true on client after first render
+        setHasMounted(true);
+    }, []);
     
     useEffect(() => {
+        if (!hasMounted) return; //Guard to wait until settings loaded before speaking?
         if (text) {
             const synth = window.speechSynthesis;
             synth.cancel();

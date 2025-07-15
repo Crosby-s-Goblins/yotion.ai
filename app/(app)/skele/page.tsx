@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useTimer } from "@/context/TimerContext";
 import { useStopwatch } from "react-timer-hook";
-
 import { useUser } from "@/components/user-provider";
 
 function SkelePageContent() {
@@ -40,6 +39,7 @@ function SkelePageContent() {
 
   const stopwatch = useStopwatch({ autoStart: false, interval: 20 });
   const [analyzing, setAnalyzing] = useState(false);
+  const [stopwatchRunning, setStopwatchRunning] = useState(false);
 
   const {
     formText,
@@ -65,21 +65,33 @@ function SkelePageContent() {
     }
     if (correctPose() && !stopwatch.isRunning) {
       stopwatch.start()
+      setStopwatchRunning(true);
     }
     if (!correctPose() && stopwatch.isRunning) {
       stopwatch.pause()
+      setStopwatchRunning(false);
     }
   }, [isLoaded, timerSeconds, timerSecondMove]);
 
+  const handleResetStopwatch = () => {
+  stopwatch.pause();
+  stopwatch.reset(undefined, false);
+  setStopwatchRunning(false);
+};
+
   useEffect(() => {
-    if (resetFlag && isLoaded) {
-      setTimerStarted(0); //Force the timer to be paused
-      setTimerSecondMove(timerSeconds); // Reset your logic here
-      setPoseStartTimer(3); //Reset pre-pose recording countdown
-      setScore(100);
-      setResetFlag(false); // Important: Reset the flag
-    }
-  }, [resetFlag, isLoaded, timerSeconds]);
+  if (resetFlag && isLoaded) {
+    setTimerStarted(0);
+    setTimerSecondMove(timerSeconds);
+    setPoseStartTimer(3);
+    handleResetStopwatch(); // ensures both stopwatch and local flag are reset
+    setScore(100);
+    setResetFlag(false);
+  }
+}, [resetFlag, isLoaded, timerSeconds]);
+
+
+
 
   useEffect(() => {
     timerStartedRef.current = timerStarted;
@@ -344,7 +356,7 @@ function SkelePageContent() {
             <Button
               onClick={() => {
                 stop();
-                router.push('/selection');}}
+                window.location.href = '/selection'}}
               size="icon"
               className="w-16 h-16 bg-white/80 backdrop-blur-lg border border-white/40 shadow-2xl text-black hover:bg-white/90 focus-visible:ring-2 focus-visible:ring-primary/60"
               aria-label="Exit session"

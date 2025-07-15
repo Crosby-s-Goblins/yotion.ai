@@ -66,7 +66,7 @@ export default function SettingsPane() {
           .from('user_preferences')
           .insert(defaultPrefs);
 
-        if (!insertError) {
+        if (insertError) {
           setPreferences(defaultPrefs);
           setLocalTimer('60');
           setLocalTTS(true);
@@ -77,7 +77,7 @@ export default function SettingsPane() {
         // Preferences exist
         setPreferences(data);
         setLocalTimer((data.default_timer ?? 60).toString());
-        setLocalTTS(data.tts_enabled ?? true);
+        setTTSEnabled(data.tts_enabled ?? true);
         setReminders(data.reminders ?? false);
         setMotivation(data.motivation ?? false);
       }
@@ -114,10 +114,6 @@ export default function SettingsPane() {
       });
     }
   };
-
-  useEffect(() => {
-    setLocalTTS(ttsEnabled);
-  }, [ttsEnabled]);
 
   useEffect(() => {
     setLocalTimer(timerSeconds.toString());

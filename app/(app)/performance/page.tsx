@@ -41,19 +41,40 @@ function calculateStreak(dates: string[]): number {
   // Start from current date at UTC midnight (today)
   const todayUTC = new Date();
   todayUTC.setUTCHours(0, 0, 0, 0);
+  const todayStr = toUTCDateStr(todayUTC);
 
+  // Check if practiced today
+  const practicedToday = normalizedDatesSet.has(todayStr);
+  
   let streak = 0;
+  let checkDate = new Date(todayUTC);
 
-  while (true) {
-    const checkDateStr = toUTCDateStr(todayUTC);
-
-    if (!normalizedDatesSet.has(checkDateStr)) {
-      break;
+  // If practiced today, start counting from today
+  if (practicedToday) {
+    while (true) {
+      const checkDateStr = toUTCDateStr(checkDate);
+      
+      if (!normalizedDatesSet.has(checkDateStr)) {
+        break;
+      }
+      
+      streak++;
+      checkDate.setUTCDate(checkDate.getUTCDate() - 1);
     }
-
-    streak++;
-    // Move one day back in UTC to ensure proper accounting of days
-    todayUTC.setUTCDate(todayUTC.getUTCDate() - 1);
+  } else {
+    // If not practiced today, start from yesterday (grace period)
+    checkDate.setUTCDate(checkDate.getUTCDate() - 1);
+    
+    while (true) {
+      const checkDateStr = toUTCDateStr(checkDate);
+      
+      if (!normalizedDatesSet.has(checkDateStr)) {
+        break;
+      }
+      
+      streak++;
+      checkDate.setUTCDate(checkDate.getUTCDate() - 1);
+    }
   }
 
   return streak;

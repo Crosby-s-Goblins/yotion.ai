@@ -232,41 +232,21 @@ export default function PerformancePage() {
         {/* Charts Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Top Row */}
-          <div className="bg-card.glass rounded-2xl p-6 border border-border/50 shadow-card">
-            <h3 className="text-lg font-semibold mb-4 bg-gradient-to-tr from-primary to-accent bg-clip-text text-transparent">
-              Weekly Progress
-            </h3>
-            <div className="w-full">
-              <ChartBarWeeklyProgress sessions={sessions}/>
-            </div>
+          <div className="bg-card.glass rounded-2xl border border-border/50 shadow-card">
+            <ChartBarWeeklyProgress sessions={sessions}/>
           </div>
           
-          <div className="bg-card.glass rounded-2xl p-6 border border-border/50 shadow-card">
-            <h3 className="text-lg font-semibold mb-4 bg-gradient-to-tr from-accent to-primary bg-clip-text text-transparent">
-              Pose Distribution
-            </h3>
-            <div className="w-full">
-              <ChartPiePoseDistribution sessions={sessions} poses={poses}/>
-            </div>
+          <div className="bg-card.glass rounded-2xl border border-border/50 shadow-card">
+            <ChartPiePoseDistribution sessions={sessions} poses={poses}/>
           </div>
           
           {/* Bottom Row */}
-          <div className="bg-card.glass rounded-2xl p-6 border border-border/50 shadow-card">
-            <h3 className="text-lg font-semibold mb-4 bg-gradient-to-tr from-green-300 to-sky-400 bg-clip-text text-transparent">
-              Consistency Trend
-            </h3>
-            <div className="w-full">
-              <ChartLineConsistency sessions={sessions}/>
-            </div>
+          <div className="bg-card.glass rounded-2xl border border-border/50 shadow-card">
+            <ChartLineConsistency sessions={sessions}/>
           </div>
           
-          <div className="bg-card.glass rounded-2xl p-6 border border-border/50 shadow-card">
-            <h3 className="text-lg font-semibold mb-4 bg-gradient-to-tr from-green-600 to-green-500 bg-clip-text text-transparent">
-              Accuracy Trend
-            </h3>
-            <div className="w-full">
-              <ChartLineAccuracy sessions={sessions}/>
-            </div>
+          <div className="bg-card.glass rounded-2xl border border-border/50 shadow-card">
+            <ChartLineAccuracy sessions={sessions}/>
           </div>
         </div>
       </section>

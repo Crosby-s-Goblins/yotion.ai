@@ -78,14 +78,14 @@ function buildChartDataLastMonth(sessions: Session[], poses:Pose[]) {
     })
 
   const colors = [
-  "#5F9EEB", // soft blue
-  "#6F8FEA", // blue-violet
-  "#7E80E9", // light indigo
-  "#8E71E7", // indigo-violet
-  "#9D63E4", // violet
-  "#A55BDF", // violet-purple
-  "#AC53D9", // warm violet
-  "#A259D3", // softened target purple
+  "#3B82F6", // blue-500
+  "#1D4ED8", // blue-700
+  "#2563EB", // blue-600
+  "#1E40AF", // blue-800
+  "#60A5FA", // blue-400
+  "#93C5FD", // blue-300
+  "#DBEAFE", // blue-100
+  "#1E3A8A", // blue-900
 ]
 
   return Array.from(poseCountMap.entries()).map(([poseName, count], i) => ({
@@ -152,14 +152,14 @@ export function ChartPiePoseDistribution({ sessions, poses }: Props) {
   const { changePercent, isIncrease } = calculateChange(todayCount, yesterdayCount)
 
   return (
-    <Card className="flex flex-col h-full">
-      <CardHeader>
-        <CardTitle>Pose Distribution Last 30 Days</CardTitle>
-        <CardDescription>
-          Total unique poses performed in the last 30 days: {uniquePosesLastMonth}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="w-full h-[300px]">
+    <div className="flex flex-col h-full">
+      <div className="flex flex-col gap-2 p-6 pb-2">
+        <div className="font-bold text-lg tracking-tight">Pose Type Breakdown</div>
+        <div className="text-sm text-gray-500">
+          See your trends and less practiced areas
+        </div>
+      </div>
+      <div className="p-6">
         {chartData.length === 0 ? (
           <div className="text-center text-muted-foreground mt-10">
             No pose data in the last 30 days.
@@ -180,8 +180,8 @@ export function ChartPiePoseDistribution({ sessions, poses }: Props) {
             </PieChart>
           </ChartContainer>
         )}
-      </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
+      </div>
+      <div className="flex flex-col items-start gap-2 text-sm p-6 pt-0">
         <div className="flex gap-2 leading-none font-medium">
           {isIncrease ? (
             <>
@@ -194,9 +194,9 @@ export function ChartPiePoseDistribution({ sessions, poses }: Props) {
           )}
         </div>
         <div className="text-muted-foreground leading-none">
-          Unique poses tried today compared to yesterday
+          Explore different pose types to develop well-rounded practice
         </div>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   )
 }

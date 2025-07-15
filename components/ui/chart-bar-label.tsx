@@ -122,12 +122,12 @@ export function ChartBarWeeklyProgress({ sessions }: Props) {
   })
 
   return (
-    <Card className="flex flex-col h-full">
-      <CardHeader>
-        <CardTitle>Daily Pose Count</CardTitle>
-        <CardDescription>Poses Completed</CardDescription>
-      </CardHeader>
-      <CardContent>
+    <div className="flex flex-col h-full">
+      <div className="flex flex-col gap-2 p-6 pb-2">
+        <div className="font-bold text-lg tracking-tight">Daily Pose Count</div>
+        <div className="text-sm text-gray-500">Poses Completed</div>
+      </div>
+      <div className="p-6">
         <ChartContainer config={chartConfig}>
           <BarChart
             accessibilityLayer
@@ -145,7 +145,7 @@ export function ChartBarWeeklyProgress({ sessions }: Props) {
               tickFormatter={(value) => value.slice(0, 3)}
             />
             <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-            <Bar dataKey="desktop" fill="#647FFF" radius={8}>
+            <Bar dataKey="desktop" fill="#3B82F6" radius={8}>
               <LabelList
                 position="top"
                 offset={12}
@@ -155,8 +155,8 @@ export function ChartBarWeeklyProgress({ sessions }: Props) {
             </Bar>
           </BarChart>
         </ChartContainer>
-      </CardContent>
-       <CardFooter className="flex-col items-start gap-2 text-sm">
+      </div>
+       <div className="flex flex-col items-start gap-2 text-sm p-6 pt-0">
         <div className="flex gap-2 leading-none font-medium">
           {isIncreaseOrNoChange ? (
             <TrendingUp className="h-4 w-4 text-green-600" />
@@ -167,8 +167,8 @@ export function ChartBarWeeklyProgress({ sessions }: Props) {
             isIncreaseOrNoChange ? "increase" : "decrease"
           } of ${Math.abs(percentChange).toFixed(1)}% this week!`}
         </div>
-        <div className="text-muted-foreground leading-none">Keep up the great work!</div>
-      </CardFooter>
-    </Card>
+        <div className="text-muted-foreground leading-none">Build consistency by practicing regularly each day</div>
+      </div>
+    </div>
   )
 }

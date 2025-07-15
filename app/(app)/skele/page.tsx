@@ -2,15 +2,15 @@
 
 import { RotateCcw, Camera, X, InfoIcon, Image as ImageIcon } from "lucide-react";
 import { useState, useRef, useEffect, Suspense } from "react";
+import { useStopwatch } from "react-timer-hook";
+import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Pose } from "@/components/selectorCardComponents/types";
 import { usePoseCorrection } from "@/components/poseCorrection";
 import { BreathIndication } from "@/components/breathingIndicatorLineBall";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import { useTimer } from "@/context/TimerContext";
-import { useStopwatch } from "react-timer-hook";
 import { useUser } from "@/components/user-provider";
 
 function SkelePageContent() {
@@ -38,8 +38,10 @@ function SkelePageContent() {
   const [go, setGo] = useState(true);
 
   const stopwatch = useStopwatch({ autoStart: false, interval: 20 });
+  const wasPoseCorrectRef = useRef(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [stopwatchRunning, setStopwatchRunning] = useState(false);
+  const pauseLockRef = useRef(false); //Locking mechanism for flicker-prevention on resets
 
   const {
     formText,
@@ -51,47 +53,75 @@ function SkelePageContent() {
     stop,
   } = usePoseCorrection(selectedPose, timerStartedRef);
 
-  const [resetFlag, setResetFlag] = useState(false);
+  const [resetCount, setResetCount] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
     router.prefetch('/post_workout');
   }, []);
 
-  useEffect(() => {
-    if (isLoaded && timerSecondMove === null) {
-      setTimerSecondMove(timerSeconds);
-      setInitialTimerSeconds(timerSeconds);
+ useEffect(() => {
+  let frameId: number;
+
+  const checkPoseAndUpdate = () => {
+    if (pauseLockRef.current || timerStarted !== 2) {
+      frameId = requestAnimationFrame(checkPoseAndUpdate);
+      return;
     }
-    if (correctPose() && !stopwatch.isRunning) {
-      stopwatch.start()
+
+    const isCorrect = correctPose();
+
+    // Only start on transition from incorrect to correct
+    if (isCorrect && !wasPoseCorrectRef.current && !stopwatch.isRunning) {
+      stopwatch.start();
       setStopwatchRunning(true);
-    }
-    if (!correctPose() && stopwatch.isRunning) {
-      stopwatch.pause()
+    } else if (!isCorrect && wasPoseCorrectRef.current && stopwatch.isRunning) {
+      stopwatch.pause();
       setStopwatchRunning(false);
     }
-  }, [isLoaded, timerSeconds, timerSecondMove]);
+    wasPoseCorrectRef.current = isCorrect;
+
+    frameId = requestAnimationFrame(checkPoseAndUpdate);
+  };
+
+  frameId = requestAnimationFrame(checkPoseAndUpdate);
+
+  return () => cancelAnimationFrame(frameId);
+}, [correctPose, stopwatch, timerStarted]);
+
+
 
   const handleResetStopwatch = () => {
-  stopwatch.pause();
-  stopwatch.reset(undefined, false);
-  setStopwatchRunning(false);
-};
+    stopwatch.pause();
+    stopwatch.reset(undefined, false); // Reset to zero, do not autostart
+    setStopwatchRunning(false);
+    setScore(100);
+    setTimerStarted(0);
+    timerStartedRef.current = 0;
+    setPoseStartTimer(3);
+    setTimerSecondMove(timerSeconds);
+    hasSubmittedRef.current = false;
+  };
 
   useEffect(() => {
-  if (resetFlag && isLoaded) {
-    setTimerStarted(0);
-    setTimerSecondMove(timerSeconds);
-    setPoseStartTimer(3);
-    handleResetStopwatch(); // ensures both stopwatch and local flag are reset
-    setScore(100);
-    setResetFlag(false);
-  }
-}, [resetFlag, isLoaded, timerSeconds]);
+  if (!isLoaded) return;
 
+  pauseLockRef.current = true;
 
+  stop();
+  handleResetStopwatch();
+  setScore(100);
+  setTimerStarted(0);
+  timerStartedRef.current = 0;
+  setPoseStartTimer(3);
+  setTimerSecondMove(timerSeconds);
 
+  hasSubmittedRef.current = false;
+
+  setTimeout(() => {
+    pauseLockRef.current = false;
+  }, 1000);
+}, [resetCount, isLoaded, timerSeconds]);
 
   useEffect(() => {
     timerStartedRef.current = timerStarted;
@@ -265,13 +295,23 @@ function SkelePageContent() {
           return prevSeconds - 1;
         }
         clearInterval(timerInterval);
-        setTimerStarted(2);
+
+        // SYNC START POINT
+        stopwatch.pause();
+        stopwatch.reset(undefined, false); // Reset to zero, do not autostart
+        stopwatch.start();           // scoring timer
+        setStopwatchRunning(true);
+
+        setTimerSecondMove(timerSeconds); // total timer
+        setInitialTimerSeconds(timerSeconds);
+        setTimerStarted(2); // move to "running" phase
+
         return 1;
       });
     }, 1000);
 
     return () => clearInterval(timerInterval);
-  }, [timerStarted])
+  }, [timerStarted]);
 
   // Timer logic
   useEffect(() => {
@@ -398,7 +438,11 @@ function SkelePageContent() {
             </div>
             {/* Reset Button (right of timer) */}
             <Button
-              onClick={() => setResetFlag(true)}
+              onClick={() => {
+                handleResetStopwatch();
+                handleResetStopwatch();
+              }}
+              disabled={pauseLockRef.current}
               size="icon"
               className="w-16 h-16 bg-white/80 backdrop-blur-lg border border-white/40 shadow-2xl text-black hover:bg-white/90 focus-visible:ring-2 focus-visible:ring-primary/60"
               aria-label="Reset session"
@@ -564,23 +608,3 @@ export default function SkelePage() {
     </Suspense>
   );
 }
-
-  // const stopCameraAndPose = async () => {
-  //   try {
-  //     await closePose(); // ensure it's awaited
-
-  //     if (videoRef.current) {
-  //       videoRef.current.pause();
-  //       videoRef.current.srcObject = null;
-  //     }
-
-  //     if (streamRef.current) {
-  //       streamRef.current.getTracks().forEach(track => track.stop());
-  //       streamRef.current = null;
-  //     }
-
-  //   } catch (err) {
-  //     console.error("Error in stopCameraAndPose:", err);
-  //     throw err; // bubble up to catch in useEffect
-  //   }
-  // };

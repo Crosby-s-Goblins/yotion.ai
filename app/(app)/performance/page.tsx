@@ -91,6 +91,7 @@ export default function PerformancePage() {
   // Stats
   const [totalSessions, setTotalSessions] = useState(0);
   const [averageAccuracy, setAverageAccuracy] = useState(0);
+  const [averageConsistency, setAverageConsistency] = useState(0);
   const [streak, setStreak] = useState(0);
   const [poses, setPoses] = useState<Pose[]>([])
 
@@ -126,6 +127,7 @@ export default function PerformancePage() {
           setSessions([]);
           setTotalSessions(0);
           setAverageAccuracy(0);
+          setAverageConsistency(0)
           setStreak(0);
           setLoading(false);
           return;
@@ -136,10 +138,15 @@ export default function PerformancePage() {
         // Compute total sessions
         setTotalSessions(data.length);
 
-        // Compute average accuracy (to 1 decimal)
+        // Compute average accuracy
         const sumAccuracy = data.reduce((sum, session) => sum + session.accuracy_score, 0);
         const avgAccuracy = sumAccuracy / 100 / data.length; //Divide by 100 to normalize to 100% scale
-        setAverageAccuracy(parseFloat(avgAccuracy.toFixed(1)));
+        setAverageAccuracy(parseFloat(avgAccuracy.toFixed(0)));
+
+        // Compute average consistency
+        const sumConsistency = data.reduce((sum, session) => sum + session.consistency_score, 0);
+        const avgConsistency = sumConsistency / 100 / data.length; //Divide by 100 to normalize to 100% scale
+        setAverageConsistency(parseFloat(avgConsistency.toFixed(0)));
 
         // Compute streak
         // Extract unique dates (YYYY-MM-DD) with sessions
@@ -212,11 +219,11 @@ export default function PerformancePage() {
       
       <section className="flex-1 w-full max-w-7xl mx-auto px-6 pb-8">
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-card.glass rounded-2xl p-6 border border-border/50 shadow-card">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total Sessions</p>
+                <p className="text-sm text-muted-foreground">Lifetime Sessions</p>
                 <p className="text-3xl font-bold bg-gradient-to-tr from-primary to-accent bg-clip-text text-transparent">{totalSessions}</p>
               </div>
               <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-primary/10 to-accent/10 flex items-center justify-center">
@@ -228,8 +235,20 @@ export default function PerformancePage() {
           <div className="bg-card.glass rounded-2xl p-6 border border-border/50 shadow-card">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Average Score</p>
+                <p className="text-sm text-muted-foreground">Average Accuracy</p>
                 <p className="text-3xl font-bold bg-gradient-to-tr from-accent to-primary bg-clip-text text-transparent">{averageAccuracy}%</p>
+              </div>
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-accent/10 to-primary/10 flex items-center justify-center">
+                <span className="text-accent text-xl">🎯</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-card.glass rounded-2xl p-6 border border-border/50 shadow-card">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Average Consistency</p>
+                <p className="text-3xl font-bold bg-gradient-to-tr from-accent to-primary bg-clip-text text-transparent">{averageConsistency}%</p>
               </div>
               <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-accent/10 to-primary/10 flex items-center justify-center">
                 <span className="text-accent text-xl">🎯</span>

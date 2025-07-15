@@ -14,6 +14,7 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { Button } from '@/components/ui/button';
 import { Filter, Search, Target } from 'lucide-react';
 import { Pose } from "@/components/selectorCardComponents/types";
+import { useSearchParams, useRouter } from "next/navigation";
 
 export default function SelectionComponents() {
   const [poses, setPoses] = useState<Pose[]>([]);

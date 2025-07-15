@@ -14,6 +14,7 @@ type TimerContextType = {
   timerSeconds: number;
   setTimerSeconds: (val: number) => void;
   isLoaded: boolean;
+  resetTimerToDefault: () => void;
 };
 
 const TimerContext = createContext<TimerContextType | undefined>(undefined);

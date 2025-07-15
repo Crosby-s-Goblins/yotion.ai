@@ -32,13 +32,13 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-function CustomTooltip({ active, payload, label }: TooltipProps<number, any>) {
+function CustomTooltip({ active, payload, label, customLabel }: any) {
   if (active && payload && payload.length) {
     const score = payload[0].value as number
     const percent = (score / 100).toFixed(1)
     return (
       <div className="bg-white p-2 rounded border shadow">
-        <p className="text-sm font-semibold">{label} Score: {percent}%</p>
+        <p className="text-sm font-semibold">{customLabel || label} Score: {percent}%</p>
       </div>
     )
   }
@@ -164,13 +164,18 @@ function ChartLine({ sessions, dataKey, label, stroke }: {
   }
 
   return (
-    <Card className="h-full">
-      <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between">
+    <div className="h-full">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between p-6 pb-2">
         <div>
-          <CardTitle>{label}</CardTitle>
-          <CardDescription>
-            {timeRange === "day" ? "Past 24 hours" : "Past 7 days"}
-          </CardDescription>
+          <div className="font-bold text-lg tracking-tight">{label}</div>
+          <div className="text-sm text-gray-500">
+            {label.includes("Consistency") 
+              ? "Your time correct vs. total time" 
+              : label.includes("Accuracy") 
+                ? "Your positioning vs. ideal positioning"
+                : timeRange === "day" ? "Past 24 hours" : "Past 7 days"
+            }
+          </div>
         </div>
         <div className="mt-2 md:mt-0 w-40">
           <Select value={timeRange} onValueChange={(val) => setTimeRange(val as "day" | "week")}> 
@@ -183,8 +188,8 @@ function ChartLine({ sessions, dataKey, label, stroke }: {
             </SelectContent>
           </Select>
         </div>
-      </CardHeader>
-      <CardContent>
+      </div>
+      <div className="p-6">
         {chartData.length === 0 ? (
           <div className="text-center text-muted-foreground mt-10">No data available</div>
         ) : (
@@ -201,7 +206,7 @@ function ChartLine({ sessions, dataKey, label, stroke }: {
                   interval={0}
                   minTickGap={16}
                 />
-                <ChartTooltip cursor={false} content={<CustomTooltip label={label} />} />
+                <ChartTooltip cursor={false} content={<CustomTooltip customLabel={label} />} />
                 <Line
                   dataKey={dataKey}
                   type="monotone"
@@ -214,8 +219,8 @@ function ChartLine({ sessions, dataKey, label, stroke }: {
             </ResponsiveContainer>
           </ChartContainer>
         )}
-      </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
+      </div>
+      <div className="flex flex-col items-start gap-2 text-sm p-6 pt-0">
         <div className="flex gap-2 leading-none font-medium">
           {isIncrease ? (
             <>
@@ -228,17 +233,22 @@ function ChartLine({ sessions, dataKey, label, stroke }: {
           )}
         </div>
         <div className="text-muted-foreground leading-none">
-          Average {label.toLowerCase()} ({timeRange === "day" ? "last 24 hours" : "last 7 days"}) compared to previous period
+          {label.includes("Consistency") 
+            ? "Track your ability to maintain poses steadily over time" 
+            : label.includes("Accuracy") 
+              ? "Monitor how precisely you perform each pose alignment"
+              : timeRange === "day" ? "Past 24 hours" : "Past 7 days"
+          }
         </div>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   )
 }
 
 export function ChartLineConsistency({ sessions }: Props) {
-  return <ChartLine sessions={sessions} dataKey="consistency_score" label="Consistency Score" stroke="#67e8f9" />
+  return <ChartLine sessions={sessions} dataKey="consistency_score" label="Consistency Score" stroke="#2563EB" />
 }
 
 export function ChartLineAccuracy({ sessions }: Props) {
-  return <ChartLine sessions={sessions} dataKey="accuracy_score" label="Accuracy Score" stroke="#10B981" />
+  return <ChartLine sessions={sessions} dataKey="accuracy_score" label="Accuracy Score" stroke="#1D4ED8" />
 }

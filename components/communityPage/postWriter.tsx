@@ -100,31 +100,6 @@ const Posts = () => {
                         )}
                     </Button>
                 </form>
-                <Separator className="my-2"/>
-                <div className="flex gap-2">
-                    <Button
-                        variant="outline"
-                        className="h-12 px-6 rounded-full"
-                        onClick={() => {
-                            const el = document.getElementById("posts-section");
-                            if (el) el.scrollIntoView({ behavior: "smooth" });
-                        }}
-                    >
-                        <MessageCircle className="w-4 h-4 lg:mr-2" />
-                        <span className="hidden lg:flex">See Posts</span>
-                    </Button>
-                    <Button
-                        variant="outline"
-                        className="h-12 px-6 rounded-full"
-                        onClick={() => {
-                            const el = document.getElementById("challenges-section");
-                            if (el) el.scrollIntoView({ behavior: "smooth" });
-                        }}
-                    >
-                        <Trophy className="w-4 h-4 lg:mr-2" />
-                        <span className="hidden lg:flex">See Challenges</span>
-                    </Button>
-                </div>
             </div>
         </Card>
     );

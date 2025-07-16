@@ -130,7 +130,7 @@ export default function PostWorkoutPage() {
         console.log('[DEBUG] getCaloriesBurned called with:', { performance, weight, poseDifficulties });
         if (!performance || !weight || !poseDifficulties.length) {
             console.log('[DEBUG] Missing data for calories:', { performance, weight, poseDifficulties });
-            return '--';
+            return 'please enter your weight in settings.';
         }
         const durationMin = performance.duration_s / 60;
         const perExerciseDuration = durationMin / poseDifficulties.length;
@@ -246,7 +246,7 @@ export default function PostWorkoutPage() {
                                 {loading ? '--' : performance ? `${Math.round(((performance.accuracy_score / 100) + (performance.consistency_score / 100))/2)}%` : '--'}
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
-                                Pose form accuracy
+                                Pose score average
                             </p>
                         </CardContent>
                     </Card>
@@ -263,10 +263,10 @@ export default function PostWorkoutPage() {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-success">
-                                {loading ? '--' : getCaloriesBurned()}
+                                {loading ? '--' : getCaloriesBurned()} kCal
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
-                                Movement stability
+                                Calories used for session
                             </p>
                         </CardContent>
                     </Card>

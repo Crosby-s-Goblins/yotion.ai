@@ -1,17 +1,16 @@
+'use client'
+import { useState } from "react";
 import PageTopBar from "@/components/page-top-bar";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Users, Trophy, TrendingUp, MessageCircle, Heart, Share2 } from "lucide-react";
 
 import PostWriter from "@/components/communityPage/postWriter"
 import AllPosts from "@/components/communityPage/allPosts"
 import Stats from "@/components/communityPage/stats";
-import Challenges from "@/components/communityPage/challenges";
+// import Challenges from "@/components/communityPage/challenges";
 import Leaderboard from "@/components/communityPage/leaderboard";
 
 export default function CommunityPage() {
+  const [postsReloadKey, setPostsReloadKey] = useState(0);
+  const handlePostSubmit = () => setPostsReloadKey(k => k + 1);
   return (
     <main className="min-h-screen bg-gradient-to-br from-background via-background to-background/95 flex flex-col">
       <PageTopBar 
@@ -21,16 +20,17 @@ export default function CommunityPage() {
       />
       
       <section className="flex-1 w-full max-w-7xl mx-auto px-6 pb-8">
+        
         {/* Community Stats */}
         <Stats/>
 
         {/* Write a post */}
-        <PostWriter/>
+        <PostWriter onPostSubmit={handlePostSubmit}/>
 
         {/* Community Feed */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Feed */}
-          <AllPosts/>
+          <AllPosts reloadKey={postsReloadKey}/>
 
           {/* Sidebar */}
           <div className="space-y-6">

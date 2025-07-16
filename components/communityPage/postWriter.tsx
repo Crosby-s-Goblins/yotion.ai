@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardHeader, CardTitle } from "../ui/card";
 
-const Posts = () => {
+const Posts = ({ onPostSubmit }: { onPostSubmit?: () => void }) => {
     const user = useUser();
     const [profile, setProfile] = useState<any>(null);
     const [postText, setPostText] = useState("");
@@ -43,6 +43,7 @@ const Posts = () => {
         if (!error) {
             setPostText("");
             setPosted(true);
+            if (onPostSubmit) onPostSubmit();
             setTimeout(() => setPosted(false), 1500);
         }
         else console.log(error);

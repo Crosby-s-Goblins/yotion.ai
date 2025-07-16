@@ -32,9 +32,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-const POSTS_PER_PAGE = 3;
+const POSTS_PER_PAGE = 4;
 
-const AllPosts = () => {
+const AllPosts = ({ reloadKey }: { reloadKey?: number }) => {
   const user = useUser();
   const [posts, setPosts] = useState<any[]>([]);
   const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
@@ -89,7 +89,7 @@ const AllPosts = () => {
       setLoading(false);
     };
     fetchData();
-  }, [user?.id, postedBy, last]);
+  }, [user?.id, postedBy, last, reloadKey]);
 
   const handleDeletePost = async (postId: number) => {
     if (!user?.id) return;
@@ -157,11 +157,42 @@ const AllPosts = () => {
   };
 
   // Pagination logic
-  const totalPages = Math.ceil(posts.length / POSTS_PER_PAGE);
-  const paginatedPosts = posts.slice(
-    (currentPage - 1) * POSTS_PER_PAGE,
-    currentPage * POSTS_PER_PAGE
-  );
+  // Sort posts by most recent for display
+  const sortedPosts = [...posts].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+  // Featured post logic
+  let featuredPost: any = null;
+  let displayPosts = sortedPosts;
+  let hasFeatured = false;
+  if (postedBy === "all" && sortedPosts.length > 0) {
+    featuredPost = sortedPosts.reduce((max: any, post: any) => (post.likes > (max?.likes ?? -Infinity) ? post : max), sortedPosts[0]);
+    displayPosts = sortedPosts.filter((post: any) => post.post_id !== (featuredPost as any).post_id);
+    hasFeatured = true;
+  }
+
+  // Adjust totalPages so that the first page has POSTS_PER_PAGE - 1 posts if featured is present
+  let totalPages = 1;
+  if (hasFeatured) {
+    if (displayPosts.length <= POSTS_PER_PAGE - 1) {
+      totalPages = 1;
+    } else {
+      totalPages = 1 + Math.ceil((displayPosts.length - (POSTS_PER_PAGE - 1)) / POSTS_PER_PAGE);
+    }
+  } else {
+    totalPages = Math.ceil(displayPosts.length / POSTS_PER_PAGE);
+  }
+
+  let paginatedPosts: any[] = [];
+  if (hasFeatured && currentPage === 1) {
+    paginatedPosts = displayPosts.slice(0, POSTS_PER_PAGE - 1);
+  } else if (hasFeatured) {
+    // For pages after the first, adjust the slice to skip the first (POSTS_PER_PAGE - 1) posts
+    const start = (POSTS_PER_PAGE - 1) + (currentPage - 2) * POSTS_PER_PAGE;
+    const end = start + POSTS_PER_PAGE;
+    paginatedPosts = displayPosts.slice(start, end);
+  } else {
+    paginatedPosts = displayPosts.slice((currentPage - 1) * POSTS_PER_PAGE, currentPage * POSTS_PER_PAGE);
+  }
 
   if (loading) {
     return (
@@ -230,8 +261,99 @@ const AllPosts = () => {
           </div>
         </div>
       </Card>
-      {paginatedPosts.map((post, idx) => {
-        const isFeatured = (currentPage - 1) * POSTS_PER_PAGE + idx === 0;
+      {/* Featured Post (only if filter is 'all') */}
+      {postedBy === "all" && featuredPost && currentPage === 1 && (
+        (() => {
+          const isYou = user?.id && featuredPost.user_id === user.id;
+          const username = featuredPost.profiles?.username || "Unknown";
+          const avatarUrl = featuredPost.profiles?.avatar_url;
+          const status = featuredPost.profiles?.status_message;
+          const liked = likedPosts.has(featuredPost.post_id);
+          return (
+            <Card key={featuredPost.post_id} className="bg-card.glass border border-border/50 shadow-card overflow-hidden">
+              <CardHeader className="pb-0">
+                <div className="flex items-center gap-3">
+                  <Avatar className="w-12 h-12 rounded-full bg-gradient-to-tr from-primary to-accent flex items-center justify-center">
+                    {avatarUrl ? (
+                      <AvatarImage src={avatarUrl} alt="avatar" />
+                    ) : (
+                      <AvatarFallback>{username[0]?.toUpperCase()}</AvatarFallback>
+                    )}
+                  </Avatar>
+                  <div className="flex flex-col gap-1">
+                    <CardTitle className="text-lg flex justify-start items-center gap-1">
+                      {isYou && <span className="text-green-700">[You] </span>}
+                      {username}
+                      <span className="relative inline-block ml-2 group">
+                        <Badge
+                          variant="secondary"
+                          className="bg-yellow-300 text-yellow-800 text-xs font-medium dark:bg-yellow-900 dark:text-yellow-300 border-none overflow-hidden relative px-3 py-1 flex gap-2"
+                        >
+                          <Trophy size={12} />
+                          <span className="relative z-10">Featured Post!</span>
+                          <span
+                            className="pointer-events-none absolute inset-0 z-0 block h-full w-full bg-[linear-gradient(45deg,transparent_40%,rgba(255,255,255,0.85)_48%,transparent_56%,transparent_100%)] bg-[length:250%_250%] bg-[position:-100%_0] bg-no-repeat animate-shine"
+                            aria-hidden="true"
+                          />
+                        </Badge>
+                      </span>
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">{status}</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="absolute top-4 right-2">
+                  {isYou &&
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button><EllipsisVertical /></button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="bg-white" align="start">
+                        <DropdownMenuItem>
+                          <button onClick={() => handleDeletePost(featuredPost.post_id)}>Delete Post</button>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  }
+                </div>
+                <p className="text-base text-muted-foreground mb-4 italic">
+                  "{featuredPost.post_text}"
+                </p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-0 lg:gap-4">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={clsx(
+                        "hover:text-primary",
+                        liked ? "text-red-500" : "text-muted-foreground"
+                      )}
+                      onClick={() => handleLike(featuredPost.post_id, liked)}
+                    >
+                      <Heart className="w-4 h-4 lg:mr-2" fill={liked ? "currentColor" : "none"} />
+                      {featuredPost.likes ?? 0}
+                    </Button>
+                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
+                      <MessageCircle className="w-4 h-4 lg:mr-2" />
+                      0
+                    </Button>
+                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
+                      <Share2 className="w-4 h-4 lg:mr-2" />
+                      <span className="hidden lg:flex">Share</span>
+                    </Button>
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {featuredPost.created_at ? formatDistanceToNow(new Date(featuredPost.created_at), { addSuffix: true }) : ""}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })()
+      )}
+
+      {paginatedPosts.map((post) => {
         const isYou = user?.id && post.user_id === user.id;
         const username = post.profiles?.username || "Unknown";
         const avatarUrl = post.profiles?.avatar_url;
@@ -249,25 +371,10 @@ const AllPosts = () => {
                     <AvatarFallback>{username[0]?.toUpperCase()}</AvatarFallback>
                   )}
                 </Avatar>
-                <div className={isFeatured ? "flex flex-col gap-1" : ""}>
+                <div>
                   <CardTitle className="text-lg flex justify-start items-center gap-1">
                     {isYou && <span className="text-green-700">[You] </span>}
                     {username}
-                    {isFeatured && (
-                      <span className="relative inline-block ml-2 group">
-                        <Badge
-                          variant="secondary"
-                          className="bg-yellow-300 text-yellow-800 text-xs font-medium dark:bg-yellow-900 dark:text-yellow-300 border-none overflow-hidden relative px-3 py-1 flex gap-2"
-                        >
-                          <Trophy size={12} />
-                          <span className="relative z-10">Featured Post!</span>
-                          <span
-                            className="pointer-events-none absolute inset-0 z-0 block h-full w-full bg-[linear-gradient(45deg,transparent_40%,rgba(255,255,255,0.85)_48%,transparent_56%,transparent_100%)] bg-[length:250%_250%] bg-[position:-100%_0] bg-no-repeat animate-shine"
-                            aria-hidden="true"
-                          />
-                        </Badge>
-                      </span>
-                    )}
                   </CardTitle>
                   <p className="text-sm text-muted-foreground">{status}</p>
                 </div>

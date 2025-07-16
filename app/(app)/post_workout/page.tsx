@@ -130,7 +130,7 @@ export default function PostWorkoutPage() {
         console.log('[DEBUG] getCaloriesBurned called with:', { performance, weight, poseDifficulties });
         if (!performance || !weight || !poseDifficulties.length) {
             console.log('[DEBUG] Missing data for calories:', { performance, weight, poseDifficulties });
-            return 'please enter your weight in settings.';
+            return <Badge variant="outline"><a href="/appSettings">Enter weight</a></Badge>;
         }
         const durationMin = performance.duration_s / 60;
         const perExerciseDuration = durationMin / poseDifficulties.length;
@@ -262,8 +262,9 @@ export default function PostWorkoutPage() {
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-success">
-                                {loading ? '--' : getCaloriesBurned()} kCal
+                            <div className="text-2xl font-bold text-success flex gap-2 items-center">
+                                {loading ? '--' : getCaloriesBurned()} 
+                                <div>kCal</div>
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
                                 Calories used for session

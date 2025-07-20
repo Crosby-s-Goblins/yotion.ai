@@ -18,7 +18,6 @@ import {
   PaginationLink,
   PaginationPrevious,
   PaginationNext,
-  PaginationEllipsis,
 } from "../ui/pagination";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import "../ui/shine.css";

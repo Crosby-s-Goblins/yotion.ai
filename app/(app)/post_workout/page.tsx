@@ -60,7 +60,7 @@ export default function PostWorkoutPage() {
                 const { data, error } = await supabase
                     .from('post_performance')
                     .select('*')
-                    .eq('user_id', user.id)
+                    .eq('user_id', user?.id)
                     .order('date', { ascending: false })
                     .limit(1);
                 if (error) {
@@ -209,13 +209,13 @@ export default function PostWorkoutPage() {
                     </Badge>
                 </div>
 
-                {/* Performance Metrics Grid */}
+                {/* Consistency Card */}
                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-8 max-w-3xl sm:max-w-4xl md:max-w-5xl mx-auto">
                     {/* Duration Card */}
                     <Card className="group relative overflow-hidden bg-card.glass border-border/50 shadow-card hover:shadow-glass transition-all duration-300 hover:scale-105">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium text-muted-foreground">
-                                Duration
+                                Consistency Score
                             </CardTitle>
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-primary/10 to-accent/10 flex items-center justify-center">
                                 <Clock className="w-4 h-4 text-primary" />
@@ -223,10 +223,10 @@ export default function PostWorkoutPage() {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-primary">
-                                {loading ? '--:--' : performance ? formatDuration(performance.duration_s) : '--:--'}
+                                {loading ? '--' : performance.consistency_score / 100}
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
-                                Time spent in session
+                                Pose score consistency
                             </p>
                         </CardContent>
                     </Card>
@@ -235,7 +235,7 @@ export default function PostWorkoutPage() {
                     <Card className="group relative overflow-hidden bg-card.glass border-border/50 shadow-card hover:shadow-glass transition-all duration-300 hover:scale-105">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium text-muted-foreground">
-                                Overall Score
+                                Accuracy Score
                             </CardTitle>
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-accent/10 to-success/10 flex items-center justify-center">
                                 <Target className="w-4 h-4 text-accent" />
@@ -243,15 +243,15 @@ export default function PostWorkoutPage() {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-accent">
-                                {loading ? '--' : performance ? `${Math.round(((performance.accuracy_score / 100) + (performance.consistency_score / 100))/2)}%` : '--'}
+                                {loading ? '--' : performance.accuracy_score/100}
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
-                                Pose score average
+                                Pose score accuracy
                             </p>
                         </CardContent>
                     </Card>
 
-                    {/* Consistency Card */}
+                    {/* Calories Burned Card */}
                     <Card className="group relative overflow-hidden bg-card.glass border-border/50 shadow-card hover:shadow-glass transition-all duration-300 hover:scale-105">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium text-muted-foreground">

@@ -24,7 +24,7 @@ function useTextToSpeech(text: string) {
     useEffect(() => {
         // Set hasMounted to true on client after first render
         setHasMounted(true);
-    }, [hasMounted]);
+    }, []);
     
     useEffect(() => {
         if (!hasMounted) return; //Guard to wait until settings loaded before speaking?
@@ -39,7 +39,7 @@ function useTextToSpeech(text: string) {
             }
             
         }
-    }, [text, ttsEnabled, hasMounted]);
+    }, [text, ttsEnabled]);
 }
 
 export function usePoseCorrection(selectedPose: number, timerStartedRef: React.RefObject<number>) {
@@ -51,7 +51,7 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
     const videoRef = useRef<HTMLVideoElement>(null);
     
     // Store previous landmarks for smoothing
-    const previousLandmarksRef = useRef<Array<{x: number, y: number, z: number, visibility: number}>>([]);
+    const previousLandmarksRef = useRef<PoseLandmark[]>([]);
 
     //Bulk values for timer start? -- Redundant with above, pick one later
     const rightElbowAngleRef = useRef<number | null>(null);
@@ -79,21 +79,22 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
         runningRef.current = true;
 
         const detectLoop = () => {
-            if (!runningRef.current) return;
-            // your pose detection logic...
-            animationFrameRef.current = requestAnimationFrame(detectLoop);
+        if (!runningRef.current) return;
+
+        // your pose detection logic...
+        animationFrameRef.current = requestAnimationFrame(detectLoop);
         };
 
         detectLoop();
 
         return () => {
-            runningRef.current = false;
-            if (animationFrameRef.current) {
-                cancelAnimationFrame(animationFrameRef.current);
-            }
-            closePose(); // Optional: close detector on unmount
+        runningRef.current = false;
+        if (animationFrameRef.current) {
+            cancelAnimationFrame(animationFrameRef.current);
+        }
+        closePose(); // Optional: close detector on unmount
         };
-    }, [closePose]);
+    }, []);
 
     const stop = () => {
         runningRef.current = false;
@@ -108,43 +109,50 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
     }, [poseAngles]);
 
     useEffect(() => {
-        async function fetchPose() {
-            const supabase = createClient();
+    async function fetchPose() {
+        const supabase = createClient();
 
-            const { data, error } = await supabase
-                .from('poseLibrary')
-                .select('angles')
-                .eq('id', selectedPose)
-                .single();
+        const { data, error } = await supabase
+        .from('poseLibrary')
+        .select('angles')
+        .eq('id', selectedPose)
+        .single();
 
-            if (error) {
-                console.error("Supabase error:", error.message);
-                setPoseAngles(null);
-                return;
-            }
-
-            if (!data || !data.angles) {
-                setPoseAngles(null);
-                return;
-            }
-
-            try {
-                const parsed = typeof data.angles === "string"
-                    ? JSON.parse(data.angles.trim())
-                    : data.angles;
-
-                setPoseAngles(Array.isArray(parsed) ? parsed : null);
-            } catch (e) {
-                console.error("Failed to parse angles JSON:", e);
-                setPoseAngles(null);
-            }
+        
+        if (error) {
+            console.error("Supabase error:", error.message);
+            setPoseAngles(null);
+            return;
         }
-        if (selectedPose) fetchPose();
+
+        if (!data || !data.angles) {
+            setPoseAngles(null);
+            return;
+        }
+
+        try {
+        const parsed = typeof data.angles === "string"
+            ? JSON.parse(data.angles.trim())
+            : data.angles;
+
+            setPoseAngles(Array.isArray(parsed) ? parsed : null);
+        } catch (e) {
+            console.error("Failed to parse angles JSON:", e);
+            setPoseAngles(null);
+        }
+
+
+    };
+    if (selectedPose) fetchPose();
     }, [selectedPose]);
 
 
     // Utility to calculate angle given points A, B, C
-    function calculateAngle(A: {x: number, y: number}, B: {x: number, y: number}, C: {x: number, y: number}): number {
+    function calculateAngle(
+        A: { x: number; y: number; z?: number; visibility?: number },
+        B: { x: number; y: number; z?: number; visibility?: number },
+        C: { x: number; y: number; z?: number; visibility?: number }
+    ): number {
         const AB = { x: A.x - B.x, y: A.y - B.y };
         const CB = { x: C.x - B.x, y: C.y - B.y };
         const dot = AB.x * CB.x + AB.y * CB.y;
@@ -155,23 +163,26 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
         return angleRad * (180 / Math.PI);
     }
 
-    function isVisible(...points: unknown[]): boolean {
-        // Assume points are objects with visibility property
-        return points.every(p => p && typeof p === 'object' && 'visibility' in p && (p as {visibility: number}).visibility > 0.5);
+    // Define a type for pose landmarks
+    type PoseLandmark = { x: number; y: number; z: number; visibility: number };
+
+    function isVisible(...points: PoseLandmark[]): boolean {
+        return points.every(p => p && p.visibility !== undefined && p.visibility > 0.5);
     }
 
     // Smooth landmarks using Exponential Moving Average (EMA)
-    function smoothLandmarks(current: Array<{x: number, y: number, z: number, visibility: number}>, previous: Array<{x: number, y: number, z: number, visibility: number}>, alpha: number = 0.5): Array<{x: number, y: number, z: number, visibility: number}> {
+    function smoothLandmarks(current: PoseLandmark[], previous: PoseLandmark[], alpha: number = 0.5): PoseLandmark[] {
         if (!previous || previous.length === 0) return current;
 
         return current.map((currPoint, i) => {
             const prevPoint = previous[i];
             if (!prevPoint || !currPoint) return currPoint;
+            
             return {
                 x: alpha * currPoint.x + (1 - alpha) * prevPoint.x,
                 y: alpha * currPoint.y + (1 - alpha) * prevPoint.y,
-                z: alpha * currPoint.z + (1 - alpha) * prevPoint.z,
-                visibility: currPoint.visibility, // Keep current visibility
+                z: alpha * (currPoint.z ?? 0) + (1 - alpha) * (prevPoint.z ?? 0),
+                visibility: currPoint.visibility ?? 1,
             };
         });
     }    

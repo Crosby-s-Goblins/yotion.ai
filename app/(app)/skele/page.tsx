@@ -1,8 +1,7 @@
 'use client'
 
 import { RotateCcw, Camera, X, InfoIcon, Image as ImageIcon } from "lucide-react";
-import { useState, useRef, useEffect, Suspense, useCallback } from "react";
-import Image from "next/image";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { useStopwatch } from "react-timer-hook";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
@@ -53,12 +52,11 @@ function SkelePageContent() {
     stop,
   } = usePoseCorrection(selectedPose, timerStartedRef);
 
-  const [resetCount] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
     router.prefetch('/post_workout');
-  }, [router]);
+  }, []);
 
  useEffect(() => {
   let frameId: number;
@@ -74,10 +72,8 @@ function SkelePageContent() {
     // Only start on transition from incorrect to correct
     if (isCorrect && !wasPoseCorrectRef.current && !stopwatch.isRunning) {
       stopwatch.start();
-      // setStopwatchRunning(true); // removed unused setter
     } else if (!isCorrect && wasPoseCorrectRef.current && stopwatch.isRunning) {
       stopwatch.pause();
-      // setStopwatchRunning(false); // removed unused setter
     }
     wasPoseCorrectRef.current = isCorrect;
 
@@ -91,7 +87,7 @@ function SkelePageContent() {
 
 
 
-  const handleResetStopwatch = useCallback(() => {
+  const handleResetStopwatch = () => {
     stopwatch.pause();
     stopwatch.reset(undefined, false); // Reset to zero, do not autostart
     setScore(100);
@@ -100,27 +96,27 @@ function SkelePageContent() {
     setPoseStartTimer(3);
     setTimerSecondMove(timerSeconds);
     hasSubmittedRef.current = false;
-  }, [stopwatch, setScore, timerSeconds]);
+  };
 
   useEffect(() => {
-    if (!isLoaded) return;
+  if (!isLoaded) return;
 
-    pauseLockRef.current = true;
+  pauseLockRef.current = true;
 
-    stop();
-    handleResetStopwatch();
-    setScore(100);
-    setTimerStarted(0);
-    timerStartedRef.current = 0;
-    setPoseStartTimer(3);
-    setTimerSecondMove(timerSeconds);
+  stop();
+  handleResetStopwatch();
+  setScore(100);
+  setTimerStarted(0);
+  timerStartedRef.current = 0;
+  setPoseStartTimer(3);
+  setTimerSecondMove(timerSeconds);
 
-    hasSubmittedRef.current = false;
+  hasSubmittedRef.current = false;
 
-    setTimeout(() => {
-      pauseLockRef.current = false;
-    }, 1000);
-  }, [resetCount, isLoaded, timerSeconds, stop, handleResetStopwatch, setScore]);
+  setTimeout(() => {
+    pauseLockRef.current = false;
+  }, 1000);
+}, [isLoaded, timerSeconds]);
 
   useEffect(() => {
     timerStartedRef.current = timerStarted;
@@ -155,6 +151,7 @@ function SkelePageContent() {
       }
     };
 
+
     if (
       typeof timerSecondMove === 'number' &&
       timerSecondMove <= 0 &&
@@ -177,7 +174,7 @@ function SkelePageContent() {
         }
       })();
     }
-  }, [timerSecondMove, go, initialTimerSeconds, selectedPose, score, heldPercentage, user?.id, stop, router]);
+  }, [timerSecondMove, go, initialTimerSeconds, selectedPose, score, heldPercentage, user?.id]);
 
   useEffect(() => {
     const fetchPose = async () => {
@@ -204,10 +201,10 @@ function SkelePageContent() {
           setPose(data);
         }
       } catch (err: unknown) {
-        if (err && typeof err === 'object' && 'message' in err) {
-          setDbError(`An unexpected error occurred: ${(err as { message: string }).message}`);
+        if (err instanceof Error) {
+          setDbError(`An unexpected error occurred: ${err.message}`);
         } else {
-          setDbError('An unexpected error occurred.');
+          setDbError("An unexpected error occurred.");
         }
       } finally {
         setIsLoadingPose(false);
@@ -253,6 +250,7 @@ function SkelePageContent() {
     }
   };
 
+  // Auto-start camera on mount
   useEffect(() => {
     startCamera();
 
@@ -260,7 +258,7 @@ function SkelePageContent() {
     return () => {
       stopCamera();
     };
-  }, [startCamera, stopCamera]);
+  }, []);
 
   useEffect(() => {
     if (!isCameraOn) return;
@@ -311,7 +309,7 @@ function SkelePageContent() {
     }, 1000);
 
     return () => clearInterval(timerInterval);
-  }, [timerStarted, correctPose, stopwatch, timerSeconds]);
+  }, [timerStarted]);
 
   // Timer logic
   useEffect(() => {
@@ -328,7 +326,7 @@ function SkelePageContent() {
     }, 1000);
 
     return () => clearInterval(timerInterval);
-  }, [timerStarted, isLoaded, timerSecondMove]);
+  }, [timerStarted]);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -480,16 +478,13 @@ function SkelePageContent() {
             >
               {/* image card */}
               <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-4 shadow-2xl border border-white/40 flex flex-col items-center">
-                <Image
+                <img
                   src={pose.images}
                   alt={`${pose.name} reference`}
-                  width={224}
-                  height={224}
                   className="w-56 h-56 object-contain rounded-xl border-2 border-white/40 shadow-lg"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).parentElement!.style.display = 'none';
+                    e.currentTarget.parentElement!.style.display = 'none';
                   }}
-                  unoptimized
                 />
                 <p className="text-black text-lg text-center mt-2 font-semibold drop-shadow">{pose.name}</p>
               </div>

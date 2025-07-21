@@ -16,7 +16,7 @@ type LeaderboardEntry = {
 };
 
 export default function Leaderboard() {
-  const userCtx = useUser();
+  const userCtx = useUser() as { id?: string } | null;
   const supabase = createClient();
 
   const [allStats, setAllStats] = useState<Record<string, LeaderboardEntry>>({});
@@ -151,7 +151,7 @@ export default function Leaderboard() {
         <CardTitle className="text-lg bg-gradient-to-tr from-gray-600 to-gray-500 bg-clip-text text-transparent">
           This Week’s Leaders
         </CardTitle>
-        <Select value={selectedType} onValueChange={(val) => setSelectedType(val as any)}>
+        <Select value={selectedType} onValueChange={(val) => setSelectedType(val as "time" | "accuracy" | "consistency" | "poses")}>
           <SelectTrigger className="w-[130px] h-8 text-xs">
             <SelectValue />
           </SelectTrigger>

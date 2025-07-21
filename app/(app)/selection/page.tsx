@@ -244,8 +244,8 @@ export default function SelectionComponents() {
           transition={{ duration: 0.3 }}
         >
           <div className=""> {/* "max-h-[calc(x*10rem)] overflow-y-auto" --To confine list of poses to x rows */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {hasPageEntered ? (
+            {hasPageEntered ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 <AnimatePresence mode="popLayout" initial={false}>
                   {isFilterReady ? (
                     searchedItems.length > 0 ? (
@@ -270,9 +270,9 @@ export default function SelectionComponents() {
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.2 }}
                       >
-                        No poses found for "<span className="font-medium">{search}</span>"
+                        No poses found for &quot;<span className="font-medium">{search}</span>&quot;
                       </motion.div>
-                    ))
+                    )
                   ) : (
                     <motion.div
                       key="no-poses"
@@ -284,9 +284,9 @@ export default function SelectionComponents() {
                     >
                       No poses found for &quot;<span className="font-medium">{search}</span>&quot;
                     </motion.div>
-                  )
-                ) : null}
-              </AnimatePresence>
+                  )}
+                </AnimatePresence>
+              </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {searchedItems.map((pose) => (

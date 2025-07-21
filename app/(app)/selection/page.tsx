@@ -157,7 +157,7 @@ export default function SelectionComponents() {
       >
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-lg">{pose.name}</h3>
+            <h3 className="font-semibold text-lg leading-snug h-[3rem] break-words line-clamp-2">{pose.name}</h3>
             <div className={`px-3 py-1 rounded-full text-xs font-medium text-white ${difficultyColors[pose.difficulty]}`}>
               {pose.difficulty}
             </div>
@@ -242,46 +242,48 @@ export default function SelectionComponents() {
           animate={{ opacity: isFilterReady ? 1 : 0 }}
           transition={{ duration: 0.3 }}
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {hasPageEntered ? (
-              <AnimatePresence mode="popLayout" initial={false}>
-                {isFilterReady ? (
-                  searchedItems.length > 0 ? (
-                    searchedItems.map((pose) => (
+          <div className=""> {/* "max-h-[calc(x*10rem)] overflow-y-auto" --To confine list of poses to x rows */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {hasPageEntered ? (
+                <AnimatePresence mode="popLayout" initial={false}>
+                  {isFilterReady ? (
+                    searchedItems.length > 0 ? (
+                      searchedItems.map((pose) => (
+                        <motion.div
+                          key={pose.id}
+                          layout
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <PoseCard pose={pose} locked={!paidStatus && !pose.isFree} />
+                        </motion.div>
+                      ))
+                    ) : (
                       <motion.div
-                        key={pose.id}
-                        layout
+                        key="no-poses"
+                        className="col-span-full text-center text-muted-foreground italic"
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.2 }}
                       >
-                        <PoseCard pose={pose} locked={!paidStatus && !pose.isFree} />
+                        No poses found for "<span className="font-medium">{search}</span>"
                       </motion.div>
-                    ))
-                  ) : (
-                    <motion.div
-                      key="no-poses"
-                      className="col-span-full text-center text-muted-foreground italic"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      No poses found for "<span className="font-medium">{search}</span>"
-                    </motion.div>
-                  )
-                ) : null}
-              </AnimatePresence>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {searchedItems.map((pose) => (
-                  <div key={pose.id}>
-                    <PoseCard pose={pose} locked={!paidStatus && !pose.isFree} />
-                  </div>
-                ))}
-              </div>
-            )}
+                    )
+                  ) : null}
+                </AnimatePresence>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {searchedItems.map((pose) => (
+                    <div key={pose.id}>
+                      <PoseCard pose={pose} locked={!paidStatus && !pose.isFree} />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </motion.div>
       </section>

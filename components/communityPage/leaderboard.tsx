@@ -1,15 +1,14 @@
 'use client'
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { useUser } from "../user-provider";
+// import { useUser } from "../user-provider";
 
 const Leaderboard = () => {
-    const user = useUser()
 
     return (
         <Card className="bg-card.glass border border-border/50 shadow-card">
               <CardHeader>
                 <CardTitle className="text-lg bg-gradient-to-tr from-gray-600 to-gray-500 bg-clip-text text-transparent">
-                  This Week's Leaders
+                  This Week&apos;s Leaders
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">

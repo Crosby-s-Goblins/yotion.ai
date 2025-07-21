@@ -1,7 +1,8 @@
 'use client'
 
 import { RotateCcw, Camera, X, InfoIcon, Image as ImageIcon } from "lucide-react";
-import { useState, useRef, useEffect, Suspense } from "react";
+import { useState, useRef, useEffect, Suspense, useCallback } from "react";
+import Image from "next/image";
 import { useStopwatch } from "react-timer-hook";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
@@ -14,7 +15,7 @@ import { useTimer } from "@/context/TimerContext";
 import { useUser } from "@/components/user-provider";
 
 function SkelePageContent() {
-  const user = useUser();
+  const user = useUser() as { id?: string } | null;
   const [isCameraOn, setIsCameraOn] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,13 +35,12 @@ function SkelePageContent() {
   const searchParams = useSearchParams();
   const poseId = searchParams.get('poseId');
 
-  const [selectedPose, setSelectedPose] = useState(Number(poseId));
-  const [go, setGo] = useState(true);
+  const [selectedPose] = useState(Number(poseId));
+  const [go] = useState(true);
 
   const stopwatch = useStopwatch({ autoStart: false, interval: 20 });
   const wasPoseCorrectRef = useRef(false);
   const [analyzing, setAnalyzing] = useState(false);
-  const [stopwatchRunning, setStopwatchRunning] = useState(false);
   const pauseLockRef = useRef(false); //Locking mechanism for flicker-prevention on resets
 
   const {
@@ -53,12 +53,12 @@ function SkelePageContent() {
     stop,
   } = usePoseCorrection(selectedPose, timerStartedRef);
 
-  const [resetCount, setResetCount] = useState(0);
+  const [resetCount] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
     router.prefetch('/post_workout');
-  }, []);
+  }, [router]);
 
  useEffect(() => {
   let frameId: number;
@@ -74,10 +74,10 @@ function SkelePageContent() {
     // Only start on transition from incorrect to correct
     if (isCorrect && !wasPoseCorrectRef.current && !stopwatch.isRunning) {
       stopwatch.start();
-      setStopwatchRunning(true);
+      // setStopwatchRunning(true); // removed unused setter
     } else if (!isCorrect && wasPoseCorrectRef.current && stopwatch.isRunning) {
       stopwatch.pause();
-      setStopwatchRunning(false);
+      // setStopwatchRunning(false); // removed unused setter
     }
     wasPoseCorrectRef.current = isCorrect;
 
@@ -91,37 +91,36 @@ function SkelePageContent() {
 
 
 
-  const handleResetStopwatch = () => {
+  const handleResetStopwatch = useCallback(() => {
     stopwatch.pause();
     stopwatch.reset(undefined, false); // Reset to zero, do not autostart
-    setStopwatchRunning(false);
     setScore(100);
     setTimerStarted(0);
     timerStartedRef.current = 0;
     setPoseStartTimer(3);
     setTimerSecondMove(timerSeconds);
     hasSubmittedRef.current = false;
-  };
+  }, [stopwatch, setScore, timerSeconds]);
 
   useEffect(() => {
-  if (!isLoaded) return;
+    if (!isLoaded) return;
 
-  pauseLockRef.current = true;
+    pauseLockRef.current = true;
 
-  stop();
-  handleResetStopwatch();
-  setScore(100);
-  setTimerStarted(0);
-  timerStartedRef.current = 0;
-  setPoseStartTimer(3);
-  setTimerSecondMove(timerSeconds);
+    stop();
+    handleResetStopwatch();
+    setScore(100);
+    setTimerStarted(0);
+    timerStartedRef.current = 0;
+    setPoseStartTimer(3);
+    setTimerSecondMove(timerSeconds);
 
-  hasSubmittedRef.current = false;
+    hasSubmittedRef.current = false;
 
-  setTimeout(() => {
-    pauseLockRef.current = false;
-  }, 1000);
-}, [resetCount, isLoaded, timerSeconds]);
+    setTimeout(() => {
+      pauseLockRef.current = false;
+    }, 1000);
+  }, [resetCount, isLoaded, timerSeconds, stop, handleResetStopwatch, setScore]);
 
   useEffect(() => {
     timerStartedRef.current = timerStarted;
@@ -156,7 +155,6 @@ function SkelePageContent() {
       }
     };
 
-
     if (
       typeof timerSecondMove === 'number' &&
       timerSecondMove <= 0 &&
@@ -179,7 +177,7 @@ function SkelePageContent() {
         }
       })();
     }
-  }, [timerSecondMove, go, initialTimerSeconds, selectedPose, score, heldPercentage, user?.id]);
+  }, [timerSecondMove, go, initialTimerSeconds, selectedPose, score, heldPercentage, user?.id, stop, router]);
 
   useEffect(() => {
     const fetchPose = async () => {
@@ -205,8 +203,12 @@ function SkelePageContent() {
         } else {
           setPose(data);
         }
-      } catch (err: any) {
-        setDbError(`An unexpected error occurred: ${err.message}`);
+      } catch (err: unknown) {
+        if (err && typeof err === 'object' && 'message' in err) {
+          setDbError(`An unexpected error occurred: ${(err as { message: string }).message}`);
+        } else {
+          setDbError('An unexpected error occurred.');
+        }
       } finally {
         setIsLoadingPose(false);
       }
@@ -251,7 +253,6 @@ function SkelePageContent() {
     }
   };
 
-  // Auto-start camera on mount
   useEffect(() => {
     startCamera();
 
@@ -259,7 +260,7 @@ function SkelePageContent() {
     return () => {
       stopCamera();
     };
-  }, []);
+  }, [startCamera, stopCamera]);
 
   useEffect(() => {
     if (!isCameraOn) return;
@@ -300,7 +301,6 @@ function SkelePageContent() {
         stopwatch.pause();
         stopwatch.reset(undefined, false); // Reset to zero, do not autostart
         stopwatch.start();           // scoring timer
-        setStopwatchRunning(true);
 
         setTimerSecondMove(timerSeconds); // total timer
         setInitialTimerSeconds(timerSeconds);
@@ -311,7 +311,7 @@ function SkelePageContent() {
     }, 1000);
 
     return () => clearInterval(timerInterval);
-  }, [timerStarted]);
+  }, [timerStarted, correctPose, stopwatch, timerSeconds]);
 
   // Timer logic
   useEffect(() => {
@@ -328,7 +328,7 @@ function SkelePageContent() {
     }, 1000);
 
     return () => clearInterval(timerInterval);
-  }, [timerStarted]);
+  }, [timerStarted, isLoaded, timerSecondMove]);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -480,13 +480,16 @@ function SkelePageContent() {
             >
               {/* image card */}
               <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-4 shadow-2xl border border-white/40 flex flex-col items-center">
-                <img
+                <Image
                   src={pose.images}
                   alt={`${pose.name} reference`}
+                  width={224}
+                  height={224}
                   className="w-56 h-56 object-contain rounded-xl border-2 border-white/40 shadow-lg"
                   onError={(e) => {
-                    e.currentTarget.parentElement!.style.display = 'none';
+                    (e.target as HTMLImageElement).parentElement!.style.display = 'none';
                   }}
+                  unoptimized
                 />
                 <p className="text-black text-lg text-center mt-2 font-semibold drop-shadow">{pose.name}</p>
               </div>

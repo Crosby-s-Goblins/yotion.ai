@@ -17,7 +17,7 @@ export default async function ProtectedPage() {
               <h1 className="text-2xl font-bold bg-gradient-to-tr from-primary to-accent bg-clip-text text-transparent">
                 Welcome to Your Dashboard
               </h1>
-              <p className="text-muted-foreground">You're successfully authenticated!</p>
+              <p className="text-muted-foreground">You&apos;re successfully authenticated!</p>
             </div>
             <Badge variant="secondary" className="ml-auto">Protected</Badge>
           </div>

@@ -13,7 +13,6 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { useTimer } from '@/context/TimerContext';
 import { useTTS } from '@/context/TextToSpeechContext';
 import { createClient } from '@/lib/supabase/client';
@@ -24,19 +23,18 @@ import { Input } from './ui/input';
 const supabase = createClient();
 
 export default function SettingsPane() {
-  const {timerSeconds, setTimerSeconds} = useTimer();
-  const { ttsEnabled, setTTSEnabled } = useTTS();
+  const {timerSeconds} = useTimer();
+  const { setTTSEnabled } = useTTS();
 
   const [localTimer, setLocalTimer] = useState<string | undefined>(undefined);
   const [localTTS, setLocalTTS] = useState<boolean | undefined>(undefined);
   const [reminders, setReminders] = useState<boolean | undefined>(undefined);
   const [motivation, setMotivation] = useState<boolean | undefined>(undefined);
-  const [load, setLoad] = useState(true);
   const [hasSubmitted, setHasSubmitted] = useState<boolean>(false);
 
   const {setPreferences, loading, preferences} = useUserPreferences();
   const [weight, setWeight] = useState<number>(0);
-  const user = useUser();
+  const user = useUser() as { id?: string } | null;
 
   useEffect(() => {
     if (!loading && preferences) {
@@ -86,11 +84,11 @@ export default function SettingsPane() {
         setMotivation(data.motivation ?? false);
       }
 
-      setLoad(false);
+      // Removed unused 'load' state
     };
 
     fetchOrInitPreferences();
-  }, [setPreferences, user]);
+  }, [setPreferences, user, setTTSEnabled]);
 
   const handleChangeWeight = async (newWeight: number) => {
     if (!user?.id) return;
@@ -108,17 +106,17 @@ export default function SettingsPane() {
   }
 
   const handleSave = async () => {
-    if (!user.data.user) return;
+    if (!user?.id) return;
 
-    const { error } = await supabase
-      .from('user_preferences')
-      .upsert({
-        id: user.data.user.id,
-        default_timer: Number(localTimer),
-        tts_enabled: localTTS,
-        reminders: reminders,
-        motivation: motivation,
-      });
+  const { error } = await supabase
+    .from('user_preferences')
+    .upsert({
+      id: user.id,
+      default_timer: Number(localTimer),
+      tts_enabled: localTTS,
+      reminders: reminders,
+      motivation: motivation,
+    });
 
     if (error) {
       console.error("Failed to save:", error);

@@ -82,7 +82,7 @@ function calculateStreak(dates: string[]): number {
 
 
 export default function PerformancePage() {
-  const user = useUser();
+  const user = useUser() as { id?: string } | null;
 
   const [sessions, setSessions] = useState<PerformanceSession[]>([]);
   const [loading, setLoading] = useState(true);

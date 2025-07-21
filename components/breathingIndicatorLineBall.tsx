@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 
 interface timingInd{
-    duration : Number
+    duration : number
 }
 
 export function BreathIndication({ duration } : timingInd) {

@@ -19,23 +19,34 @@ import {
   PaginationPrevious,
   PaginationNext,
 } from "../ui/pagination";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import "../ui/shine.css";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
 
+interface Post {
+  user_id: string;
+  profiles?: {
+    username?: string;
+    avatar_url?: string;
+    status_message?: string;
+  };
+  post_id: number;
+  likes?: number;
+  post_text: string;
+  created_at?: string;
+}
+
 const POSTS_PER_PAGE = 4;
 
 const AllPosts = ({ reloadKey }: { reloadKey?: number }) => {
-  const user = useUser();
-  const [posts, setPosts] = useState<any[]>([]);
+  const user = useUser() as { id?: string } | null;
+  const [posts, setPosts] = useState<Post[]>([]);
   const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -70,11 +81,11 @@ const AllPosts = ({ reloadKey }: { reloadKey?: number }) => {
       }
       fromQuery = fromQuery.order("likes", { ascending: false }).order("created_at", { ascending: false });
       // Fetch posts
-      const { data: postsData, error: postsError } = await fromQuery;
+      const { data: postsData } = await fromQuery;
       if (postsData) setPosts(postsData);
       // Fetch liked_posts for current user
       if (user?.id) {
-        const { data: profileData, error: profileError } = await supabase
+        const { data: profileData } = await supabase
           .from("profiles")
           .select("liked_posts")
           .eq("id", user.id)
@@ -157,15 +168,15 @@ const AllPosts = ({ reloadKey }: { reloadKey?: number }) => {
 
   // Pagination logic
   // Sort posts by most recent for display
-  const sortedPosts = [...posts].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  const sortedPosts = [...posts].sort((a, b) => new Date(b.created_at ?? '').getTime() - new Date(a.created_at ?? '').getTime());
 
   // Featured post logic
-  let featuredPost: any = null;
+  let featuredPost: Post | null = null;
   let displayPosts = sortedPosts;
   let hasFeatured = false;
   if (postedBy === "all" && sortedPosts.length > 0) {
-    featuredPost = sortedPosts.reduce((max: any, post: any) => (post.likes > (max?.likes ?? -Infinity) ? post : max), sortedPosts[0]);
-    displayPosts = sortedPosts.filter((post: any) => post.post_id !== (featuredPost as any).post_id);
+    featuredPost = sortedPosts.reduce((max, post) => (post.likes && (!max || post.likes > (max.likes ?? -Infinity)) ? post : max), sortedPosts[0]);
+    displayPosts = sortedPosts.filter((post) => post.post_id !== (featuredPost as Post).post_id);
     hasFeatured = true;
   }
 
@@ -181,7 +192,7 @@ const AllPosts = ({ reloadKey }: { reloadKey?: number }) => {
     totalPages = Math.ceil(displayPosts.length / POSTS_PER_PAGE);
   }
 
-  let paginatedPosts: any[] = [];
+  let paginatedPosts: Post[] = [];
   if (hasFeatured && currentPage === 1) {
     paginatedPosts = displayPosts.slice(0, POSTS_PER_PAGE - 1);
   } else if (hasFeatured) {
@@ -263,13 +274,14 @@ const AllPosts = ({ reloadKey }: { reloadKey?: number }) => {
       {/* Featured Post (only if filter is 'all') */}
       {postedBy === "all" && featuredPost && currentPage === 1 && (
         (() => {
-          const isYou = user?.id && featuredPost.user_id === user.id;
-          const username = featuredPost.profiles?.username || "Unknown";
-          const avatarUrl = featuredPost.profiles?.avatar_url;
-          const status = featuredPost.profiles?.status_message;
-          const liked = likedPosts.has(featuredPost.post_id);
+          const fp = featuredPost;
+          const isYou = user?.id && fp.user_id === user.id;
+          const username = fp.profiles?.username || "Unknown";
+          const avatarUrl = fp.profiles?.avatar_url;
+          const status = fp.profiles?.status_message;
+          const liked = likedPosts.has(fp.post_id);
           return (
-            <Card key={featuredPost.post_id} className="bg-card.glass border border-border/50 shadow-card overflow-hidden">
+            <Card key={fp.post_id} className="bg-card.glass border border-border/50 shadow-card overflow-hidden">
               <CardHeader className="pb-0">
                 <div className="flex items-center gap-3">
                   <Avatar className="w-12 h-12 rounded-full bg-gradient-to-tr from-primary to-accent flex items-center justify-center">
@@ -310,14 +322,14 @@ const AllPosts = ({ reloadKey }: { reloadKey?: number }) => {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent className="bg-white" align="start">
                         <DropdownMenuItem>
-                          <button onClick={() => handleDeletePost(featuredPost.post_id)}>Delete Post</button>
+                          <button onClick={() => handleDeletePost(fp.post_id)}>Delete Post</button>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   }
                 </div>
                 <p className="text-base text-muted-foreground mb-4 italic">
-                  "{featuredPost.post_text}"
+                  &quot;{fp.post_text}&quot;
                 </p>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-0 lg:gap-4">
@@ -328,10 +340,10 @@ const AllPosts = ({ reloadKey }: { reloadKey?: number }) => {
                         "hover:text-primary",
                         liked ? "text-red-500" : "text-muted-foreground"
                       )}
-                      onClick={() => handleLike(featuredPost.post_id, liked)}
+                      onClick={() => handleLike(fp.post_id, liked)}
                     >
                       <Heart className="w-4 h-4 lg:mr-2" fill={liked ? "currentColor" : "none"} />
-                      {featuredPost.likes ?? 0}
+                      {fp.likes ?? 0}
                     </Button>
                     <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
                       <MessageCircle className="w-4 h-4 lg:mr-2" />
@@ -343,7 +355,7 @@ const AllPosts = ({ reloadKey }: { reloadKey?: number }) => {
                     </Button>
                   </div>
                   <span className="text-xs text-muted-foreground">
-                    {featuredPost.created_at ? formatDistanceToNow(new Date(featuredPost.created_at), { addSuffix: true }) : ""}
+                    {fp.created_at ? formatDistanceToNow(new Date(fp.created_at), { addSuffix: true }) : ""}
                   </span>
                 </div>
               </CardContent>
@@ -352,15 +364,15 @@ const AllPosts = ({ reloadKey }: { reloadKey?: number }) => {
         })()
       )}
 
-      {paginatedPosts.map((post) => {
-        const isYou = user?.id && post.user_id === user.id;
-        const username = post.profiles?.username || "Unknown";
-        const avatarUrl = post.profiles?.avatar_url;
-        const status = post.profiles?.status_message;
-        const liked = likedPosts.has(post.post_id);
+      {paginatedPosts.map((p) => {
+        const isYou = user?.id && p.user_id === user.id;
+        const username = p.profiles?.username || "Unknown";
+        const avatarUrl = p.profiles?.avatar_url;
+        const status = p.profiles?.status_message;
+        const liked = likedPosts.has(p.post_id);
 
         return (
-          <Card key={post.post_id} className="bg-card.glass border border-border/50 shadow-card overflow-hidden">
+          <Card key={p.post_id} className="bg-card.glass border border-border/50 shadow-card overflow-hidden">
             <CardHeader className="pb-0">
               <div className="flex items-center gap-3">
                 <Avatar className="w-12 h-12 rounded-full bg-gradient-to-tr from-primary to-accent flex items-center justify-center">
@@ -388,14 +400,14 @@ const AllPosts = ({ reloadKey }: { reloadKey?: number }) => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="bg-white" align="start">
                       <DropdownMenuItem>
-                        <button onClick={() => handleDeletePost(post.post_id)}>Delete Post</button>
+                        <button onClick={() => handleDeletePost(p.post_id)}>Delete Post</button>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 }
               </div>
               <p className="text-base text-muted-foreground mb-4 italic">
-                "{post.post_text}"
+                &quot;{p.post_text}&quot;
               </p>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-0 lg:gap-4">
@@ -406,10 +418,10 @@ const AllPosts = ({ reloadKey }: { reloadKey?: number }) => {
                       "hover:text-primary",
                       liked ? "text-red-500" : "text-muted-foreground"
                     )}
-                    onClick={() => handleLike(post.post_id, liked)}
+                    onClick={() => handleLike(p.post_id, liked)}
                   >
                     <Heart className="w-4 h-4 lg:mr-2" fill={liked ? "currentColor" : "none"} />
-                    {post.likes ?? 0}
+                    {p.likes ?? 0}
                   </Button>
                   <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
                     <MessageCircle className="w-4 h-4 lg:mr-2" />
@@ -421,7 +433,7 @@ const AllPosts = ({ reloadKey }: { reloadKey?: number }) => {
                   </Button>
                 </div>
                 <span className="text-xs text-muted-foreground">
-                  {post.created_at ? formatDistanceToNow(new Date(post.created_at), { addSuffix: true }) : ""}
+                  {p.created_at ? formatDistanceToNow(new Date(p.created_at), { addSuffix: true }) : ""}
                 </span>
               </div>
             </CardContent>

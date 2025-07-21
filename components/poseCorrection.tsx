@@ -42,7 +42,7 @@ function useTextToSpeech(text: string) {
     }, [text, ttsEnabled]);
 }
 
-export function usePoseCorrection(selectedPose: number, timerStartedRef: React.RefObject<number>) {
+export function usePoseCorrection(selectedPose: number, timerStartedRef: React.RefObject<number>, isReversed?: boolean) {
     let poseLandmarker: PoseLandmarker | null = null;
 
     const [poseAngles, setPoseAngles] = useState<PoseAngles | null>(null);
@@ -118,7 +118,6 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
         .eq('id', selectedPose)
         .single();
 
-        
         if (error) {
             console.error("Supabase error:", error.message);
             setPoseAngles(null);
@@ -135,16 +134,23 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
             ? JSON.parse(data.angles.trim())
             : data.angles;
 
-            setPoseAngles(Array.isArray(parsed) ? parsed : null);
+        let angles = Array.isArray(parsed) ? parsed : null;
+        if (angles && isReversed) {
+            angles = angles.map(a => {
+                if (a.joint.startsWith('left')) return { ...a, joint: a.joint.replace('left', 'right') };
+                if (a.joint.startsWith('right')) return { ...a, joint: a.joint.replace('right', 'left') };
+                return a;
+            });
+        }
+        setPoseAngles(angles);
         } catch (e) {
             console.error("Failed to parse angles JSON:", e);
             setPoseAngles(null);
         }
 
-
     };
     if (selectedPose) fetchPose();
-    }, [selectedPose]);
+    }, [selectedPose, isReversed]);
 
 
     // Utility to calculate angle given points A, B, C
@@ -296,51 +302,51 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
                         const leftHipData = selectedPoseRef.current?.find(a => a.joint === "leftHip");
                     
                         if ( rightElbowData && rightElbowAngleRef.current < (rightElbowData.expected - rightElbowData.tolerance)) {
-                            setFormText("Open your right arm.");
+                            setFormText(reverseInstruction("Open your right arm."));
                         } else if (rightElbowData && rightElbowAngleRef.current > (rightElbowData.expected + rightElbowData.tolerance)) {
-                            setFormText("Close your right arm.");
+                            setFormText(reverseInstruction("Close your right arm."));
                         } 
                         
                         else if (leftElbowData && leftElbowAngleRef.current < (leftElbowData.expected - leftElbowData.tolerance)) {
-                            setFormText("Open your left arm.");
+                            setFormText(reverseInstruction("Open your left arm."));
                         } else if (leftElbowData && leftElbowAngleRef.current > (leftElbowData.expected + leftElbowData.tolerance)) {
-                            setFormText("Close left right arm.");
+                            setFormText(reverseInstruction("Close left right arm."));
                         }
 
                         else if (rightShoulderData && rightShoulderAngleRef.current < (rightShoulderData.expected - rightShoulderData.tolerance)){
-                            setFormText("Open your right shoulder.")
+                            setFormText(reverseInstruction("Open your right shoulder."));
                         } else if (rightShoulderData && rightShoulderAngleRef.current > (rightShoulderData.expected + rightShoulderData.tolerance)) {
-                            setFormText("Close your right shoulder.");
+                            setFormText(reverseInstruction("Close your right shoulder."));
                         }
 
                         else if (leftShoulderData && leftShoulderAngleRef.current < (leftShoulderData.expected - leftShoulderData.tolerance)){
-                            setFormText("Open your left shoulder.")
+                            setFormText(reverseInstruction("Open your left shoulder."));
                         } else if (leftShoulderData && leftShoulderAngleRef.current > (leftShoulderData.expected + leftShoulderData.tolerance)) {
-                            setFormText("Close your left shoulder.");
+                            setFormText(reverseInstruction("Close your left shoulder."));
                         }
 
                         else if (rightHipData && rightHipAngleRef.current < (rightHipData.expected - rightHipData.tolerance)){
-                            setFormText("Open your right hip.")
+                            setFormText(reverseInstruction("Open your right hip."));
                         } else if (rightHipData && rightHipAngleRef.current > (rightHipData.expected + rightHipData.tolerance)) {
-                            setFormText("Close your right hip.");
+                            setFormText(reverseInstruction("Close your right hip."));
                         }
                         
                         else if (leftHipData && leftHipAngleRef.current < (leftHipData.expected - leftHipData.tolerance)){
-                            setFormText("Open your left hip.")
+                            setFormText(reverseInstruction("Open your left hip."));
                         } else if (leftHipData && leftHipAngleRef.current > (leftHipData.expected + leftHipData.tolerance)) {
-                            setFormText("Close your left hip.");
+                            setFormText(reverseInstruction("Close your left hip."));
                         }
 
                         else if (rightKneeData && rightKneeAngleRef.current < (rightKneeData.expected - rightKneeData.tolerance)){
-                            setFormText("Open your right knee.")
+                            setFormText(reverseInstruction("Open your right knee."));
                         } else if (rightKneeData && rightKneeAngleRef.current > (rightKneeData.expected + rightKneeData.tolerance)) {
-                            setFormText("Close your right knee.");
+                            setFormText(reverseInstruction("Close your right knee."));
                         }
 
                         else if (leftKneeData && leftKneeAngleRef.current < (leftKneeData.expected - leftKneeData.tolerance)){
-                            setFormText("Open your left knee.")
+                            setFormText(reverseInstruction("Open your left knee."));
                         } else if (leftKneeData && leftKneeAngleRef.current > (leftKneeData.expected + leftKneeData.tolerance)) {
-                            setFormText("Close your left knee.");
+                            setFormText(reverseInstruction("Close your left knee."));
                         }
 
                         else {
@@ -457,6 +463,15 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
         };
     }, [selectedPose]);
 
+    // Helper to reverse left/right in instruction text
+    function reverseInstruction(text: string) {
+        if (!isReversed) return text;
+        return text
+            .replace(/left/gi, '__TEMP__')
+            .replace(/right/gi, 'left')
+            .replace(/__TEMP__/gi, 'right');
+    }
+
     // Function to check if an angle is within tolerance
     function isAngleCorrect(angle: number | null, expected: number, tolerance: number) {
         if (angle === null) return false;
@@ -471,20 +486,37 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
     function correctPose() {
         const currentPose = selectedPoseRef.current;
 
+        // Helper to get the correct joint name and value, swapping left/right if isReversed
+        function getJoint(joint: string) {
+            if (!isReversed) return joint;
+            if (joint.startsWith('left')) return joint.replace('left', 'right');
+            else if (joint.startsWith('right')) return joint.replace('right', 'left');
+            return joint;
+        }
+        function getRef(joint: string) {
+            switch (joint) {
+                case 'rightElbow': return isReversed ? leftElbowAngleRef : rightElbowAngleRef;
+                case 'leftElbow': return isReversed ? rightElbowAngleRef : leftElbowAngleRef;
+                case 'rightKnee': return isReversed ? leftKneeAngleRef : rightKneeAngleRef;
+                case 'leftKnee': return isReversed ? rightKneeAngleRef : leftKneeAngleRef;
+                case 'rightShoulder': return isReversed ? leftShoulderAngleRef : rightShoulderAngleRef;
+                case 'leftShoulder': return isReversed ? rightShoulderAngleRef : leftShoulderAngleRef;
+                case 'rightHip': return isReversed ? leftHipAngleRef : rightHipAngleRef;
+                case 'leftHip': return isReversed ? rightHipAngleRef : leftHipAngleRef;
+                default: return null;
+            }
+        }
+
         const requiredJoints = [
-            { joint: "rightElbow", value: rightElbowAngleRef.current },
-            { joint: "leftElbow", value: leftElbowAngleRef.current },
-            { joint: "rightKnee", value: rightKneeAngleRef.current },
-            { joint: "leftKnee", value: leftKneeAngleRef.current },
-            { joint: "rightShoulder", value: rightShoulderAngleRef.current },
-            { joint: "leftShoulder", value: leftShoulderAngleRef.current },
-            { joint: "rightHip", value: rightHipAngleRef.current },
-            { joint: "leftHip", value: leftHipAngleRef.current },
+            'rightElbow', 'leftElbow', 'rightKnee', 'leftKnee',
+            'rightShoulder', 'leftShoulder', 'rightHip', 'leftHip',
         ];
 
-        for (const { joint, value } of requiredJoints) {
-            const angleData = currentPose?.find(a => a.joint === joint);
-            if (!isAngleCorrect(value, angleData?.expected || 0, angleData?.tolerance || 0)) {
+        for (const joint of requiredJoints) {
+            const ref = getRef(joint);
+            const value = ref?.current;
+            const angleData = currentPose?.find(a => a.joint === getJoint(joint));
+            if (!isAngleCorrect(value ?? null, angleData?.expected || 0, angleData?.tolerance || 0)) {
                 return false;
             }
         }

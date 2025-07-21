@@ -15,6 +15,7 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { Button } from '@/components/ui/button';
 import { Filter, Search, Target } from 'lucide-react';
 import { Pose } from "@/components/selectorCardComponents/types";
+import { Switch } from "@/components/ui/switch";
 
 export default function SelectionComponents() {
   const [poses, setPoses] = useState<Pose[]>([]);
@@ -29,6 +30,7 @@ export default function SelectionComponents() {
   const [modalTimer, setModalTimer] = useState<number>(timerSeconds);
   const [isFilterReady, setIsFilterReady] = useState(false);
   const [hasPageEntered, setHasPageEntered] = useState(false);
+  const [reflectPose, setReflectPose] = useState(false);
 
   useEffect(() => {
     resetTimerToDefault();
@@ -112,7 +114,7 @@ export default function SelectionComponents() {
   const handleStartSession = () => {
     if (!selectedPose) return;
     setTimerSeconds(modalTimer); // Always set timerSeconds to modalTimer, even if unchanged
-    window.location.href = `/skele?poseId=${selectedPose.id}`;
+    window.location.href = `/skele?poseId=${selectedPose.id}${reflectPose ? '&reverse=true' : ''}`;
   };
 
 
@@ -329,13 +331,15 @@ export default function SelectionComponents() {
                     {selectedPose.name}
                   </h2>
                   <p className="text-muted-foreground mb-2">{selectedPose.description || "No description available."}</p>
+                  {/* Reverse Pose Toggle */}
                   {selectedPose.images && (
                     <Image
                       src={selectedPose.images}
                       alt={`${selectedPose.name} reference`}
                       width={400}
                       height={192}
-                      className="w-full h-48 object-contain rounded-xl border-2 border-white/20 mx-auto mb-4"
+                      className={`w-full h-48 object-contain rounded-xl border-2 border-white/20 mx-auto mb-4 ${reflectPose ? 'scale-x-[-1]' : ''}`}
+                      style={reflectPose ? { transform: 'scaleX(-1)' } : {}}
                       onError={(e) => {
                         (e.target as HTMLImageElement).style.display = 'none';
                       }}
@@ -359,6 +363,22 @@ export default function SelectionComponents() {
                     ))}
                   </select>
                 </div>
+                {/* Reverse Pose Toggle (only for asymmetric poses) */}
+                {selectedPose.isAsymmetric && (
+                  <div className="w-full flex flex-col items-center mb-4">
+                    <div className="bg-card.glass border border-border/50 rounded-xl px-6 py-4 flex flex-row items-center justify-center gap-4 shadow-card w-full max-w-md">
+                      <span className="font-semibold text-base text-foreground flex items-center">
+                        Reverse Pose
+                      </span>
+                      <Switch
+                        id="reverse-pose-toggle"
+                        checked={reflectPose}
+                        onCheckedChange={setReflectPose}
+                        className="ml-2"
+                      />
+                    </div>
+                  </div>
+                )}
                 {/* Start Session Button */}
                 <Button className="w-full h-12 rounded-2xl text-lg mt-2" onClick={handleStartSession}>
                   Start Session

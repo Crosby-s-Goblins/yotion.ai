@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import { Pose } from "./types";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import Image from "next/image";
 
 interface Props {
   pose: Pose;
@@ -61,13 +62,16 @@ export function ExpandedPoseCard({ pose, onClose }: Props) {
             </button>
           </div>
           {/* image */}
-          <img
-            src={pose.images}
+          <Image
+            src={pose.images ?? "/nullImage.png"}
             alt={`${pose.name} reference`}
+            width={800}
+            height={600}
             className="h-full w-full object-contain rounded-lg bg-black/25"
             onError={(e) => {
-              e.currentTarget.parentElement!.style.display = 'none';
+              (e.target as HTMLImageElement).parentElement!.style.display = 'none';
             }}
+            unoptimized
           />
           {/* Description */}
           <div className="flex flex-col h-full justify-between overflow-y-auto">

@@ -3,14 +3,6 @@
 import { TrendingUp, TrendingDown } from "lucide-react"
 import { Pie, PieChart } from "recharts"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
@@ -39,14 +31,6 @@ function getDateStr(offsetDays = 0) {
   const d = new Date()
   d.setUTCDate(d.getUTCDate() - offsetDays)
   return d.toISOString().slice(0, 10)
-}
-
-// Check if session date is within last N days (inclusive) based on YYYY-MM-DD substring
-function isDateInLastNDays(sessionDate: string, cutoffDate: string) {
-  // Convert both to Date objects for safer comparison
-  const sessionD = new Date(sessionDate.slice(0,10))
-  const cutoffD = new Date(cutoffDate)
-  return sessionD >= cutoffD
 }
 
 // Utility to map pose ID to name
@@ -128,17 +112,6 @@ function calculateChange(todayCount: number, yesterdayCount: number) {
 export function ChartPiePoseDistribution({ sessions, poses }: Props) {
   const chartData = useMemo(() => buildChartDataLastMonth(sessions, poses), [sessions, poses])
   const chartConfig = useMemo(() => buildChartConfig(chartData), [chartData])
-
-  const uniquePosesLastMonth = useMemo(() => {
-    const cutoffDate = getDateStr(30)
-    const posesSet = new Set<number>()
-    sessions.forEach((s) => {
-      if (isDateInLastNDays(s.date, cutoffDate)) {
-        (s.exercises_performed ?? []).forEach((p) => posesSet.add(p))
-      }
-    })
-    return posesSet.size
-  }, [sessions])
 
   const todayStr = getDateStr(0)
   const yesterdayStr = getDateStr(1)

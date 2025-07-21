@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 const Stats = () => {
-    const user = useUser()
+    const user = useUser() as { id?: string } | null;
     const [activeMembers, setActiveMembers] = useState<number|null>(null);
     const [sessionsToday, setSessionsToday] = useState<number|null>(null);
     const [loadingMembers, setLoadingMembers] = useState(true);

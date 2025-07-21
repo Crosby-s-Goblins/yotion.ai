@@ -9,11 +9,9 @@ import { useUser } from './user-provider';
 export function Hero() {
   const user = useUser();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   
   useEffect(() => {
-    setMounted(true);
     setIsLoggedIn(!!user);
   }, [user]);
 

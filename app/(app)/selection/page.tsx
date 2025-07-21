@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useDeferredValue, useMemo } from "react";
+import Image from "next/image";
 import { AnimatePresence, motion } from 'framer-motion';
 import { Input } from "@/components/ui/input";
 import {Select, SelectTrigger, SelectValue, SelectContent, SelectItem} from '@/components/ui/select';
@@ -22,7 +23,7 @@ export default function SelectionComponents() {
   const [selectedDifficulty, setSelectedDifficulty] = useState("all");
   const [selectedPose, setSelectedPose] = useState<Pose | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const user = useUser();
+  const user = useUser() as { id?: string } | null;
   const { timerSeconds, setTimerSeconds, resetTimerToDefault } = useTimer();
   const [paidStatus, setPaidStatus] = useState<boolean | null>(null);
   const [modalTimer, setModalTimer] = useState<number>(timerSeconds);
@@ -31,7 +32,7 @@ export default function SelectionComponents() {
 
   useEffect(() => {
     resetTimerToDefault();
-  }, []);
+  }, [resetTimerToDefault]);
 
   // Simulate page transition to account for page change animations
   useEffect(() => {
@@ -50,13 +51,13 @@ export default function SelectionComponents() {
       let finalPaidStatus = false;
 
       if (user) {
-        const { data: allProfileData, error: allError } = await supabase
+        const { data: allProfileData } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', user.id)
           .single();
 
-        const parseBool = (v: any) => v === true || v === 'true';
+        const parseBool = (v: unknown) => v === true || v === 'true';
 
         finalPaidStatus =
           parseBool(allProfileData?.paidUser) ||
@@ -271,19 +272,30 @@ export default function SelectionComponents() {
                       >
                         No poses found for "<span className="font-medium">{search}</span>"
                       </motion.div>
-                    )
-                  ) : null}
-                </AnimatePresence>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {searchedItems.map((pose) => (
-                    <div key={pose.id}>
-                      <PoseCard pose={pose} locked={!paidStatus && !pose.isFree} />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                    ))
+                  ) : (
+                    <motion.div
+                      key="no-poses"
+                      className="col-span-full text-center text-muted-foreground italic"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      No poses found for &quot;<span className="font-medium">{search}</span>&quot;
+                    </motion.div>
+                  )
+                ) : null}
+              </AnimatePresence>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {searchedItems.map((pose) => (
+                  <div key={pose.id}>
+                    <PoseCard pose={pose} locked={!paidStatus && !pose.isFree} />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </motion.div>
       </section>
@@ -317,13 +329,16 @@ export default function SelectionComponents() {
                   </h2>
                   <p className="text-muted-foreground mb-2">{selectedPose.description || "No description available."}</p>
                   {selectedPose.images && (
-                    <img
+                    <Image
                       src={selectedPose.images}
                       alt={`${selectedPose.name} reference`}
+                      width={400}
+                      height={192}
                       className="w-full h-48 object-contain rounded-xl border-2 border-white/20 mx-auto mb-4"
                       onError={(e) => {
-                        e.currentTarget.style.display = 'none';
+                        (e.target as HTMLImageElement).style.display = 'none';
                       }}
+                      unoptimized
                     />
                   )}
                 </div>

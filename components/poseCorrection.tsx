@@ -44,7 +44,6 @@ function useTextToSpeech(text: string) {
 
 export function usePoseCorrection(selectedPose: number, timerStartedRef: React.RefObject<number>) {
     let poseLandmarker: PoseLandmarker | null = null;
-    let temp : string;
 
     const [poseAngles, setPoseAngles] = useState<PoseAngles | null>(null);
 
@@ -52,7 +51,7 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
     const videoRef = useRef<HTMLVideoElement>(null);
     
     // Store previous landmarks for smoothing
-    const previousLandmarksRef = useRef<any[]>([]);
+    const previousLandmarksRef = useRef<PoseLandmark[]>([]);
 
     //Bulk values for timer start? -- Redundant with above, pick one later
     const rightElbowAngleRef = useRef<number | null>(null);
@@ -149,7 +148,11 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
 
 
     // Utility to calculate angle given points A, B, C
-    function calculateAngle(A: any, B: any, C: any): number {
+    function calculateAngle(
+        A: { x: number; y: number; z?: number; visibility?: number },
+        B: { x: number; y: number; z?: number; visibility?: number },
+        C: { x: number; y: number; z?: number; visibility?: number }
+    ): number {
         const AB = { x: A.x - B.x, y: A.y - B.y };
         const CB = { x: C.x - B.x, y: C.y - B.y };
         const dot = AB.x * CB.x + AB.y * CB.y;
@@ -160,12 +163,15 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
         return angleRad * (180 / Math.PI);
     }
 
-    function isVisible(...points: any[]): boolean {
+    // Define a type for pose landmarks
+    type PoseLandmark = { x: number; y: number; z: number; visibility: number };
+
+    function isVisible(...points: PoseLandmark[]): boolean {
         return points.every(p => p && p.visibility !== undefined && p.visibility > 0.5);
     }
 
     // Smooth landmarks using Exponential Moving Average (EMA)
-    function smoothLandmarks(current: any[], previous: any[], alpha: number = 0.5): any[] {
+    function smoothLandmarks(current: PoseLandmark[], previous: PoseLandmark[], alpha: number = 0.5): PoseLandmark[] {
         if (!previous || previous.length === 0) return current;
 
         return current.map((currPoint, i) => {
@@ -175,14 +181,13 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
             return {
                 x: alpha * currPoint.x + (1 - alpha) * prevPoint.x,
                 y: alpha * currPoint.y + (1 - alpha) * prevPoint.y,
-                z: alpha * currPoint.z + (1 - alpha) * prevPoint.z,
-                visibility: currPoint.visibility, // Keep current visibility
+                z: alpha * (currPoint.z ?? 0) + (1 - alpha) * (prevPoint.z ?? 0),
+                visibility: currPoint.visibility ?? 1,
             };
         });
     }    
 
     useEffect(() => {
-        let isMounted = true;
         let animationFrameId: number;
         let poseLandmarkerInstance: PoseLandmarker | null = null;
 
@@ -447,7 +452,6 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
 
         init();
         return () => {
-            isMounted = false;
             if (animationFrameId) cancelAnimationFrame(animationFrameId);
             if (poseLandmarkerInstance) poseLandmarkerInstance.close();
         };

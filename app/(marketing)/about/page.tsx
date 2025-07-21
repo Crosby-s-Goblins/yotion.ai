@@ -1,6 +1,5 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 
@@ -14,7 +13,7 @@ export default function aboutPage() {
           Welcome to <span className="font-semibold">Yotion</span> — your AI-powered yoga companion designed to elevate your practice with intelligent guidance, real-time feedback, and personalized workouts.
         </p>
         <p className="text-gray-600">
-          Whether you're a total beginner or a seasoned yogi, Yotion helps you align, breathe, and move with confidence.
+          Whether you&apos;re a total beginner or a seasoned yogi, Yotion helps you align, breathe, and move with confidence.
         </p>
       </section>
 

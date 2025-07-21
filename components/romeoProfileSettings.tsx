@@ -8,10 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
     Card,
-    CardAction,
-    CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
@@ -35,12 +32,16 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 
 //Icons
-import { ExternalLink, Loader2Icon, Check, CircleAlert } from "lucide-react";
+import { Loader2Icon, Check, CircleAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
 import PasswordAlteration from "./passwordChanger";
 
 interface SettingsProps {
-    user: any;
+    user: User;
+}
+
+interface User {
+    id: string;
 }
 
 const Settings = ({ user }: SettingsProps) => {
@@ -67,10 +68,10 @@ const Settings = ({ user }: SettingsProps) => {
                 throw "Username can only contain letters and numbers!";
             }
 
-            const { error } = await supabase
+            await supabase
                 .from("profiles")
                 .update({ username: newName })
-                .eq("id", user?.id);
+                .eq("id", user.id);
 
             setLocked(true);
             toast("Success! Changes will be applied shortly.");
@@ -86,8 +87,7 @@ const Settings = ({ user }: SettingsProps) => {
         const { error } = await supabase
             .from("profiles")
             .update({ avatar_url: newAvatarUrl })
-            .eq("id", user?.id);
-
+            .eq("id", user.id);
         if (error) {
             toast(`Error updating avatar: ${error}`);
         } else {
@@ -106,7 +106,7 @@ const Settings = ({ user }: SettingsProps) => {
 
         try {
             const supabase = await createClient();
-            const filePath = `${user?.id}`;
+            const filePath = `${user.id}`;
 
             const { error: uploadError } = await supabase.storage
                 .from("avatars")

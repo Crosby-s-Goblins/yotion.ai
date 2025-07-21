@@ -6,7 +6,7 @@ import { useUser } from "@/components/user-provider";
 import PageTopBar from "@/components/page-top-bar";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { 
   Clock, 
   Target, 
@@ -26,11 +26,26 @@ interface InsightResponse {
   encouragement: string;
 }
 
+interface Performance {
+    id: string;
+    user_id: string;
+    duration_s: number;
+    accuracy_score: number;
+    consistency_score: number;
+    exercises_performed: string[];
+    // Add other fields as needed
+}
+
+interface Pose {
+    id: string;
+    name: string;
+    difficulty: string;
+}
+
 export default function PostWorkoutPage() {
-    const user = useUser();
-    const [performance, setPerformance] = useState<any>(null);
+    const user = useUser() as { id?: string } | null;
+    const [performance, setPerformance] = useState<Performance | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [insights, setInsights] = useState<InsightResponse | null>(null);
     const [insightsLoading, setInsightsLoading] = useState(false);
     const [insightsError, setInsightsError] = useState<string | null>(null);
@@ -54,23 +69,23 @@ export default function PostWorkoutPage() {
         const fetchPerformance = async () => {
             if (!user?.id) return;
             setLoading(true);
-            setError(null);
             try {
                 const supabase = await createClient();
                 const { data, error } = await supabase
                     .from('post_performance')
                     .select('*')
-                    .eq('user_id', user.id)
+                    .eq('user_id', user?.id)
                     .order('date', { ascending: false })
                     .limit(1);
                 if (error) {
-                    setError(error.message);
                 } else {
-                    setPerformance(data && data.length > 0 ? data[0] : null);
+                    setPerformance(data && data.length > 0 ? data[0] as Performance : null);
                     console.log('[DEBUG] All fetched performance data:', data);
                 }
-            } catch (err: any) {
-                setError(err.message);
+            } catch (err: unknown) {
+                if (err instanceof Error) {
+                } else {
+                }
             } finally {
                 setLoading(false);
             }
@@ -99,9 +114,9 @@ export default function PostWorkoutPage() {
                     .select('difficulty, id, name')
                     .in('id', performance.exercises_performed);
                 console.log('[DEBUG] poseLibrary fetch result:', poses);
-                setPoseDifficulties(poses?.map((p: any) => p.difficulty) ?? []);
+                setPoseDifficulties((poses as Pose[])?.map((p) => p.difficulty) ?? []);
                 if (poses) {
-                    poses.forEach((p: any, idx: number) => {
+                    (poses as Pose[]).forEach((p, idx) => {
                         console.log(`[DEBUG] Pose #${idx + 1}:`, p);
                     });
                 }
@@ -111,12 +126,51 @@ export default function PostWorkoutPage() {
         fetchWeightAndDifficulties();
     }, [performance, user?.id]);
 
-    // Format duration nicely
-    const formatDuration = (seconds: number) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
-    };
+    // Fetch insights from Gemini API
+    const fetchInsights = useCallback(async () => {
+        if (!performance) return;
+        // Debug: Log what we're sending to the API
+        console.log('[DEBUG] Sending performance data to insights API:', {
+            exercises_performed: performance.exercises_performed,
+            exercises_count: performance.exercises_performed?.length || 0,
+            duration_s: performance.duration_s,
+            accuracy_score: performance.accuracy_score,
+            consistency_score: performance.consistency_score
+        });
+        setInsightsLoading(true);
+        setInsightsError(null);
+        try {
+            const response = await fetch('/api/insights', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(performance)
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch insights');
+            }
+            const insightData: InsightResponse = await response.json();
+            setInsights(insightData);
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setInsightsError(err.message);
+                console.error('Error fetching insights:', err);
+            } else {
+                setInsightsError('An unknown error occurred');
+                console.error('Unknown error fetching insights:', err);
+            }
+        } finally {
+            setInsightsLoading(false);
+        }
+    }, [performance]);
+
+    // Auto-fetch insights when performance data is available
+    useEffect(() => {
+        if (performance && !loading) {
+            fetchInsights();
+        }
+    }, [performance, loading, fetchInsights]);
 
     const getAverageMET = () => {
         if (!poseDifficulties.length) return null;
@@ -146,52 +200,6 @@ export default function PostWorkoutPage() {
         return Math.round(totalCalories);
     };
 
-    // Fetch insights from Gemini API
-    const fetchInsights = async () => {
-        if (!performance) return;
-        
-        // Debug: Log what we're sending to the API
-        console.log('[DEBUG] Sending performance data to insights API:', {
-            exercises_performed: performance.exercises_performed,
-            exercises_count: performance.exercises_performed?.length || 0,
-            duration_s: performance.duration_s,
-            accuracy_score: performance.accuracy_score,
-            consistency_score: performance.consistency_score
-        });
-        
-        setInsightsLoading(true);
-        setInsightsError(null);
-        
-        try {
-            const response = await fetch('/api/insights', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(performance)
-            });
-            
-            if (!response.ok) {
-                throw new Error('Failed to fetch insights');
-            }
-            
-            const insightData: InsightResponse = await response.json();
-            setInsights(insightData);
-        } catch (err: any) {
-            setInsightsError(err.message);
-            console.error('Error fetching insights:', err);
-        } finally {
-            setInsightsLoading(false);
-        }
-    };
-
-    // Auto-fetch insights when performance data is available
-    useEffect(() => {
-        if (performance && !loading) {
-            fetchInsights();
-        }
-    }, [performance, loading]);
-
     return (
         <main className="min-h-screen bg-gradient-to-br from-background via-background to-background/95 flex flex-col">
             <PageTopBar 
@@ -209,13 +217,13 @@ export default function PostWorkoutPage() {
                     </Badge>
                 </div>
 
-                {/* Performance Metrics Grid */}
+                {/* Consistency Card */}
                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-8 max-w-3xl sm:max-w-4xl md:max-w-5xl mx-auto">
                     {/* Duration Card */}
                     <Card className="group relative overflow-hidden bg-card.glass border-border/50 shadow-card hover:shadow-glass transition-all duration-300 hover:scale-105">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium text-muted-foreground">
-                                Duration
+                                Consistency Score
                             </CardTitle>
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-primary/10 to-accent/10 flex items-center justify-center">
                                 <Clock className="w-4 h-4 text-primary" />
@@ -223,10 +231,10 @@ export default function PostWorkoutPage() {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-primary">
-                                {loading ? '--:--' : performance ? formatDuration(performance.duration_s) : '--:--'}
+                                {loading ? '--' : performance?.consistency_score ? performance.consistency_score / 100 : '--'}
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
-                                Time spent in session
+                                Pose score consistency
                             </p>
                         </CardContent>
                     </Card>
@@ -235,7 +243,7 @@ export default function PostWorkoutPage() {
                     <Card className="group relative overflow-hidden bg-card.glass border-border/50 shadow-card hover:shadow-glass transition-all duration-300 hover:scale-105">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium text-muted-foreground">
-                                Overall Score
+                                Accuracy Score
                             </CardTitle>
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-accent/10 to-success/10 flex items-center justify-center">
                                 <Target className="w-4 h-4 text-accent" />
@@ -243,15 +251,15 @@ export default function PostWorkoutPage() {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-accent">
-                                {loading ? '--' : performance ? `${Math.round(((performance.accuracy_score / 100) + (performance.consistency_score / 100))/2)}%` : '--'}
+                                {loading ? '--' : performance?.accuracy_score ? performance.accuracy_score / 100 : '--'}
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
-                                Pose score average
+                                Pose score accuracy
                             </p>
                         </CardContent>
                     </Card>
 
-                    {/* Consistency Card */}
+                    {/* Calories Burned Card */}
                     <Card className="group relative overflow-hidden bg-card.glass border-border/50 shadow-card hover:shadow-glass transition-all duration-300 hover:scale-105">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium text-muted-foreground">

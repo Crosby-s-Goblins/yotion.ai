@@ -14,7 +14,7 @@ import { useTimer } from "@/context/TimerContext";
 import { useUser } from "@/components/user-provider";
 
 function SkelePageContent() {
-  const user = useUser();
+  const user = useUser() as { id?: string } | null;
   const [isCameraOn, setIsCameraOn] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,13 +34,12 @@ function SkelePageContent() {
   const searchParams = useSearchParams();
   const poseId = searchParams.get('poseId');
 
-  const [selectedPose, setSelectedPose] = useState(Number(poseId));
-  const [go, setGo] = useState(true);
+  const [selectedPose] = useState(Number(poseId));
+  const [go] = useState(true);
 
   const stopwatch = useStopwatch({ autoStart: false, interval: 20 });
   const wasPoseCorrectRef = useRef(false);
   const [analyzing, setAnalyzing] = useState(false);
-  const [stopwatchRunning, setStopwatchRunning] = useState(false);
   const pauseLockRef = useRef(false); //Locking mechanism for flicker-prevention on resets
 
   const {
@@ -53,7 +52,6 @@ function SkelePageContent() {
     stop,
   } = usePoseCorrection(selectedPose, timerStartedRef);
 
-  const [resetCount, setResetCount] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -74,10 +72,8 @@ function SkelePageContent() {
     // Only start on transition from incorrect to correct
     if (isCorrect && !wasPoseCorrectRef.current && !stopwatch.isRunning) {
       stopwatch.start();
-      setStopwatchRunning(true);
     } else if (!isCorrect && wasPoseCorrectRef.current && stopwatch.isRunning) {
       stopwatch.pause();
-      setStopwatchRunning(false);
     }
     wasPoseCorrectRef.current = isCorrect;
 
@@ -94,7 +90,6 @@ function SkelePageContent() {
   const handleResetStopwatch = () => {
     stopwatch.pause();
     stopwatch.reset(undefined, false); // Reset to zero, do not autostart
-    setStopwatchRunning(false);
     setScore(100);
     setTimerStarted(0);
     timerStartedRef.current = 0;
@@ -121,7 +116,7 @@ function SkelePageContent() {
   setTimeout(() => {
     pauseLockRef.current = false;
   }, 1000);
-}, [resetCount, isLoaded, timerSeconds]);
+}, [isLoaded, timerSeconds]);
 
   useEffect(() => {
     timerStartedRef.current = timerStarted;
@@ -205,8 +200,12 @@ function SkelePageContent() {
         } else {
           setPose(data);
         }
-      } catch (err: any) {
-        setDbError(`An unexpected error occurred: ${err.message}`);
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setDbError(`An unexpected error occurred: ${err.message}`);
+        } else {
+          setDbError("An unexpected error occurred.");
+        }
       } finally {
         setIsLoadingPose(false);
       }
@@ -300,7 +299,6 @@ function SkelePageContent() {
         stopwatch.pause();
         stopwatch.reset(undefined, false); // Reset to zero, do not autostart
         stopwatch.start();           // scoring timer
-        setStopwatchRunning(true);
 
         setTimerSecondMove(timerSeconds); // total timer
         setInitialTimerSeconds(timerSeconds);

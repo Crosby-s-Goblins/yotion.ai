@@ -1,19 +1,23 @@
 "use client";
 
-import { Check, MessageCircle, Send, SendHorizonal, Trophy } from "lucide-react";
-import { Loader } from "lucide-react";
+import { Check, SendHorizonal, Loader } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useUser } from "../user-provider";
-import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardHeader, CardTitle } from "../ui/card";
 
+interface Profile {
+    username?: string;
+    avatar_url?: string;
+    status_message?: string;
+}
+
 const Posts = ({ onPostSubmit }: { onPostSubmit?: () => void }) => {
-    const user = useUser();
-    const [profile, setProfile] = useState<any>(null);
+    const user = useUser() as { id?: string } | null;
+    const [profile, setProfile] = useState<Profile | null>(null);
     const [postText, setPostText] = useState("");
     const [loading, setLoading] = useState(false);
     const [posted, setPosted] = useState(false);
@@ -26,7 +30,7 @@ const Posts = ({ onPostSubmit }: { onPostSubmit?: () => void }) => {
             .eq("id", user?.id)
             .single()
             .then(({ data: profileData }) => {
-                if (profileData) setProfile(profileData);
+                if (profileData) setProfile(profileData as Profile);
             });
     }, [user]);
 
@@ -56,13 +60,13 @@ const Posts = ({ onPostSubmit }: { onPostSubmit?: () => void }) => {
                     <Avatar className="w-12 h-12 rounded-full bg-gradient-to-tr from-primary to-accent flex items-center justify-center">
                         <AvatarImage src={profile?.avatar_url} alt="avatar" />
                         <AvatarFallback>
-                            {profile?.username?.[0]?.toUpperCase()}
+                            {profile?.username ? profile.username[0]?.toUpperCase() : ''}
                         </AvatarFallback>
                     </Avatar>
                     <div>
-                        <CardTitle className="text-lg"><span className="text-green-700">[You]</span> {profile?.username}</CardTitle>
+                        <CardTitle className="text-lg"><span className="text-green-700">[You]</span> {profile?.username ?? ''}</CardTitle>
                         <p className="text-sm text-muted-foreground">
-                            {profile?.status_message}
+                            {profile?.status_message ?? ''}
                         </p>
                     </div>
                 </div>

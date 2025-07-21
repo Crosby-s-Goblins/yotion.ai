@@ -6,7 +6,5 @@ export default async function SettingsPage() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    return (
-        <ProfileSettings user={user}/>
-    );
+    return user ? <ProfileSettings user={user} /> : null;
 }

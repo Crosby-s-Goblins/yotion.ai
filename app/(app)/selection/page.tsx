@@ -24,7 +24,7 @@ export default function SelectionComponents() {
   const [selectedPose, setSelectedPose] = useState<Pose | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const user = useUser() as { id?: string } | null;
-  const { timerSeconds, setTimerSeconds, resetTimerToDefault } = useTimer();
+  const { timerSeconds, setTimerSeconds, resetTimerToDefault, isLoaded } = useTimer();
   const [paidStatus, setPaidStatus] = useState<boolean | null>(null);
   const [modalTimer, setModalTimer] = useState<number>(timerSeconds);
   const [isFilterReady, setIsFilterReady] = useState(false);
@@ -100,8 +100,9 @@ export default function SelectionComponents() {
 
 
   const handlePoseSelect = (pose: Pose) => {
+    if (!isLoaded) return; // Prevent selection until timer is loaded
     setSelectedPose(pose);
-    setModalTimer(timerSeconds); // default to current timer
+    setModalTimer(timerSeconds); // Always use the current timerSeconds (from context, which is preference or 60)
   };
 
   const handleCloseExpanded = () => {
@@ -110,7 +111,7 @@ export default function SelectionComponents() {
 
   const handleStartSession = () => {
     if (!selectedPose) return;
-    setTimerSeconds(modalTimer);
+    setTimerSeconds(modalTimer); // Always set timerSeconds to modalTimer, even if unchanged
     window.location.href = `/skele?poseId=${selectedPose.id}`;
   };
 
@@ -138,7 +139,7 @@ export default function SelectionComponents() {
   });
 }, [poses, deferredSearch, selectedDifficulty]);
 
-  if(paidStatus === null){
+  if (!isLoaded || paidStatus === null) {
     return <Loading />;
   }
 

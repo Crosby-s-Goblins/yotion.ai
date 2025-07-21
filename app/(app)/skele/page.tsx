@@ -33,6 +33,8 @@ function SkelePageContent() {
 
   const searchParams = useSearchParams();
   const poseId = searchParams.get('poseId');
+  const reverseParam = searchParams.get('reverse');
+  const isReversed = reverseParam === 'true';
 
   const [selectedPose] = useState(Number(poseId));
   const [go] = useState(true);
@@ -50,7 +52,7 @@ function SkelePageContent() {
     setScore,
     correctPose,
     stop,
-  } = usePoseCorrection(selectedPose, timerStartedRef);
+  } = usePoseCorrection(selectedPose, timerStartedRef, isReversed);
 
   const router = useRouter();
 

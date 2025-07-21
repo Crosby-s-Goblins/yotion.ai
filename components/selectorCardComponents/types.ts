@@ -6,4 +6,5 @@ export interface Pose {
   benefits?: string[] | string;
   images?: string;
   isFree?: boolean;
+  isAsymmetric?: boolean;
 }

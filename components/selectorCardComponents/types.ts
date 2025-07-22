@@ -8,3 +8,12 @@ export interface Pose {
   isFree?: boolean;
   isAsymmetric?: boolean;
 }
+
+export interface Session {
+  id: number;
+  name: string;
+  posesIn: string[];
+  poseTiming: number[];
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  searchRes: string;
+}

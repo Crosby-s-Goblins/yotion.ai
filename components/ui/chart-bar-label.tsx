@@ -14,7 +14,7 @@ export const description = "A bar chart with a label"
 
 const chartConfig = {
   desktop: {
-    label: "Desktop",
+    label: "Poses Done",
     color: "var(--chart-2)",
   },
 } satisfies ChartConfig

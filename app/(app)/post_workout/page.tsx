@@ -187,7 +187,7 @@ export default function PostWorkoutPage() {
             return <Badge variant="outline"><a href="/appSettings">Enter weight</a></Badge>;
         }
         const durationMin = performance.duration_s / 60;
-        const perExerciseDuration = durationMin / poseDifficulties.length;
+        const perExerciseDuration = durationMin / (performance.exercises_performed?.length || 1);
         const metMap: Record<string, number> = { easy: 2.5, medium: 5.5, hard: 7.0 };
         let totalCalories = 0;
         poseDifficulties.forEach((difficulty, idx) => {
@@ -407,10 +407,10 @@ export default function PostWorkoutPage() {
                             Practice Again
                         </Button>
                     </Link>
-                    <Link href="/skele">
+                    <Link href="/performance">
                         <Button variant="outline" className="w-full sm:w-auto">
                             <BarChart3 className="w-4 h-4 mr-2" />
-                            Back to Session
+                            View all statistics
                         </Button>
                     </Link>
                 </div>

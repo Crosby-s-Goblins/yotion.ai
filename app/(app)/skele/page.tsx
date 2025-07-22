@@ -12,6 +12,7 @@ import { BreathIndication } from "@/components/breathingIndicatorLineBall";
 import { Button } from "@/components/ui/button";
 import { useTimer } from "@/context/TimerContext";
 import { useUser } from "@/components/user-provider";
+import { useProgramSession } from '@/context/ProgramSessionContext';
 
 function SkelePageContent() {
   const user = useUser() as { id?: string } | null;
@@ -22,7 +23,7 @@ function SkelePageContent() {
   const [pose, setPose] = useState<Pose | null>(null);
   const [isLoadingPose, setIsLoadingPose] = useState<boolean>(true);
   const [dbError, setDbError] = useState<string | null>(null);
-  const { timerSeconds, isLoaded } = useTimer();
+  const { timerSeconds, setTimerSeconds, isLoaded } = useTimer();
   const [timerSecondMove, setTimerSecondMove] = useState<number | null>(null);
   const [initialTimerSeconds, setInitialTimerSeconds] = useState<number | null>(null);
   const [poseStartTimer, setPoseStartTimer] = useState<number>(1); // changed from 3 to 1 for testing purposes
@@ -30,13 +31,57 @@ function SkelePageContent() {
   const timerStartedRef = useRef(timerStarted);
   const [showImageRef, setShowImageRef] = useState(false);
   const hasSubmittedRef = useRef(false);
+  const [hasNavigated, setHasNavigated] = useState(false);
 
-  const searchParams = useSearchParams();
-  const poseId = searchParams.get('poseId');
-  const reverseParam = searchParams.get('reverse');
-  const isReversed = reverseParam === 'true';
+  const searchParams = useSearchParams(); // Always call at the top
+  // --- Program session integration ---
+  const programSession = useProgramSession ? useProgramSession() : undefined;
+  const isProgramActive = programSession && programSession.posesIn.length > 0;
+  // Determine poseId, isReversed, and timerForPose
+  let poseId, isReversed, timerForPose;
+  if (isProgramActive) {
+    // Program mode: use context for poseId, reverse, and timing
+    const poseEntry = programSession.posesIn[programSession.currentPoseIndex];
+    if (typeof poseEntry === 'string' && poseEntry.endsWith('R')) {
+      poseId = poseEntry.slice(0, -1);
+      isReversed = true;
+    } else {
+      poseId = poseEntry;
+      isReversed = false;
+    }
+    timerForPose = programSession.poseTiming[programSession.currentPoseIndex];
+  } else {
+    // Single-pose mode: use URL params and user preference/default for timer
+    poseId = searchParams.get('poseId');
+    const reverseParam = searchParams.get('reverse');
+    isReversed = reverseParam === 'true';
+    // Timer: check for timer param, else user preference, else 60
+    const timerParam = searchParams.get('timer');
+    timerForPose = timerParam ? Number(timerParam) : (typeof timerSeconds === 'number' ? timerSeconds : 60);
+  }
 
-  const [selectedPose] = useState(Number(poseId));
+  // Set the timer for the current pose whenever poseId or timerForPose changes
+  useEffect(() => {
+    if (timerForPose && typeof setTimerSeconds === 'function') {
+      setTimerSeconds(timerForPose);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [poseId, timerForPose]);
+
+  // After determining isProgramActive, poseId, etc.
+  useEffect(() => {
+    if (!isProgramActive) {
+      const stored = localStorage.getItem('timerSeconds');
+      console.log('Skele page: read timerSeconds from localStorage:', stored);
+      if (stored !== null) {
+        setTimerSeconds(Number(stored));
+        console.log('Skele page: setTimerSeconds to', Number(stored));
+      }
+    }
+    // eslint-disable-next-line
+  }, []);
+
+  // Use Number(poseId) directly for current pose
   const [go] = useState(true);
 
   const stopwatch = useStopwatch({ autoStart: false, interval: 20 });
@@ -52,7 +97,7 @@ function SkelePageContent() {
     setScore,
     correctPose,
     stop,
-  } = usePoseCorrection(selectedPose, timerStartedRef, isReversed);
+  } = usePoseCorrection(Number(poseId), timerStartedRef, isReversed);
 
   const router = useRouter();
 
@@ -85,7 +130,7 @@ function SkelePageContent() {
   frameId = requestAnimationFrame(checkPoseAndUpdate);
 
   return () => cancelAnimationFrame(frameId);
-}, [correctPose, stopwatch, timerStarted]);
+}, [correctPose, stopwatch, timerStarted, poseId, isProgramActive, programSession]);
 
 
 
@@ -139,7 +184,7 @@ function SkelePageContent() {
         .from('post_performance')
         .insert({
           user_id: user?.id,
-          exercises_performed: [selectedPose],
+          exercises_performed: [Number(poseId)],
           accuracy_score: Math.round(score * 100),
           consistency_score: Math.round(heldPercentage * 100),
           duration_s: initialTimerSeconds,
@@ -153,36 +198,100 @@ function SkelePageContent() {
       }
     };
 
-
     if (
       typeof timerSecondMove === 'number' &&
       timerSecondMove <= 0 &&
       go &&
-      !hasSubmittedRef.current
+      !hasSubmittedRef.current &&
+      !hasNavigated // Prevent double navigation
     ) {
       hasSubmittedRef.current = true; // Set immediately to prevent further inserts
       setAnalyzing(true);
+      setHasNavigated(true); // Prevent further navigation
 
       (async () => {
         try {
           // await stopCameraAndPose();
-          await pushData();
-          stop();
-          await new Promise((resolve) => setTimeout(resolve, 300));
-          router.replace('/post_workout'); // faster than push
+          if (isProgramActive && programSession) {
+            // Update per-pose accuracy and time in correct position
+            programSession.updateAccuracy(Math.round(score * 100));
+            stopwatch.pause();
+            programSession.setTimeInCorrectForPose(totalHeldSeconds);
+            // Program mode: advance to next pose or finish
+            if (programSession.currentPoseIndex < programSession.posesIn.length - 1) {
+              // Get the next pose entry BEFORE incrementing
+              const nextEntry = programSession.posesIn[programSession.currentPoseIndex + 1];
+              let nextPoseId = nextEntry;
+              let nextReverse = false;
+              if (typeof nextEntry === 'string' && nextEntry.endsWith('R')) {
+                nextPoseId = nextEntry.slice(0, -1);
+                nextReverse = true;
+              }
+              console.log('[DEBUG] Before nextPose, currentPoseIndex:', programSession.currentPoseIndex);
+              programSession.nextPose();
+              // Navigate to the next pose with id and reverse in the URL
+              const url = nextReverse ? `/skele?poseId=${nextPoseId}&reverse=true` : `/skele?poseId=${nextPoseId}`;
+              window.location.href = url;
+            } else {
+              // Program complete: calculate and store summary
+              // Manually build arrays including the just-recorded values for the last pose
+              const updatedAccuracy = [...programSession.accuracy];
+              updatedAccuracy[programSession.currentPoseIndex] = Math.round(score * 100);
+
+              const updatedTimeInCorrect = [...programSession.timeInCorrectPosition];
+              updatedTimeInCorrect[programSession.currentPoseIndex] = totalHeldSeconds;
+
+              const poseNumbers = programSession.posesIn.map(p => {
+                if (typeof p === 'string' && p.endsWith('R')) return Number(p.slice(0, -1));
+                return Number(p);
+              });
+              const totalTime = programSession.poseTiming.reduce((a, b) => a + b, 0);
+              // Use updatedTimeInCorrect for totalCorrect
+              const totalCorrect = updatedTimeInCorrect.reduce((a, b) => a + b, 0);
+              let avgConsistency = totalTime > 0 ? Math.round((totalCorrect / totalTime) * 10000) : 0;
+              if (avgConsistency > 10000) avgConsistency = 10000;
+              // Use updatedAccuracy for avgAccuracy (time-weighted average)
+              let avgAccuracy = 0;
+              if (totalTime > 0 && updatedAccuracy.length === programSession.poseTiming.length) {
+                let weightedSum = 0;
+                for (let i = 0; i < updatedAccuracy.length; i++) {
+                  weightedSum += updatedAccuracy[i] * programSession.poseTiming[i];
+                }
+                avgAccuracy = Math.round(weightedSum / totalTime);
+              }
+              // Store in post_performance
+              const supabase = createClient();
+              (async () => {
+                await supabase.from('post_performance').insert({
+                  user_id: user?.id,
+                  exercises_performed: poseNumbers,
+                  accuracy_score: avgAccuracy,
+                  consistency_score: avgConsistency,
+                  duration_s: totalTime,
+                });
+              })();
+              router.replace('/post_workout');
+            }
+          } else {
+            // Single-pose mode: insert after each pose
+            await pushData();
+            router.replace('/post_workout');
+          }
         } catch (err) {
           console.error("Cleanup failed:", err);
           setAnalyzing(false);
         }
       })();
     }
-  }, [timerSecondMove, go, initialTimerSeconds, selectedPose, score, heldPercentage, user?.id]);
+  }, [timerSecondMove, go, initialTimerSeconds, poseId, score, heldPercentage, user?.id, isProgramActive, programSession, hasNavigated]);
 
   useEffect(() => {
     const fetchPose = async () => {
-      if (!poseId) {
+      const numericPoseId = Number(poseId);
+      console.log('Fetching pose with id:', numericPoseId, typeof numericPoseId);
+      if (!numericPoseId || isNaN(numericPoseId)) {
         setIsLoadingPose(false);
-        setDbError("No Pose ID was provided in the URL.");
+        setDbError("Invalid pose ID.");
         return;
       }
 
@@ -192,13 +301,13 @@ function SkelePageContent() {
         const { data, error } = await supabase
           .from("poseLibrary")
           .select('id, name, difficulty, description, images')
-          .eq('id', poseId)
+          .eq('id', numericPoseId)
           .single();
 
         if (error) {
           setDbError(`Database Error: ${error.message}`);
         } else if (!data) {
-          setDbError(`No pose found with ID: ${poseId}.`);
+          setDbError(`No pose found with ID: ${numericPoseId}.`);
         } else {
           setPose(data);
         }
@@ -483,7 +592,7 @@ function SkelePageContent() {
                 <img
                   src={pose.images}
                   alt={`${pose.name} reference`}
-                  className="w-56 h-56 object-contain rounded-xl border-2 border-white/40 shadow-lg"
+                  className={`w-56 h-56 object-contain rounded-xl border-2 border-white/40 shadow-lg ${isReversed ? 'scale-x-[-1]' : ''}`}
                   onError={(e) => {
                     e.currentTarget.parentElement!.style.display = 'none';
                   }}
@@ -583,13 +692,11 @@ function SkelePageContent() {
       </div>
       
       {analyzing && (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/80 backdrop-blur-sm text-white">
-          <div className="text-center">
-            <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-6" />
-            <h2 className="text-2xl font-semibold">Analyzing your results...</h2>
-            <p className="text-sm text-muted-foreground mt-2">This will only take a moment.</p>
-          </div>
-        </div>
+        <ProgramNextPoseLoader 
+          isProgramActive={!!isProgramActive} 
+          programSession={programSession} 
+          poseId={poseId} 
+        />
       )}
 
     </div>
@@ -606,5 +713,63 @@ export default function SkelePage() {
     }>
       <SkelePageContent />
     </Suspense>
+  );
+}
+
+function ProgramNextPoseLoader({ isProgramActive, programSession, poseId }: { isProgramActive: boolean, programSession: any, poseId: any }) {
+  const [nextPoseName, setNextPoseName] = useState<string | null>(null);
+  useEffect(() => {
+    if (
+      isProgramActive &&
+      programSession &&
+      programSession.currentPoseIndex < programSession.posesIn.length - 1
+    ) {
+      // Get the next pose id
+      const nextEntry = programSession.posesIn[programSession.currentPoseIndex + 1];
+      let nextPoseId = nextEntry;
+      if (typeof nextEntry === 'string' && nextEntry.endsWith('R')) {
+        nextPoseId = nextEntry.slice(0, -1);
+      }
+      // Fetch the pose name from the database
+      (async () => {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from('poseLibrary')
+          .select('name')
+          .eq('id', Number(nextPoseId))
+          .single();
+        if (!error && data && data.name) {
+          setNextPoseName(data.name);
+        } else {
+          setNextPoseName(null);
+        }
+      })();
+    }
+  }, [isProgramActive, programSession]);
+
+  if (
+    isProgramActive &&
+    programSession &&
+    programSession.currentPoseIndex < programSession.posesIn.length - 1 &&
+    nextPoseName
+  ) {
+    return (
+      <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/80 backdrop-blur-sm text-white">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-6" />
+          <h2 className="text-2xl font-semibold">Loading next pose: {nextPoseName}. Please hold</h2>
+        </div>
+      </div>
+    );
+  }
+  // Default analyzing overlay
+  return (
+    <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/80 backdrop-blur-sm text-white">
+      <div className="text-center">
+        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-6" />
+        <h2 className="text-2xl font-semibold">Analyzing your results...</h2>
+        <p className="text-sm text-muted-foreground mt-2">This will only take a moment.</p>
+      </div>
+    </div>
   );
 }

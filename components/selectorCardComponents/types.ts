@@ -16,4 +16,5 @@ export interface Session {
   poseTiming: number[];
   difficulty: 'Easy' | 'Medium' | 'Hard';
   searchRes: string;
+  isUser?: boolean;
 }

@@ -88,9 +88,15 @@ export const SessionCard = ({ session, locked }: SessionCardProps) => {
           <div className="p-6 flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold text-lg leading-snug break-words line-clamp-2">{session.name}</h3>
-              <div className={`px-3 py-1 rounded-full text-xs font-medium text-white ${difficultyColors[session.difficulty]}`}>
-                {session.difficulty}
-              </div>
+              <div className="flex flex-row gap-2 items-center min-w-[56px] justify-end">
+                  {session.isUser ? (
+                    <div className="px-3 py-1 rounded-full text-xs font-medium h-7 min-w-[56px] flex items-center justify-center text-gray-700 bg-gray-200 border border-gray-300">User</div>
+                  ) : (
+                    <div className={`px-3 py-1 rounded-full text-xs font-medium text-white ${difficultyColors[session.difficulty]} h-7 min-w-[56px] flex items-center justify-center`}>
+                      {session.difficulty}
+                    </div>
+                  )}
+                </div>
             </div>
             <div className="text-sm text-muted-foreground mt-1">
               {timeString}

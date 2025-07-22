@@ -18,8 +18,9 @@ import { Pose } from "@/components/selectorCardComponents/types";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Session } from '@/components/selectorCardComponents/types';
-import { SessionCard } from '@/components/selectorCardComponents/sessionCard';
+import { SessionCard } from '@/components/selectorCardComponents/programCard';
 import { useProgramSession } from '@/context/ProgramSessionContext';
+import AddProgramModal from '@/components/selectorCardComponents/addProgramModal';
 
 export default function SelectionComponents() {
   const [poses, setPoses] = useState<Pose[]>([]);
@@ -40,11 +41,16 @@ export default function SelectionComponents() {
   const [programs, setPrograms] = useState<Session[]>([]);
   const [programsLoading, setProgramsLoading] = useState(false);
   const [programsError, setProgramsError] = useState<string | null>(null);
+  const [programsFetched, setProgramsFetched] = useState(false);
+  const [programSourceFilter, setProgramSourceFilter] = useState<'all' | 'premade' | 'user'>('all');
   const [programSearch, setProgramSearch] = useState("");
   const [selectedProgramDifficulty, setSelectedProgramDifficulty] = useState("all");
   const deferredProgramSearch = useDeferredValue(programSearch);
   const [isProgramFilterReady, setIsProgramFilterReady] = useState(false);
   const { resetSession } = useProgramSession();
+  const [addProgramOpen, setAddProgramOpen] = useState(false);
+  const [editProgramOpen, setEditProgramOpen] = useState(false);
+  const [selectedProgram, setSelectedProgram] = useState<any | null>(null);
 
   useEffect(() => {
     resetTimerToDefault();
@@ -114,44 +120,44 @@ export default function SelectionComponents() {
   }
 }, [user]);
 
-  // Fetch programs for program tab (from sessionLibrary)
+  // Fetch programs from both sessionLibrary and userSessionLibrary ONCE per page load
   useEffect(() => {
-    if (tab !== 'programs' || !user?.id) return;
+    if (!user?.id || programsFetched) return;
     setProgramsLoading(true);
     setProgramsError(null);
     const supabase = createClient();
-    let programCall = supabase
-      .from('sessionLibrary')
-      .select('*');
-    if (!paidStatus) {
-      programCall = programCall.order('isFree', { ascending: false });
-    }
-    programCall = programCall.order('name');
-    programCall.then(({ data, error }) => {
-      if (error) setProgramsError(error.message);
-      // Transform data to match Session type
-      const transformed = (data || []).map((item: any) => ({
-        id: item.id,
-        name: item.name,
-        posesIn: Array.isArray(item.posesIn)
-          ? item.posesIn
-          : typeof item.posesIn === 'string'
-            ? JSON.parse(item.posesIn)
-            : [],
-        poseTiming: Array.isArray(item.poseTiming)
-          ? item.poseTiming.map(Number)
-          : typeof item.poseTiming === 'string'
-            ? JSON.parse(item.poseTiming).map(Number)
-            : [],
-        difficulty: typeof item.difficulty === 'string'
-          ? item.difficulty.charAt(0).toUpperCase() + item.difficulty.slice(1).toLowerCase()
-          : 'Easy',
-        searchRes: typeof item.searchRes === 'string' ? item.searchRes : '',
-      }));
-      setPrograms(transformed);
+    // Fetch both in parallel
+    Promise.all([
+      supabase.from('sessionLibrary').select('*').order('name'),
+      supabase.from('userSessionLibrary').select('*').eq('user_id', user.id).order('name'),
+    ]).then(([globalRes, userRes]) => {
+      let allPrograms: any[] = [];
+      if (globalRes.data) {
+        allPrograms = allPrograms.concat(
+          (globalRes.data || []).map((item: any) => ({
+            ...item,
+            isUser: false,
+            id: `global-${item.id}`,
+          }))
+        );
+      }
+      if (userRes.data) {
+        allPrograms = allPrograms.concat(
+          (userRes.data || []).map((item: any) => ({
+            ...item,
+            isUser: true,
+            id: `user-${item.id}`,
+          }))
+        );
+      }
+      setPrograms(allPrograms);
+      setProgramsLoading(false);
+      setProgramsFetched(true);
+    }).catch((err) => {
+      setProgramsError('Failed to load programs');
       setProgramsLoading(false);
     });
-  }, [tab, user?.id, paidStatus]);
+  }, [user?.id, programsFetched]);
 
   // Program search/filter effect for perceived smoothness
   useEffect(() => {
@@ -281,7 +287,7 @@ export default function SelectionComponents() {
     <main className="min-h-screen bg-gradient-to-br from-background via-background to-background/95 flex flex-col">
       <PageTopBar
         title="Choose Your Practice"
-        description={paidStatus ? "Select from our curated collection of AI-powered yoga poses or your past sessions" : "Start your yoga journey with AI-powered guidance"}
+        description={paidStatus ? "Select from our curated collection of AI-powered yoga poses, programs, or make your own!" : "Start your yoga journey with AI-powered guidance"}
         backHref="/practice"
       />
       <section className="flex-1 w-full max-w-7xl mx-auto px-6 pb-8">
@@ -412,7 +418,7 @@ export default function SelectionComponents() {
             <div className="bg-card.glass rounded-2xl p-6 border border-border/50 shadow-card mb-8">
               <div className="flex flex-col lg:flex-row gap-4 items-center">
                 {/* Search Bar */}
-                <div className="relative flex-1 w-full">
+                <div className="relative flex-1 w-full flex items-center gap-2">
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
                   <Input
                     className="w-full pl-12 pr-4 h-12 rounded-full border-2 bg-background/50 backdrop-blur-sm"
@@ -421,6 +427,18 @@ export default function SelectionComponents() {
                     value={programSearch}
                     onChange={(e) => setProgramSearch(e.target.value)}
                   />
+                  {paidStatus && (
+                    <Button
+                      variant="default"
+                      className="h-12 w-12 rounded-full flex items-center justify-center shadow-lg ml-2"
+                      aria-label="Add Program"
+                      onClick={() => setAddProgramOpen(true)}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                      </svg>
+                    </Button>
+                  )}
                 </div>
                 {/* Filter Popover */}
                 <Popover>
@@ -436,7 +454,7 @@ export default function SelectionComponents() {
                         <label className="text-sm font-medium text-muted-foreground mb-2 block">
                           Difficulty Level
                         </label>
-                        <Select value={selectedProgramDifficulty} onValueChange={setSelectedProgramDifficulty}>
+                        <Select value={selectedProgramDifficulty} onValueChange={setSelectedProgramDifficulty} disabled={programSourceFilter === 'user'}>
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select difficulty" />
                           </SelectTrigger>
@@ -445,6 +463,21 @@ export default function SelectionComponents() {
                             <SelectItem value="easy">Easy</SelectItem>
                             <SelectItem value="medium">Medium</SelectItem>
                             <SelectItem value="hard">Hard</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                          Program Source
+                        </label>
+                        <Select value={programSourceFilter} onValueChange={v => setProgramSourceFilter(v as 'all' | 'premade' | 'user')}>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select source" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white">
+                            <SelectItem value="all">All</SelectItem>
+                            <SelectItem value="premade">Premade</SelectItem>
+                            <SelectItem value="user">User-Created</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -462,22 +495,31 @@ export default function SelectionComponents() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   <AnimatePresence mode="popLayout" initial={false}>
                     {isProgramFilterReady ? (
-                      searchedPrograms.length > 0 ? (
-                        searchedPrograms.map((program) => (
-                          <SessionCard key={program.id} session={program} locked={!paidStatus} />
-                        ))
-                      ) : (
-                        <motion.div
-                          key="no-programs"
-                          className="col-span-full text-center text-muted-foreground italic"
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          No programs found for &quot;<span className="font-medium">{programSearch}</span>&quot;
-                        </motion.div>
-                      )
+                        (
+                          searchedPrograms
+                            .filter((program) =>
+                              programSourceFilter === 'all' ? true :
+                              programSourceFilter === 'premade' ? !program.isUser :
+                              program.isUser
+                            )
+                            .sort((a, b) => a.name.localeCompare(b.name))
+                            .map((program) => (
+                              <div key={program.id} className="relative group">
+                                <SessionCard session={program} locked={!paidStatus} />
+                                {program.isUser && (
+                                  <button
+                                    className="absolute top-2 right-2 z-10 bg-white/80 rounded-full p-1 shadow hover:bg-white"
+                                    onClick={() => { setSelectedProgram(program); setEditProgramOpen(true); }}
+                                    title="Edit Program"
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-gray-600">
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 5.487a2.1 2.1 0 1 1 2.97 2.97L7.5 20.79l-4 1 1-4 14.362-14.303z" />
+                                    </svg>
+                                  </button>
+                                )}
+                              </div>
+                            ))
+                        )
                     ) : (
                       <motion.div
                         key="no-programs"
@@ -499,13 +541,12 @@ export default function SelectionComponents() {
                   {/* Show fake/empty cards or a message */}
                   <motion.div
                     key="paywall"
-                    className="col-span-full text-center text-muted-foreground italic"
+                    className="col-span-full text-center text-muted-foreground italic h-24"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.2 }}
                   >
-                    Programs are a premium feature.<br />Upgrade to unlock program history!
                   </motion.div>
                 </div>
                 <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center">
@@ -608,6 +649,28 @@ export default function SelectionComponents() {
             </motion.div>
           )}
         </AnimatePresence>
+        <AddProgramModal
+          open={editProgramOpen}
+          onClose={() => { setEditProgramOpen(false); setSelectedProgram(null); }}
+          onCreate={() => { setEditProgramOpen(false); setSelectedProgram(null); setProgramsFetched(false); }}
+          onDelete={(id) => {
+            setEditProgramOpen(false);
+            setSelectedProgram(null);
+            setPrograms((prev) => prev.filter((p) => String(p.id) !== String(id)));
+          }}
+          userId={user?.id || ''}
+          editing={true}
+          initialProgram={selectedProgram}
+        />
+        <AddProgramModal
+          open={addProgramOpen}
+          onClose={() => setAddProgramOpen(false)}
+          onCreate={() => {
+            setAddProgramOpen(false);
+            setProgramsFetched(false);
+          }}
+          userId={user?.id || ''}
+        />
       </section>
     </main>
   );

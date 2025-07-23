@@ -320,14 +320,14 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
                         const leftHipData = selectedPoseRef.current?.find(a => a.joint === "leftHip");
                     
                         if ( rightElbowData && rightElbowAngleRef.current < (rightElbowData.expected - rightElbowData.tolerance)) {
-                            const msg = reverseInstruction("Open your right arm.");
+                            const msg = "Open your right arm.";
                             const now = Date.now();
                             if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
                               setFormText(msg);
                               lastFormTextUpdateRef.current = now;
                             }
                         } else if (rightElbowData && rightElbowAngleRef.current > (rightElbowData.expected + rightElbowData.tolerance)) {
-                            const msg = reverseInstruction("Close your right arm.");
+                            const msg = "Close your right arm.";
                             const now = Date.now();
                             if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
                               setFormText(msg);
@@ -336,14 +336,14 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
                         } 
                         
                         else if (leftElbowData && leftElbowAngleRef.current < (leftElbowData.expected - leftElbowData.tolerance)) {
-                            const msg = reverseInstruction("Open your left arm.");
+                            const msg = "Open your left arm.";
                             const now = Date.now();
                             if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
                               setFormText(msg);
                               lastFormTextUpdateRef.current = now;
                             }
                         } else if (leftElbowData && leftElbowAngleRef.current > (leftElbowData.expected + leftElbowData.tolerance)) {
-                            const msg = reverseInstruction("Close left right arm.");
+                            const msg = "Close your left arm.";
                             const now = Date.now();
                             if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
                               setFormText(msg);
@@ -352,14 +352,14 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
                         }
 
                         else if (rightShoulderData && rightShoulderAngleRef.current < (rightShoulderData.expected - rightShoulderData.tolerance)){
-                            const msg = reverseInstruction("Open your right shoulder.");
+                            const msg = "Open your right shoulder.";
                             const now = Date.now();
                             if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
                               setFormText(msg);
                               lastFormTextUpdateRef.current = now;
                             }
                         } else if (rightShoulderData && rightShoulderAngleRef.current > (rightShoulderData.expected + rightShoulderData.tolerance)) {
-                            const msg = reverseInstruction("Close your right shoulder.");
+                            const msg = "Close your right shoulder.";
                             const now = Date.now();
                             if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
                               setFormText(msg);
@@ -368,14 +368,14 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
                         }
 
                         else if (leftShoulderData && leftShoulderAngleRef.current < (leftShoulderData.expected - leftShoulderData.tolerance)){
-                            const msg = reverseInstruction("Open your left shoulder.");
+                            const msg = "Open your left shoulder.";
                             const now = Date.now();
                             if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
                               setFormText(msg);
                               lastFormTextUpdateRef.current = now;
                             }
                         } else if (leftShoulderData && leftShoulderAngleRef.current > (leftShoulderData.expected + leftShoulderData.tolerance)) {
-                            const msg = reverseInstruction("Close your left shoulder.");
+                            const msg = "Close your left shoulder.";
                             const now = Date.now();
                             if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
                               setFormText(msg);
@@ -384,14 +384,14 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
                         }
 
                         else if (rightHipData && rightHipAngleRef.current < (rightHipData.expected - rightHipData.tolerance)){
-                            const msg = reverseInstruction("Open your right hip.");
+                            const msg = "Open your right hip.";
                             const now = Date.now();
                             if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
                               setFormText(msg);
                               lastFormTextUpdateRef.current = now;
                             }
                         } else if (rightHipData && rightHipAngleRef.current > (rightHipData.expected + rightHipData.tolerance)) {
-                            const msg = reverseInstruction("Close your right hip.");
+                            const msg = "Close your right hip.";
                             const now = Date.now();
                             if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
                               setFormText(msg);
@@ -400,14 +400,14 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
                         }
                         
                         else if (leftHipData && leftHipAngleRef.current < (leftHipData.expected - leftHipData.tolerance)){
-                            const msg = reverseInstruction("Open your left hip.");
+                            const msg = "Open your left hip.";
                             const now = Date.now();
                             if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
                               setFormText(msg);
                               lastFormTextUpdateRef.current = now;
                             }
                         } else if (leftHipData && leftHipAngleRef.current > (leftHipData.expected + leftHipData.tolerance)) {
-                            const msg = reverseInstruction("Close your left hip.");
+                            const msg = "Close your left hip.";
                             const now = Date.now();
                             if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
                               setFormText(msg);
@@ -416,14 +416,14 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
                         }
 
                         else if (rightKneeData && rightKneeAngleRef.current < (rightKneeData.expected - rightKneeData.tolerance)){
-                            const msg = reverseInstruction("Open your right knee.");
+                            const msg = "Open your right knee.";
                             const now = Date.now();
                             if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
                               setFormText(msg);
                               lastFormTextUpdateRef.current = now;
                             }
                         } else if (rightKneeData && rightKneeAngleRef.current > (rightKneeData.expected + rightKneeData.tolerance)) {
-                            const msg = reverseInstruction("Close your right knee.");
+                            const msg = "Close your right knee.";
                             const now = Date.now();
                             if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
                               setFormText(msg);
@@ -432,14 +432,14 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
                         }
 
                         else if (leftKneeData && leftKneeAngleRef.current < (leftKneeData.expected - leftKneeData.tolerance)){
-                            const msg = reverseInstruction("Open your left knee.");
+                            const msg = "Open your left knee.";
                             const now = Date.now();
                             if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
                               setFormText(msg);
                               lastFormTextUpdateRef.current = now;
                             }
                         } else if (leftKneeData && leftKneeAngleRef.current > (leftKneeData.expected + leftKneeData.tolerance)) {
-                            const msg = reverseInstruction("Close your left knee.");
+                            const msg = "Close your left knee.";
                             const now = Date.now();
                             if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
                               setFormText(msg);
@@ -565,15 +565,6 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
             if (poseLandmarkerInstance) poseLandmarkerInstance.close();
         };
     }, []);
-
-    // Helper to reverse left/right in instruction text
-    function reverseInstruction(text: string) {
-        if (!isReversed) return text;
-        return text
-            .replace(/left/gi, '__TEMP__')
-            .replace(/right/gi, 'left')
-            .replace(/__TEMP__/gi, 'right');
-    }
 
     // Function to check if an angle is within tolerance
     function isAngleCorrect(angle: number | null, expected: number, tolerance: number) {

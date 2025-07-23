@@ -1,8 +1,8 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
-import { User, Activity, Mic, Users, TrendingUp } from 'lucide-react';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
+import { Activity, Mic, Users, TrendingUp } from 'lucide-react';
+import Link from 'next/link';
 import Image from 'next/image';
 
 const TEAM = [
@@ -111,9 +111,9 @@ export default function AboutPage() {
         <p className="text-gray-700 text-center max-w-xl">
           Join Yotion today and experience the future of mindful movement—powered by AI, inspired by community, and designed for you.
         </p>
-        <a href="/" className="mt-2 px-8 py-3 rounded-full bg-gradient-to-tr from-primary to-accent text-white font-bold shadow-lg hover:from-primary/90 hover:to-accent/90 transition-all duration-200">
+        <Link href="/" className="mt-2 px-8 py-3 rounded-full bg-gradient-to-tr from-primary to-accent text-white font-bold shadow-lg hover:from-primary/90 hover:to-accent/90 transition-all duration-200">
           Get Started
-        </a>
+        </Link>
       </section>
     </main>
   );

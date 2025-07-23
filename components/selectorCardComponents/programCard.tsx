@@ -47,7 +47,7 @@ export const SessionCard = ({ session, locked }: SessionCardProps) => {
       }
       // id may be number or string, so normalize to string
       const map: Record<string, string> = {};
-      (data || []).forEach((pose: any) => {
+      (data || []).forEach((pose) => {
         map[String(pose.id)] = pose.name;
       });
       setPoseMap(map);
@@ -60,7 +60,7 @@ export const SessionCard = ({ session, locked }: SessionCardProps) => {
   const handleStartProgram = () => {
     initializeSession(session.posesIn, session.poseTiming);
     // Determine first pose and reverse param
-    let firstPose = session.posesIn[0];
+    const firstPose = session.posesIn[0];
     let poseId = firstPose;
     let reverse = false;
     if (typeof firstPose === 'string' && firstPose.endsWith('R')) {

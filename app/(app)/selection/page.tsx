@@ -28,7 +28,6 @@ export default function SelectionComponents() {
   const deferredSearch = useDeferredValue(search);
   const [selectedDifficulty, setSelectedDifficulty] = useState("all");
   const [selectedPose, setSelectedPose] = useState<Pose | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const user = useUser() as { id?: string } | null;
   const { timerSeconds, setTimerSeconds, resetTimerToDefault, isLoaded } = useTimer();
   const [paidStatus, setPaidStatus] = useState<boolean | null>(null);
@@ -50,7 +49,7 @@ export default function SelectionComponents() {
   const { resetSession } = useProgramSession();
   const [addProgramOpen, setAddProgramOpen] = useState(false);
   const [editProgramOpen, setEditProgramOpen] = useState(false);
-  const [selectedProgram, setSelectedProgram] = useState<any | null>(null);
+  const [selectedProgram, setSelectedProgram] = useState<Session | null>(null);
 
   useEffect(() => {
     resetTimerToDefault();
@@ -101,17 +100,14 @@ export default function SelectionComponents() {
 
       poseCall = poseCall.order('name');
 
-      const { data, error } = await poseCall;
+      const { data } = await poseCall;
 
-      if (error) {
-        console.error('Error fetching poses:', error);
-      } else {
+      if (data) {
         setPoses(data || []);
       }
     } catch (error) {
       console.error('Error during fetch:', error);
     } finally {
-      setIsLoading(false);
     }
   };
 
@@ -131,29 +127,29 @@ export default function SelectionComponents() {
       supabase.from('sessionLibrary').select('*').order('name'),
       supabase.from('userSessionLibrary').select('*').eq('user_id', user.id).order('name'),
     ]).then(([globalRes, userRes]) => {
-      let allPrograms: any[] = [];
+      let allPrograms: unknown[] = [];
       if (globalRes.data) {
         allPrograms = allPrograms.concat(
-          (globalRes.data || []).map((item: any) => ({
-            ...item,
+          (globalRes.data || []).map((item: unknown) => ({
+            ...(item as Session),
             isUser: false,
-            id: `global-${item.id}`,
+            id: `global-${(item as Session).id}`,
           }))
         );
       }
       if (userRes.data) {
         allPrograms = allPrograms.concat(
-          (userRes.data || []).map((item: any) => ({
-            ...item,
+          (userRes.data || []).map((item: unknown) => ({
+            ...(item as Session),
             isUser: true,
-            id: `user-${item.id}`,
+            id: `user-${(item as Session).id}`,
           }))
         );
       }
-      setPrograms(allPrograms);
+      setPrograms(allPrograms as Session[]);
       setProgramsLoading(false);
       setProgramsFetched(true);
-    }).catch((err) => {
+    }).catch(() => {
       setProgramsError('Failed to load programs');
       setProgramsLoading(false);
     });
@@ -208,13 +204,6 @@ export default function SelectionComponents() {
   const handleCloseExpanded = () => {
     setSelectedPose(null);
   };
-
-  const handleStartSession = () => {
-    if (!selectedPose) return;
-    setTimerSeconds(modalTimer); // Always set timerSeconds to modalTimer, even if unchanged
-    window.location.href = `/skele?poseId=${selectedPose.id}${reflectPose ? '&reverse=true' : ''}`;
-  };
-
 
   useEffect(() => {
     const delay = setTimeout(() => {
@@ -509,7 +498,7 @@ export default function SelectionComponents() {
                                 {program.isUser && (
                                   <button
                                     className="absolute top-2 right-2 z-10 bg-white/80 rounded-full p-1 shadow hover:bg-white"
-                                    onClick={() => { setSelectedProgram(program); setEditProgramOpen(true); }}
+                                    onClick={() => { setSelectedProgram(program as Session); setEditProgramOpen(true); }}
                                     title="Edit Program"
                                   >
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-gray-600">
@@ -660,7 +649,7 @@ export default function SelectionComponents() {
           }}
           userId={user?.id || ''}
           editing={true}
-          initialProgram={selectedProgram}
+          initialProgram={selectedProgram ?? undefined}
         />
         <AddProgramModal
           open={addProgramOpen}

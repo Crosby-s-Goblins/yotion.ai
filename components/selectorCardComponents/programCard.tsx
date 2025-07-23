@@ -86,9 +86,9 @@ export const SessionCard = ({ session, locked }: SessionCardProps) => {
           className={`bg-card.glass rounded-2xl border border-border/50 shadow-card hover:shadow-glass transition-all duration-200 ${locked ? 'opacity-60 pointer-events-none' : ''}`}
         >
           <div className="p-6 flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-lg leading-snug break-words line-clamp-2">{session.name}</h3>
-              <div className="flex flex-row gap-2 items-center min-w-[56px] justify-end">
+            <div className="flex items-start justify-between">
+              <h3 className="font-semibold text-lg leading-snug break-words line-clamp-2 h-12">{session.name}</h3>
+              <div className="flex flex-row gap-2 items-start min-w-[56px] justify-end pt-0.5">
                   {session.isUser ? (
                     <div className="px-3 py-1 rounded-full text-xs font-medium h-7 min-w-[56px] flex items-center justify-center text-gray-700 bg-gray-200 border border-gray-300">User</div>
                   ) : (
@@ -140,9 +140,9 @@ export const SessionCard = ({ session, locked }: SessionCardProps) => {
                 </div>
                 <div className="mb-4">
                   <h4 className="font-semibold mb-4 text-lg">Program Steps</h4>
-                  <div className="flex flex-col gap-0">
+                  <div className="flex flex-col gap-0 max-h-[19rem] overflow-y-auto rounded-md border border-border/30 bg-gray-50/60 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
                     {loadingPoses || !poseMap ? (
-                      <div className="text-center text-muted-foreground">Loading poses...</div>
+                      <div className="text-center text-muted-foreground py-8">Loading poses...</div>
                     ) : (
                       <ol className="divide-y divide-border">
                         {session.posesIn.map((poseId, idx) => {
@@ -164,7 +164,14 @@ export const SessionCard = ({ session, locked }: SessionCardProps) => {
                                   <span className="ml-2 px-2 py-0.5 rounded bg-gray-100 text-gray-500 text-xs font-medium">Reversed</span>
                                 )}
                               </div>
-                              <span className="text-xs text-muted-foreground min-w-[40px] text-right">{session.poseTiming[idx] ? `${session.poseTiming[idx]}s` : ''}</span>
+                              <span className="text-xs text-muted-foreground min-w-[40px] text-right">
+                                {session.poseTiming[idx] !== undefined && session.poseTiming[idx] !== null ? (() => {
+                                  const totalSec = Number(session.poseTiming[idx]);
+                                  const min = Math.floor(totalSec / 60);
+                                  const sec = totalSec % 60;
+                                  return min > 0 ? `${min}m ${sec.toString().padStart(2, '0')}s` : `${sec}s`;
+                                })() : ''}
+                              </span>
                             </li>
                           );
                         })}

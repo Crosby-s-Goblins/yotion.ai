@@ -29,9 +29,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Uniqueness check for poses
+    const uniquePoseIds = Array.from(new Set(
+      (rawPerformanceData.exercises_performed || []).map((id: string | number) => {
+        const str = String(id);
+        return str.endsWith('R') ? str.slice(0, -1) : str;
+      })
+    ));
+
     // Normalize the performance data to ensure consistent 0-100 scale
     const performanceData = {
       ...rawPerformanceData,
+      exercises_performed: uniquePoseIds,
       // Normalize accuracy_score to 0-100 range (assuming it might be stored as 0-10000)
       accuracy_score: rawPerformanceData.accuracy_score > 100 
         ? Math.round(rawPerformanceData.accuracy_score / 100) 

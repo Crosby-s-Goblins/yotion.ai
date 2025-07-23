@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/client';
-import { Pose } from './types';
+import { Pose, Session } from './types';
 
 interface AddProgramModalProps {
   open: boolean;
@@ -9,7 +9,7 @@ interface AddProgramModalProps {
   onCreate: (name: string) => void;
   userId: string;
   editing?: boolean;
-  initialProgram?: any;
+  initialProgram?: Session | null;
   onDelete?: (id: string) => void;
 }
 
@@ -90,8 +90,7 @@ export default function AddProgramModal({ open, onClose, onCreate, userId, editi
         return { ...row, isAsymmetric: !!pose?.isAsymmetric };
       })
     );
-    // eslint-disable-next-line
-  }, [poses, poseRows.map(r => r.poseId).join(',')]);
+  }, [poses]);
 
   if (!open) return null;
 
@@ -101,7 +100,7 @@ export default function AddProgramModal({ open, onClose, onCreate, userId, editi
       return;
     }
     // Ignore the last (empty) row
-    const validRows = poseRows.filter(row => row.poseId);
+    const validRows = poseRows.filter(row => row.poseId) as PoseRow[];
     if (validRows.length === 0 || validRows.some(row => !row.timing)) {
       setError('All poses and timings are required.');
       return;
@@ -169,7 +168,7 @@ export default function AddProgramModal({ open, onClose, onCreate, userId, editi
       setError('Failed to delete program.');
       return;
     }
-    if (onDelete) onDelete(initialProgram.id);
+    if (onDelete) onDelete(String(initialProgram.id));
     handleClose();
   };
 
@@ -196,10 +195,6 @@ export default function AddProgramModal({ open, onClose, onCreate, userId, editi
     setPoseRows(rows => rows.map((row, i) =>
       i === idx ? { ...row, reverse } : row
     ));
-  };
-
-  const handleAddRow = () => {
-    setPoseRows(rows => [...rows, { poseId: null, timing: 60, reverse: false, isAsymmetric: false }]);
   };
 
   const handleRemoveRow = (idx: number) => {
@@ -231,7 +226,7 @@ export default function AddProgramModal({ open, onClose, onCreate, userId, editi
   };
 
   // Always show an empty row at the end for quick addition
-  const displayRows = poseRows.some(row => !row.poseId)
+  const displayRows: PoseRow[] = poseRows.some(row => !row.poseId)
     ? poseRows
     : [...poseRows, { poseId: null, timing: 60, reverse: false, isAsymmetric: false }];
 

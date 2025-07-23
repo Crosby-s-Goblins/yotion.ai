@@ -10,7 +10,7 @@ export interface Pose {
 }
 
 export interface Session {
-  id: number;
+  id: number | string;
   name: string;
   posesIn: string[];
   poseTiming: number[];

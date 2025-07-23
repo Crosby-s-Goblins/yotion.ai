@@ -1,7 +1,7 @@
 'use client'
 
 import { RotateCcw, Camera, X, InfoIcon, Image as ImageIcon } from "lucide-react";
-import { useState, useRef, useEffect, Suspense } from "react";
+import React, { useState, useRef, useEffect, useCallback, Suspense } from "react";
 import { useStopwatch } from "react-timer-hook";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { useTimer } from "@/context/TimerContext";
 import { useUser } from "@/components/user-provider";
 import { useProgramSession } from '@/context/ProgramSessionContext';
+import Image from 'next/image';
 
 function SkelePageContent() {
   const user = useUser() as { id?: string } | null;
@@ -24,18 +25,9 @@ function SkelePageContent() {
   const [isLoadingPose, setIsLoadingPose] = useState<boolean>(true);
   const [dbError, setDbError] = useState<string | null>(null);
   const { timerSeconds, setTimerSeconds, isLoaded } = useTimer();
-  const [timerSecondMove, setTimerSecondMove] = useState<number | null>(null);
-  const [initialTimerSeconds, setInitialTimerSeconds] = useState<number | null>(null);
-  const [poseStartTimer, setPoseStartTimer] = useState<number>(1); // changed from 3 to 1 for testing purposes
-  const [timerStarted, setTimerStarted] = useState<number>(0);
-  const timerStartedRef = useRef(timerStarted);
-  const [showImageRef, setShowImageRef] = useState(false);
-  const hasSubmittedRef = useRef(false);
-  const [hasNavigated, setHasNavigated] = useState(false);
-
   const searchParams = useSearchParams(); // Always call at the top
   // --- Program session integration ---
-  const programSession = useProgramSession ? useProgramSession() : undefined;
+  const programSession = useProgramSession(); // Always call the hook
   const isProgramActive = programSession && programSession.posesIn.length > 0;
   // Determine poseId, isReversed, and timerForPose
   let poseId, isReversed, timerForPose;
@@ -59,6 +51,15 @@ function SkelePageContent() {
     const timerParam = searchParams.get('timer');
     timerForPose = timerParam ? Number(timerParam) : (typeof timerSeconds === 'number' ? timerSeconds : 60);
   }
+  // Now safe to initialize timerSecondMove
+  const [timerSecondMove, setTimerSecondMove] = useState<number>(60);
+  const [initialTimerSeconds, setInitialTimerSeconds] = useState<number | null>(null);
+  const [poseStartTimer, setPoseStartTimer] = useState<number>(1); // changed from 3 to 1 for testing purposes
+  const [timerStarted, setTimerStarted] = useState<number>(0);
+  const timerStartedRef = useRef(timerStarted);
+  const [showImageRef, setShowImageRef] = useState(false);
+  const hasSubmittedRef = useRef(false);
+  const [hasNavigated, setHasNavigated] = useState(false);
 
   // Set the timer for the current pose whenever poseId or timerForPose changes
   useEffect(() => {
@@ -67,6 +68,16 @@ function SkelePageContent() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [poseId, timerForPose]);
+
+  // Set timerSecondMove to the correct value immediately in program mode
+  useEffect(() => {
+    if (isProgramActive && typeof timerForPose === 'number') {
+      setTimerSecondMove(timerForPose);
+    } else if (typeof timerSeconds === 'number') {
+      setTimerSecondMove(timerSeconds);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [poseId, timerForPose, isProgramActive, timerSeconds, programSession]);
 
   // After determining isProgramActive, poseId, etc.
   useEffect(() => {
@@ -103,7 +114,7 @@ function SkelePageContent() {
 
   useEffect(() => {
     router.prefetch('/post_workout');
-  }, []);
+  }, [router]);
 
  useEffect(() => {
   let frameId: number;
@@ -134,16 +145,16 @@ function SkelePageContent() {
 
 
 
-  const handleResetStopwatch = () => {
+  const handleResetStopwatch = useCallback(() => {
     stopwatch.pause();
     stopwatch.reset(undefined, false); // Reset to zero, do not autostart
     setScore(100);
     setTimerStarted(0);
     timerStartedRef.current = 0;
     setPoseStartTimer(3);
-    setTimerSecondMove(timerSeconds);
+    setTimerSecondMove(isProgramActive ? timerForPose : timerSeconds);
     hasSubmittedRef.current = false;
-  };
+  }, [stopwatch, setScore, setTimerStarted, timerSeconds, isProgramActive, timerForPose]);
 
   useEffect(() => {
   if (!isLoaded) return;
@@ -152,18 +163,14 @@ function SkelePageContent() {
 
   stop();
   handleResetStopwatch();
-  setScore(100);
-  setTimerStarted(0);
-  timerStartedRef.current = 0;
-  setPoseStartTimer(3);
-  setTimerSecondMove(timerSeconds);
 
   hasSubmittedRef.current = false;
 
   setTimeout(() => {
     pauseLockRef.current = false;
   }, 1000);
-}, [isLoaded, timerSeconds]);
+// eslint-disable-next-line react-hooks/exhaustive-deps
+}, [isLoaded]);
 
   useEffect(() => {
     timerStartedRef.current = timerStarted;
@@ -180,13 +187,14 @@ function SkelePageContent() {
     const pushData = async () => {
       const supabase = createClient();
 
+      const cappedConsistency = Math.min(Math.round(heldPercentage * 100), 10000);
       const { error } = await supabase
         .from('post_performance')
         .insert({
           user_id: user?.id,
           exercises_performed: [Number(poseId)],
           accuracy_score: Math.round(score * 100),
-          consistency_score: Math.round(heldPercentage * 100),
+          consistency_score: cappedConsistency,
           duration_s: initialTimerSeconds,
         });
 
@@ -283,7 +291,7 @@ function SkelePageContent() {
         }
       })();
     }
-  }, [timerSecondMove, go, initialTimerSeconds, poseId, score, heldPercentage, user?.id, isProgramActive, programSession, hasNavigated]);
+  }, [timerSecondMove, go, initialTimerSeconds, poseId, score, heldPercentage, user?.id, isProgramActive, programSession, hasNavigated, router]);
 
   useEffect(() => {
     const fetchPose = async () => {
@@ -326,7 +334,7 @@ function SkelePageContent() {
   }, [poseId]);
 
   // Start camera
-  const startCamera = async () => {
+  const startCamera = useCallback(async () => {
     if (!videoRef.current) return;
 
     setIsLoading(true);
@@ -349,17 +357,17 @@ function SkelePageContent() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [videoRef, setIsLoading, setError]);
 
   // Stop camera
-  const stopCamera = () => {
+  const stopCamera = useCallback(() => {
     if (videoRef.current && videoRef.current.srcObject) {
       const stream = videoRef.current.srcObject as MediaStream;
       stream.getTracks().forEach((track) => track.stop());
       videoRef.current.srcObject = null;
       setIsCameraOn(false);
     }
-  };
+  }, [videoRef, setIsCameraOn]);
 
   // Auto-start camera on mount
   useEffect(() => {
@@ -369,7 +377,7 @@ function SkelePageContent() {
     return () => {
       stopCamera();
     };
-  }, []);
+  }, [startCamera, stopCamera]);
 
   useEffect(() => {
     if (!isCameraOn) return;
@@ -383,7 +391,7 @@ function SkelePageContent() {
         setTimerStarted(0);
         setPoseStartTimer(3);
       }
-    }, 200);
+    }, 1000);
 
     return () => clearInterval(poseCheckInterval);
   }, [isCameraOn, correctPose]);
@@ -411,8 +419,8 @@ function SkelePageContent() {
         stopwatch.reset(undefined, false); // Reset to zero, do not autostart
         stopwatch.start();           // scoring timer
 
-        setTimerSecondMove(timerSeconds); // total timer
-        setInitialTimerSeconds(timerSeconds);
+        setTimerSecondMove(timerForPose); // total timer
+        setInitialTimerSeconds(timerForPose);
         setTimerStarted(2); // move to "running" phase
 
         return 1;
@@ -437,7 +445,7 @@ function SkelePageContent() {
     }, 1000);
 
     return () => clearInterval(timerInterval);
-  }, [timerStarted]);
+  }, [timerStarted, isLoaded, timerSecondMove]);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -589,13 +597,16 @@ function SkelePageContent() {
             >
               {/* image card */}
               <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-4 shadow-2xl border border-white/40 flex flex-col items-center">
-                <img
+                <Image
                   src={pose.images}
                   alt={`${pose.name} reference`}
+                  width={224}
+                  height={224}
                   className={`w-56 h-56 object-contain rounded-xl border-2 border-white/40 shadow-lg ${isReversed ? 'scale-x-[-1]' : ''}`}
                   onError={(e) => {
-                    e.currentTarget.parentElement!.style.display = 'none';
+                    (e.target as HTMLImageElement).parentElement!.style.display = 'none';
                   }}
+                  unoptimized
                 />
                 <p className="text-black text-lg text-center mt-2 font-semibold drop-shadow">{pose.name}</p>
               </div>
@@ -695,7 +706,6 @@ function SkelePageContent() {
         <ProgramNextPoseLoader 
           isProgramActive={!!isProgramActive} 
           programSession={programSession} 
-          poseId={poseId} 
         />
       )}
 
@@ -716,7 +726,7 @@ export default function SkelePage() {
   );
 }
 
-function ProgramNextPoseLoader({ isProgramActive, programSession, poseId }: { isProgramActive: boolean, programSession: any, poseId: any }) {
+function ProgramNextPoseLoader({ isProgramActive, programSession }: { isProgramActive: boolean, programSession: ReturnType<typeof useProgramSession> }) {
   const [nextPoseName, setNextPoseName] = useState<string | null>(null);
   useEffect(() => {
     if (

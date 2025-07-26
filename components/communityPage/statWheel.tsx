@@ -93,7 +93,7 @@ const Statwheel = () => {
 
   return (
     <div className="flex items-center justify-between">
-      <div className="overflow-hidden min-h-[64px] flex items-start relative">
+      <div className="overflow-hidden flex items-start relative">
         <AnimatePresence mode="wait">
           {current && (
             <motion.div

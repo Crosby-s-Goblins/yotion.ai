@@ -45,7 +45,7 @@ const Stats = () => {
   }, [user]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 items-center">
       <div className="bg-card.glass rounded-2xl p-6 border border-border/50 shadow-card">
         <div className="flex items-center justify-between">
           <div>
@@ -86,7 +86,7 @@ const Stats = () => {
         </div>
       </div>
 
-      <div className="bg-card.glass rounded-2xl p-6 border border-border/50 shadow-card overflow-hidden relative">
+      <div className="bg-card.glass rounded-2xl p-6 border border-border/50 shadow-card">
         <Statwheel/>
       </div>
     </div>

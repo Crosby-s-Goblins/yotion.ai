@@ -4,14 +4,6 @@ import { TrendingUp, TrendingDown } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, LabelList, XAxis } from "recharts"
 
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
@@ -22,7 +14,7 @@ export const description = "A bar chart with a label"
 
 const chartConfig = {
   desktop: {
-    label: "Desktop",
+    label: "Poses Done",
     color: "var(--chart-2)",
   },
 } satisfies ChartConfig

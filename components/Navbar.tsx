@@ -10,10 +10,15 @@ import { useUser } from './user-provider';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 
+interface Profile {
+  username?: string;
+  avatar_url?: string;
+}
+
 export default function Navbar() {
-  const user = useUser();
+  const user = useUser() as { id?: string; email?: string } | null;
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -108,11 +113,11 @@ export default function Navbar() {
                     <a href='/settings'>
                       <Avatar>
                         <AvatarImage src={profile?.avatar_url} alt="avatar"/>
-                        <AvatarFallback>{profile?.username?.[0]?.toUpperCase()}</AvatarFallback>
+                        <AvatarFallback>{profile?.username?.[0]?.toUpperCase() || ''}</AvatarFallback>
                       </Avatar>
                     </a>
                   </HoverCardTrigger>
-                  <HoverCardContent>
+                  <HoverCardContent className='bg-white'>
                     <div className='flex flex-col items-left gap-2'>
                       <div className='flex flex-col'>
                         <p className='opacity-50'>Logged in as:</p>

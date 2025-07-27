@@ -1,9 +1,0 @@
-[
-    {"joint": "rightElbow", "expected": 0, "tolerance": 25}, 
-    {"joint": "leftElbow", "expected": 0, "tolerance": 25}, 
-    {"joint": "rightShoulder", "expected": 0, "tolerance": 25}, 
-    {"joint": "leftShoulder", "expected": 0, "tolerance": 25}, 
-    {"joint": "rightKnee", "expected": 0, "tolerance": 20}, 
-    {"joint": "leftKnee", "expected": 0, "tolerance": 20}, 
-    {"joint": "rightHip", "expected": 0, "tolerance": 10}, 
-    {"joint": "leftHip", "expected": 0, "tolerance": 10}]

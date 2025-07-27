@@ -47,7 +47,7 @@ function calculateStreak(dates: string[]): number {
   const practicedToday = normalizedDatesSet.has(todayStr);
   
   let streak = 0;
-  let checkDate = new Date(todayUTC);
+  const checkDate = new Date(todayUTC);
 
   // If practiced today, start counting from today
   if (practicedToday) {
@@ -82,7 +82,7 @@ function calculateStreak(dates: string[]): number {
 
 
 export default function PerformancePage() {
-  const user = useUser();
+  const user = useUser() as { id?: string } | null;
 
   const [sessions, setSessions] = useState<PerformanceSession[]>([]);
   const [loading, setLoading] = useState(true);
@@ -158,9 +158,13 @@ export default function PerformancePage() {
         setStreak(calculatedStreak);
 
         setLoading(false);
-      } catch (err: any) {
-        setError(err.message || "Failed to fetch data");
-        setLoading(false);
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Failed to fetch data");
+        }
+        setLoading(false);      
       }
     };
 

@@ -8,17 +8,8 @@ import {
   LineChart,
   ResponsiveContainer,
   XAxis,
-  TooltipProps,
 } from "recharts"
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 import {
   ChartConfig,
   ChartContainer,
@@ -32,7 +23,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-function CustomTooltip({ active, payload, label, customLabel }: any) {
+function CustomTooltip({ active, payload, label, customLabel }: {
+  active?: boolean;
+  payload?: Array<{value: number}>;
+  label?: string;
+  customLabel?: string;
+}) {
   if (active && payload && payload.length) {
     const score = payload[0].value as number
     const percent = (score / 100).toFixed(1)
@@ -78,7 +74,7 @@ function ChartLine({ sessions, dataKey, label, stroke }: {
 }) {
   const [timeRange, setTimeRange] = useState<"day" | "week">("day")
 
-  const now = new Date()
+  const now = useMemo(() => new Date(), [])
 
   const recentPoints = useMemo(() => {
     if (timeRange === "day") {

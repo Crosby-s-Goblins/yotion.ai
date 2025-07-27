@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,19 +9,20 @@ import { Label } from "@radix-ui/react-dropdown-menu";
 
 export default function Hero() {
 
-    async function handleSubmit(e) {
+    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
+        const form = e.currentTarget;
         const response = await fetch("https://api.web3forms.com/submit", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                Accept: "application/json",
             },
             body: JSON.stringify({
-                access_key: process.env.NEXT_PUBLIC_WEB3_PUBLIC_KEY,
-                name: (e.target.fName.value+" "+e.target.lName.value),
-                email: e.target.email.value,
-                message: e.target.message.value,
+                access_key: "xk5b1-2q3b6-2k6z6-9v1b1",
+                fName: (form.elements.namedItem('fName') as HTMLInputElement)?.value,
+                lName: (form.elements.namedItem('lName') as HTMLInputElement)?.value,
+                email: (form.elements.namedItem('email') as HTMLInputElement)?.value,
+                message: (form.elements.namedItem('message') as HTMLInputElement)?.value,
             }),
         });
         const result = await response.json();
@@ -65,7 +66,7 @@ export default function Hero() {
                     <div>
                         <Card className="justify-content my-4">
                         {/* <label htmlFor="message">Message</label> */}
-                            <Textarea name="message" required rows="9" placeholder="Message" className="shadow" style={{resize:'none'}}></Textarea>
+                            <Textarea name="message" required rows={9} placeholder="Message" className="shadow" style={{resize:'none'}}></Textarea>
                         </Card>
                     </div>
                     <Button type="submit" className="bg-black text-white items-center mt-0 w-full">Submit Form</Button>

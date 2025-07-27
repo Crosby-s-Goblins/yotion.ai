@@ -6,9 +6,10 @@ import {
     DrawingUtils,
     PoseLandmarker
 } from '@mediapipe/tasks-vision';
-import { useEffect, useRef, useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useTTS } from '@/context/TextToSpeechContext';
+import { useUserPreferences } from '@/context/UserPreferencesContext';
 
 type PoseAngle = {
     joint: string;
@@ -17,17 +18,16 @@ type PoseAngle = {
 };
 type PoseAngles = PoseAngle[];
 
-function useTextToSpeech(text: string) {
+function useTextToSpeech(text: string, loading: boolean) {
     const { ttsEnabled } = useTTS();
     const [hasMounted, setHasMounted] = useState(false);
 
     useEffect(() => {
-        // Set hasMounted to true on client after first render
         setHasMounted(true);
     }, []);
-    
+
     useEffect(() => {
-        if (!hasMounted) return; //Guard to wait until settings loaded before speaking?
+        if (!hasMounted || loading) return; // Wait until preferences are loaded
         if (text) {
             const synth = window.speechSynthesis;
             synth.cancel();
@@ -37,14 +37,13 @@ function useTextToSpeech(text: string) {
             } else {
                 console.log ("Text to speech is currently disabled, change in settings");
             }
-            
         }
-    }, [text, ttsEnabled]);
+    }, [text, ttsEnabled, loading]);
 }
 
-export function usePoseCorrection(selectedPose: number, timerStartedRef: React.RefObject<number>) {
+export function usePoseCorrection(selectedPose: number, timerStartedRef: React.RefObject<number>, isReversed?: boolean) {
+    const { loading } = useUserPreferences();
     let poseLandmarker: PoseLandmarker | null = null;
-    let temp : string;
 
     const [poseAngles, setPoseAngles] = useState<PoseAngles | null>(null);
 
@@ -52,7 +51,7 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
     const videoRef = useRef<HTMLVideoElement>(null);
     
     // Store previous landmarks for smoothing
-    const previousLandmarksRef = useRef<any[]>([]);
+    const previousLandmarksRef = useRef<PoseLandmark[]>([]);
 
     //Bulk values for timer start? -- Redundant with above, pick one later
     const rightElbowAngleRef = useRef<number | null>(null);
@@ -66,36 +65,49 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
 
     // text to speech 
     const [formText, setFormText] = useState<string | null>("no text yet");
-    useTextToSpeech(formText ?? "");
+    const formTextRef = useRef(formText);
+    const lastFormTextUpdateRef = useRef(Date.now());
+    useEffect(() => {
+      if (!loading) {
+        formTextRef.current = formText;
+      }
+    }, [formText, loading]);
+    useTextToSpeech(!loading ? (formText ?? "") : "", loading);
 
     const selectedPoseRef = useRef<PoseAngles | null>(null);
 
     // score system - accuracy
     const [score, setScore] = useState<number>(100);
+    const scoreRef = useRef(score);
+    useEffect(() => {
+      scoreRef.current = score;
+    }, [score]);
+    const lastScoreUpdateRef = useRef(Date.now());
 
     const animationFrameRef = useRef<number | null>(null);
     const runningRef = useRef(true); // control loop state
 
+    const closePose = useCallback(() => {
+        poseLandmarker?.close?.();
+        poseLandmarker = null;
+    }, [poseLandmarker]);
+
     useEffect(() => {
         runningRef.current = true;
-
         const detectLoop = () => {
-        if (!runningRef.current) return;
-
-        // your pose detection logic...
-        animationFrameRef.current = requestAnimationFrame(detectLoop);
+            if (!runningRef.current) return;
+            // your pose detection logic...
+            animationFrameRef.current = requestAnimationFrame(detectLoop);
         };
-
         detectLoop();
-
         return () => {
-        runningRef.current = false;
-        if (animationFrameRef.current) {
-            cancelAnimationFrame(animationFrameRef.current);
-        }
-        closePose(); // Optional: close detector on unmount
+            runningRef.current = false;
+            if (animationFrameRef.current) {
+                cancelAnimationFrame(animationFrameRef.current);
+            }
+            closePose(); // Optional: close detector on unmount
         };
-    }, []);
+    }, [closePose]);
 
     const stop = () => {
         runningRef.current = false;
@@ -119,7 +131,6 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
         .eq('id', selectedPose)
         .single();
 
-        
         if (error) {
             console.error("Supabase error:", error.message);
             setPoseAngles(null);
@@ -136,20 +147,31 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
             ? JSON.parse(data.angles.trim())
             : data.angles;
 
-            setPoseAngles(Array.isArray(parsed) ? parsed : null);
+        let angles = Array.isArray(parsed) ? parsed : null;
+        if (angles && isReversed) {
+            angles = angles.map(a => {
+                if (a.joint.startsWith('left')) return { ...a, joint: a.joint.replace('left', 'right') };
+                if (a.joint.startsWith('right')) return { ...a, joint: a.joint.replace('right', 'left') };
+                return a;
+            });
+        }
+        setPoseAngles(angles);
         } catch (e) {
             console.error("Failed to parse angles JSON:", e);
             setPoseAngles(null);
         }
 
-
     };
     if (selectedPose) fetchPose();
-    }, [selectedPose]);
+    }, [selectedPose, isReversed]);
 
 
     // Utility to calculate angle given points A, B, C
-    function calculateAngle(A: any, B: any, C: any): number {
+    function calculateAngle(
+        A: { x: number; y: number; z?: number; visibility?: number },
+        B: { x: number; y: number; z?: number; visibility?: number },
+        C: { x: number; y: number; z?: number; visibility?: number }
+    ): number {
         const AB = { x: A.x - B.x, y: A.y - B.y };
         const CB = { x: C.x - B.x, y: C.y - B.y };
         const dot = AB.x * CB.x + AB.y * CB.y;
@@ -160,12 +182,15 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
         return angleRad * (180 / Math.PI);
     }
 
-    function isVisible(...points: any[]): boolean {
+    // Define a type for pose landmarks
+    type PoseLandmark = { x: number; y: number; z: number; visibility: number };
+
+    function isVisible(...points: PoseLandmark[]): boolean {
         return points.every(p => p && p.visibility !== undefined && p.visibility > 0.5);
     }
 
     // Smooth landmarks using Exponential Moving Average (EMA)
-    function smoothLandmarks(current: any[], previous: any[], alpha: number = 0.5): any[] {
+    function smoothLandmarks(current: PoseLandmark[], previous: PoseLandmark[], alpha: number = 0.5): PoseLandmark[] {
         if (!previous || previous.length === 0) return current;
 
         return current.map((currPoint, i) => {
@@ -175,8 +200,8 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
             return {
                 x: alpha * currPoint.x + (1 - alpha) * prevPoint.x,
                 y: alpha * currPoint.y + (1 - alpha) * prevPoint.y,
-                z: alpha * currPoint.z + (1 - alpha) * prevPoint.z,
-                visibility: currPoint.visibility, // Keep current visibility
+                z: alpha * (currPoint.z ?? 0) + (1 - alpha) * (prevPoint.z ?? 0),
+                visibility: currPoint.visibility ?? 1,
             };
         });
     }    
@@ -279,7 +304,11 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
                         landmark[25]));
                     
                     if (!isVisible(landmark[13], landmark[11], landmark[23], landmark[14], landmark[12], landmark[24], landmark[23], landmark[25], landmark[27], landmark[12], landmark[14], landmark[16], landmark[11], landmark[13], landmark[21], landmark[24], landmark[26], landmark[28], landmark[11], landmark[23], landmark[25])) {
-                        setFormText("Body not in frame")
+                        const now = Date.now();
+                        if (isMounted && formTextRef.current !== "Body not in frame" && now - lastFormTextUpdateRef.current > 200) {
+                          setFormText("Body not in frame");
+                          lastFormTextUpdateRef.current = now;
+                        }
                     } else {
                         const rightElbowData = selectedPoseRef.current?.find(a => a.joint === "rightElbow");
                         const leftElbowData = selectedPoseRef.current?.find(a => a.joint === "leftElbow");
@@ -291,55 +320,139 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
                         const leftHipData = selectedPoseRef.current?.find(a => a.joint === "leftHip");
                     
                         if ( rightElbowData && rightElbowAngleRef.current < (rightElbowData.expected - rightElbowData.tolerance)) {
-                            setFormText("Open your right arm.");
+                            const msg = "Open your right arm.";
+                            const now = Date.now();
+                            if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
+                              setFormText(msg);
+                              lastFormTextUpdateRef.current = now;
+                            }
                         } else if (rightElbowData && rightElbowAngleRef.current > (rightElbowData.expected + rightElbowData.tolerance)) {
-                            setFormText("Close your right arm.");
+                            const msg = "Close your right arm.";
+                            const now = Date.now();
+                            if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
+                              setFormText(msg);
+                              lastFormTextUpdateRef.current = now;
+                            }
                         } 
                         
                         else if (leftElbowData && leftElbowAngleRef.current < (leftElbowData.expected - leftElbowData.tolerance)) {
-                            setFormText("Open your left arm.");
+                            const msg = "Open your left arm.";
+                            const now = Date.now();
+                            if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
+                              setFormText(msg);
+                              lastFormTextUpdateRef.current = now;
+                            }
                         } else if (leftElbowData && leftElbowAngleRef.current > (leftElbowData.expected + leftElbowData.tolerance)) {
-                            setFormText("Close left right arm.");
+                            const msg = "Close your left arm.";
+                            const now = Date.now();
+                            if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
+                              setFormText(msg);
+                              lastFormTextUpdateRef.current = now;
+                            }
                         }
 
                         else if (rightShoulderData && rightShoulderAngleRef.current < (rightShoulderData.expected - rightShoulderData.tolerance)){
-                            setFormText("Open your right shoulder.")
+                            const msg = "Open your right shoulder.";
+                            const now = Date.now();
+                            if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
+                              setFormText(msg);
+                              lastFormTextUpdateRef.current = now;
+                            }
                         } else if (rightShoulderData && rightShoulderAngleRef.current > (rightShoulderData.expected + rightShoulderData.tolerance)) {
-                            setFormText("Close your right shoulder.");
+                            const msg = "Close your right shoulder.";
+                            const now = Date.now();
+                            if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
+                              setFormText(msg);
+                              lastFormTextUpdateRef.current = now;
+                            }
                         }
 
                         else if (leftShoulderData && leftShoulderAngleRef.current < (leftShoulderData.expected - leftShoulderData.tolerance)){
-                            setFormText("Open your left shoulder.")
+                            const msg = "Open your left shoulder.";
+                            const now = Date.now();
+                            if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
+                              setFormText(msg);
+                              lastFormTextUpdateRef.current = now;
+                            }
                         } else if (leftShoulderData && leftShoulderAngleRef.current > (leftShoulderData.expected + leftShoulderData.tolerance)) {
-                            setFormText("Close your left shoulder.");
+                            const msg = "Close your left shoulder.";
+                            const now = Date.now();
+                            if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
+                              setFormText(msg);
+                              lastFormTextUpdateRef.current = now;
+                            }
                         }
 
                         else if (rightHipData && rightHipAngleRef.current < (rightHipData.expected - rightHipData.tolerance)){
-                            setFormText("Open your right hip.")
+                            const msg = "Open your right hip.";
+                            const now = Date.now();
+                            if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
+                              setFormText(msg);
+                              lastFormTextUpdateRef.current = now;
+                            }
                         } else if (rightHipData && rightHipAngleRef.current > (rightHipData.expected + rightHipData.tolerance)) {
-                            setFormText("Close your right hip.");
+                            const msg = "Close your right hip.";
+                            const now = Date.now();
+                            if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
+                              setFormText(msg);
+                              lastFormTextUpdateRef.current = now;
+                            }
                         }
                         
                         else if (leftHipData && leftHipAngleRef.current < (leftHipData.expected - leftHipData.tolerance)){
-                            setFormText("Open your left hip.")
+                            const msg = "Open your left hip.";
+                            const now = Date.now();
+                            if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
+                              setFormText(msg);
+                              lastFormTextUpdateRef.current = now;
+                            }
                         } else if (leftHipData && leftHipAngleRef.current > (leftHipData.expected + leftHipData.tolerance)) {
-                            setFormText("Close your left hip.");
+                            const msg = "Close your left hip.";
+                            const now = Date.now();
+                            if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
+                              setFormText(msg);
+                              lastFormTextUpdateRef.current = now;
+                            }
                         }
 
                         else if (rightKneeData && rightKneeAngleRef.current < (rightKneeData.expected - rightKneeData.tolerance)){
-                            setFormText("Open your right knee.")
+                            const msg = "Open your right knee.";
+                            const now = Date.now();
+                            if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
+                              setFormText(msg);
+                              lastFormTextUpdateRef.current = now;
+                            }
                         } else if (rightKneeData && rightKneeAngleRef.current > (rightKneeData.expected + rightKneeData.tolerance)) {
-                            setFormText("Close your right knee.");
+                            const msg = "Close your right knee.";
+                            const now = Date.now();
+                            if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
+                              setFormText(msg);
+                              lastFormTextUpdateRef.current = now;
+                            }
                         }
 
                         else if (leftKneeData && leftKneeAngleRef.current < (leftKneeData.expected - leftKneeData.tolerance)){
-                            setFormText("Open your left knee.")
+                            const msg = "Open your left knee.";
+                            const now = Date.now();
+                            if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
+                              setFormText(msg);
+                              lastFormTextUpdateRef.current = now;
+                            }
                         } else if (leftKneeData && leftKneeAngleRef.current > (leftKneeData.expected + leftKneeData.tolerance)) {
-                            setFormText("Close your left knee.");
+                            const msg = "Close your left knee.";
+                            const now = Date.now();
+                            if (isMounted && formTextRef.current !== msg && now - lastFormTextUpdateRef.current > 200) {
+                              setFormText(msg);
+                              lastFormTextUpdateRef.current = now;
+                            }
                         }
 
                         else {
-                            setFormText("Perfect!")
+                            const now = Date.now();
+                            if (isMounted && formTextRef.current !== "Perfect!" && now - lastFormTextUpdateRef.current > 200) {
+                              setFormText("Perfect!");
+                              lastFormTextUpdateRef.current = now;
+                            }
                         }
                           
                     }
@@ -451,7 +564,7 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
             if (animationFrameId) cancelAnimationFrame(animationFrameId);
             if (poseLandmarkerInstance) poseLandmarkerInstance.close();
         };
-    }, [selectedPose]);
+    }, []);
 
     // Function to check if an angle is within tolerance
     function isAngleCorrect(angle: number | null, expected: number, tolerance: number) {
@@ -459,28 +572,40 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
         return Math.abs(angle - expected) <= tolerance;
     };
 
-    function closePose() {
-        poseLandmarker?.close?.();
-        poseLandmarker = null;
-    }
-
     function correctPose() {
         const currentPose = selectedPoseRef.current;
 
+        // Helper to get the correct joint name and value, swapping left/right if isReversed
+        function getJoint(joint: string) {
+            if (!isReversed) return joint;
+            if (joint.startsWith('left')) return joint.replace('left', 'right');
+            else if (joint.startsWith('right')) return joint.replace('right', 'left');
+            return joint;
+        }
+        function getRef(joint: string) {
+            switch (joint) {
+                case 'rightElbow': return isReversed ? leftElbowAngleRef : rightElbowAngleRef;
+                case 'leftElbow': return isReversed ? rightElbowAngleRef : leftElbowAngleRef;
+                case 'rightKnee': return isReversed ? leftKneeAngleRef : rightKneeAngleRef;
+                case 'leftKnee': return isReversed ? rightKneeAngleRef : leftKneeAngleRef;
+                case 'rightShoulder': return isReversed ? leftShoulderAngleRef : rightShoulderAngleRef;
+                case 'leftShoulder': return isReversed ? rightShoulderAngleRef : leftShoulderAngleRef;
+                case 'rightHip': return isReversed ? leftHipAngleRef : rightHipAngleRef;
+                case 'leftHip': return isReversed ? rightHipAngleRef : leftHipAngleRef;
+                default: return null;
+            }
+        }
+
         const requiredJoints = [
-            { joint: "rightElbow", value: rightElbowAngleRef.current },
-            { joint: "leftElbow", value: leftElbowAngleRef.current },
-            { joint: "rightKnee", value: rightKneeAngleRef.current },
-            { joint: "leftKnee", value: leftKneeAngleRef.current },
-            { joint: "rightShoulder", value: rightShoulderAngleRef.current },
-            { joint: "leftShoulder", value: leftShoulderAngleRef.current },
-            { joint: "rightHip", value: rightHipAngleRef.current },
-            { joint: "leftHip", value: leftHipAngleRef.current },
+            'rightElbow', 'leftElbow', 'rightKnee', 'leftKnee',
+            'rightShoulder', 'leftShoulder', 'rightHip', 'leftHip',
         ];
 
-        for (const { joint, value } of requiredJoints) {
-            const angleData = currentPose?.find(a => a.joint === joint);
-            if (!isAngleCorrect(value, angleData?.expected || 0, angleData?.tolerance || 0)) {
+        for (const joint of requiredJoints) {
+            const ref = getRef(joint);
+            const value = ref?.current;
+            const angleData = currentPose?.find(a => a.joint === getJoint(joint));
+            if (!isAngleCorrect(value ?? null, angleData?.expected || 0, angleData?.tolerance || 0)) {
                 return false;
             }
         }
@@ -494,7 +619,12 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
             pointLoss = 0.000001 * (para ** 2);
         }
         if (typeof pointLoss === 'number' && !isNaN(pointLoss)) {
-            setScore(prev => Math.max(0, prev - pointLoss));
+            const now = Date.now();
+            const newScore = Math.max(0, scoreRef.current - pointLoss);
+            if (scoreRef.current !== newScore && now - lastScoreUpdateRef.current > 200) {
+                setScore(newScore);
+                lastScoreUpdateRef.current = now;
+            }
         }
         return pointLoss;
     }

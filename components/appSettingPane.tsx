@@ -13,25 +13,28 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { useTimer } from '@/context/TimerContext';
 import { useTTS } from '@/context/TextToSpeechContext';
 import { createClient } from '@/lib/supabase/client';
 import { useUserPreferences } from '@/context/UserPreferencesContext';
+import { useUser } from './user-provider';
+import { Input } from './ui/input';
 
 const supabase = createClient();
 
 export default function SettingsPane() {
-  const {timerSeconds, setTimerSeconds} = useTimer();
-  const { ttsEnabled, setTTSEnabled } = useTTS();
+  const {timerSeconds} = useTimer();
+  const { setTTSEnabled } = useTTS();
 
   const [localTimer, setLocalTimer] = useState<string | undefined>(undefined);
   const [localTTS, setLocalTTS] = useState<boolean | undefined>(undefined);
   const [reminders, setReminders] = useState<boolean | undefined>(undefined);
   const [motivation, setMotivation] = useState<boolean | undefined>(undefined);
-  const [load, setLoad] = useState(true);
+  const [hasSubmitted, setHasSubmitted] = useState<boolean>(false);
 
   const {setPreferences, loading, preferences} = useUserPreferences();
+  const [weight, setWeight] = useState<number>(0);
+  const user = useUser() as { id?: string } | null;
 
   useEffect(() => {
     if (!loading && preferences) {
@@ -44,7 +47,6 @@ export default function SettingsPane() {
 
   useEffect(() => {
     const fetchOrInitPreferences = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
       const { data, error } = await supabase
@@ -82,25 +84,39 @@ export default function SettingsPane() {
         setMotivation(data.motivation ?? false);
       }
 
-      setLoad(false);
+      // Removed unused 'load' state
     };
 
     fetchOrInitPreferences();
-  }, [setPreferences]);
+  }, [setPreferences, user, setTTSEnabled]);
 
-  const handleSave = async () => {
-    const user = await supabase.auth.getUser();
-    if (!user.data.user) return;
+  const handleChangeWeight = async (newWeight: number) => {
+    if (!user?.id) return;
 
     const { error } = await supabase
       .from('user_preferences')
-      .upsert({
-        id: user.data.user.id,
-        default_timer: Number(localTimer),
-        tts_enabled: localTTS,
-        reminders: reminders,
-        motivation: motivation,
-      });
+      .update({ weight: newWeight })
+      .eq('id', user.id);
+
+    if (error) {
+      console.log(error)
+    } else {
+      setHasSubmitted(true);
+    }
+  }
+
+  const handleSave = async () => {
+    if (!user?.id) return;
+
+  const { error } = await supabase
+    .from('user_preferences')
+    .upsert({
+      id: user.id,
+      default_timer: Number(localTimer),
+      tts_enabled: localTTS,
+      reminders: reminders,
+      motivation: motivation,
+    });
 
     if (error) {
       console.error("Failed to save:", error);
@@ -166,6 +182,38 @@ export default function SettingsPane() {
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      <div className="bg-card.glass flex flex-row justify-between rounded-2xl p-6 border border-border/50 shadow-card">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="text-lg font-bold bg-gradient-to-tr from-primary to-accent bg-clip-text text-transparent">
+              Change Weight
+            </h3>
+            <p className="text-sm text-muted-foreground">Configure your weight for calorie calculations.</p>
+          </div>
+        </div>
+        
+        <form
+          onSubmit={e => {
+            e.preventDefault();
+            handleChangeWeight(weight);
+          }}
+          className="flex items-center gap-7"
+        >
+          <div className='flex items-center gap-2'>
+            <Input
+              placeholder='150'
+              className='rounded-md w-[75px] text-center'
+              value={weight}
+              onChange={(e) => setWeight(Number(e.target.value))}
+            />
+            <p className='font-regular text-xl'>lbs</p>
+          </div>
+            <Button disabled={hasSubmitted}>
+              {hasSubmitted ? "Changed!" : "Submit"}
+            </Button>
+        </form>
       </div>
 
       {/* Notifications Card */}

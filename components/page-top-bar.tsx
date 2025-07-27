@@ -1,7 +1,6 @@
 'use client'
 
 import { ArrowLeftFromLine } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useNavigationDirection } from "@/context/NavigationDirectionContext";
 import { flushSync } from "react-dom";

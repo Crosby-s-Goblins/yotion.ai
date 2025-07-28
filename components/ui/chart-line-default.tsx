@@ -220,11 +220,11 @@ function ChartLine({ sessions, dataKey, label, stroke }: {
         <div className="flex gap-2 leading-none font-medium">
           {isIncrease ? (
             <>
-              Trending up by {changePercent.toFixed(1)}% <TrendingUp className="h-4 w-4" />
+              <TrendingUp className="h-4 w-4 text-green-600" /> Trending up by {changePercent.toFixed(1)}% 
             </>
           ) : (
             <>
-              Trending down by {Math.abs(changePercent).toFixed(1)}% <TrendingDown className="h-4 w-4" />
+              <TrendingDown className="h-4 w-4 text-red-600" /> Trending down by {Math.abs(changePercent).toFixed(1)}% 
             </>
           )}
         </div>

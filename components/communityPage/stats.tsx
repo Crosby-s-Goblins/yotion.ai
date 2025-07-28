@@ -11,9 +11,9 @@ const Stats = () => {
   const [sessionsToday, setSessionsToday] = useState<number | null>(null);
   const [loadingMembers, setLoadingMembers] = useState(true);
   const [loadingSessions, setLoadingSessions] = useState(true);
+  const supabase = createClient();
 
   useEffect(() => {
-    const supabase = createClient();
     // Fetch active members (count of profiles)
     supabase.from("profiles").select("id", { count: "exact", head: true })
       .then(({ count }) => {
@@ -24,7 +24,6 @@ const Stats = () => {
 
   useEffect(() => {
     if (!user?.id) return;
-    const supabase = createClient();
     // Get today's date in YYYY-MM-DD format (UTC)
     const today = new Date();
     const yyyy = today.getUTCFullYear();

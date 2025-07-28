@@ -51,7 +51,7 @@ const AllPosts = ({ reloadKey }: { reloadKey?: number }) => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [postedBy, setPostedBy] = useState<string>("all");
-  const [last, setLast] = useState<string>("week");
+  const [last, setLast] = useState<string>("month");
 
   // Fetch posts and liked_posts
   useEffect(() => {
@@ -241,7 +241,7 @@ const AllPosts = ({ reloadKey }: { reloadKey?: number }) => {
   return (
     <div className="lg:col-span-2 space-y-6" id="posts-section">
       <Card className="p-3 px-6 flex items-center justify-between">
-        <h1 className="text-md">Filter Options:</h1>
+        <h1 className="text-md hidden md:flex">Filter Options:</h1>
         <div className="flex gap-4">
           <div className="flex text-sm items-center gap-1">
             posted by:
@@ -301,7 +301,7 @@ const AllPosts = ({ reloadKey }: { reloadKey?: number }) => {
                           className="bg-yellow-300 text-yellow-800 text-xs font-medium dark:bg-yellow-900 dark:text-yellow-300 border-none overflow-hidden relative px-3 py-1 flex gap-2"
                         >
                           <Trophy size={12} />
-                          <span className="relative z-10">Featured Post!</span>
+                          <span className="relative z-10 hidden md:flex">Featured Post!</span>
                           <span
                             className="pointer-events-none absolute inset-0 z-0 block h-full w-full bg-[linear-gradient(45deg,transparent_40%,rgba(255,255,255,0.85)_48%,transparent_56%,transparent_100%)] bg-[length:250%_250%] bg-[position:-100%_0] bg-no-repeat animate-shine"
                             aria-hidden="true"

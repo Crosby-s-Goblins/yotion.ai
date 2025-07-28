@@ -299,7 +299,7 @@ export default function SelectionComponents() {
                 <div className="relative flex-1 w-full">
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
                   <Input
-                    className="w-full pl-12 pr-4 h-12 rounded-full border-2 bg-background/50 backdrop-blur-sm"
+                    className="w-full pl-12 pr-4 h-12 rounded-full border-2 bg-background/50"
                     placeholder="Search poses..."
                     type="text"
                     value={search}
@@ -410,7 +410,7 @@ export default function SelectionComponents() {
                 <div className="relative flex-1 w-full flex items-center gap-2">
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
                   <Input
-                    className="w-full pl-12 pr-4 h-12 rounded-full border-2 bg-background/50 backdrop-blur-sm"
+                    className="w-full pl-12 pr-4 h-12 rounded-full border-2 bg-background/50"
                     placeholder="Search programs..."
                     type="text"
                     value={programSearch}

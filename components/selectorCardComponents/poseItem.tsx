@@ -1,3 +1,4 @@
+// import { Pose } from './types';
 import { motion } from "framer-motion";
 
 export const difficultyColors = {

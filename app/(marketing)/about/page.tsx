@@ -81,12 +81,12 @@ export default function AboutPage() {
         </Card>
       </section>
 
-      {/* Team Section */}
+      {/* Team Section
       <section className="pt-8">
         <h2 className="text-3xl font-bold text-center mb-8">Meet the Team</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {TEAM.map((member) => (
-            <Card key={member.name} className="flex flex-col items-center p-6 bg-white/95 shadow-xl border-0">
+          {TEAM.map((member, index) => (
+            <Card key={`${member.name}-${index}`} className="flex flex-col items-center p-6 bg-white/95 shadow-xl border-0">
               <div className="w-24 h-24 rounded-full overflow-hidden mb-4 border-4 border-primary/20 shadow-md">
                 <Image
                   src={member.img}
@@ -103,7 +103,7 @@ export default function AboutPage() {
             </Card>
           ))}
         </div>
-      </section>
+      </section> */}
 
       {/* Call to Action */}
       <section className="flex flex-col items-center pt-12 gap-4">

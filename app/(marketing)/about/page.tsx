@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
-import { Activity, Mic, Users, TrendingUp } from 'lucide-react';
+import { Activity, Mic, Users, TrendingUp, AlertTriangle, Clock, UserX, Frown } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -37,15 +37,62 @@ export default function AboutPage() {
     <main className="max-w-5xl mx-auto px-4 sm:px-6">
       {/* Hero Section */}
       <section className="flex flex-col items-center text-center gap-6 mt-20 mb-10">
-        <h1 className="text-5xl sm:text-6xl font-extrabold bg-gradient-to-tr from-primary to-accent bg-clip-text text-transparent drop-shadow-lg">About Yotion</h1>
-        <p className="text-lg sm:text-xl text-gray-700 max-w-2xl">
-          <span className="font-semibold">Yotion</span> is your AI-powered yoga companion—blending intelligent pose correction, real-time feedback, and a vibrant community to help you move, breathe, and grow with confidence.
-        </p>
-        <div className="flex flex-wrap justify-center gap-4 mt-2">
-          <span className="inline-block bg-primary/10 text-primary px-4 py-1 rounded-full text-sm font-medium">AI Pose Detection</span>
-          <span className="inline-block bg-accent/10 text-accent px-4 py-1 rounded-full text-sm font-medium">Voice Feedback</span>
-          <span className="inline-block bg-secondary/10 text-secondary px-4 py-1 rounded-full text-sm font-medium">Progress Tracking</span>
-          <span className="inline-block bg-gray-100 text-gray-700 px-4 py-1 rounded-full text-sm font-medium">Community</span>
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            The Struggles of <span className="bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">Traditional Yoga</span>
+          </h2>
+          <p className="text-gray-600 max-w-2xl mx-auto">
+            Many practitioners face common challenges that hold them back from reaching their full potential
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="flex flex-col items-center py-8 shadow-lg border-0 bg-red-50/50 hover:bg-red-50/80 transition-colors">
+            <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
+              <AlertTriangle className="w-8 h-8 text-red-600" />
+            </div>
+            <CardTitle className="mb-2 text-lg text-gray-900">Poor Form</CardTitle>
+            <CardContent className="text-gray-600 text-sm text-center px-2">
+              Without real-time feedback, it's easy to develop bad habits or risk injury with incorrect alignment.
+            </CardContent>
+          </Card>
+          
+          <Card className="flex flex-col items-center py-8 shadow-lg border-0 bg-orange-50/50 hover:bg-orange-50/80 transition-colors">
+            <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center mb-4">
+              <Clock className="w-8 h-8 text-orange-600" />
+            </div>
+            <CardTitle className="mb-2 text-lg text-gray-900">Inconsistent Practice</CardTitle>
+            <CardContent className="text-gray-600 text-sm text-center px-2">
+              Staying motivated and maintaining a regular practice routine can be challenging without proper guidance.
+            </CardContent>
+          </Card>
+          
+          <Card className="flex flex-col items-center py-8 shadow-lg border-0 bg-yellow-50/50 hover:bg-yellow-50/80 transition-colors">
+            <div className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center mb-4">
+              <UserX className="w-8 h-8 text-yellow-600" />
+            </div>
+            <CardTitle className="mb-2 text-lg text-gray-900">Generic Instruction</CardTitle>
+            <CardContent className="text-gray-600 text-sm text-center px-2">
+              One-size-fits-all classes don't address your unique needs, flexibility level, or personal goals.
+            </CardContent>
+          </Card>
+          
+          <Card className="flex flex-col items-center py-8 shadow-lg border-0 bg-blue-50/50 hover:bg-blue-50/80 transition-colors">
+            <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mb-4">
+              <Frown className="w-8 h-8 text-blue-600" />
+            </div>
+            <CardTitle className="mb-2 text-lg text-gray-900">Lack of Community</CardTitle>
+            <CardContent className="text-gray-600 text-sm text-center px-2">
+              Practicing alone can feel isolating, with no support system to celebrate progress or overcome challenges.
+            </CardContent>
+          </Card>
+        </div>
+        
+        <div className="text-center mt-12">
+          <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full">
+            <span className="text-2xl">⬇️</span>
+            <span className="font-medium text-gray-800">That's where Yotion steps in</span>
+          </div>
         </div>
       </section>
 

@@ -113,7 +113,7 @@ export default function PricingPage() {
     <main className="min-h-screen flex flex-col items-center">
       <div className="flex-1 w-full flex flex-col gap-10 items-center">
         <div className="flex flex-col gap-4 items-center px-4 md:px-8 pt-20">
-          <h1 className="font-medium text-2xl sm:text-3xl lg:text-4xl !leading-tight mx-auto max-w-xl text-center">
+          <h1 className="font-semibold text-2xl sm:text-3xl lg:text-4xl !leading-tight mx-auto max-w-xl text-center">
             Choose Your Plan
           </h1>
           <p className="text-muted-foreground text-center max-w-2xl">

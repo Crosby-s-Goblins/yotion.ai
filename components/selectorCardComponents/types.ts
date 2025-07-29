@@ -5,7 +5,7 @@ export interface Pose {
     difficulty?: 'Easy' | 'Medium' | 'Hard';
     primary?: string[];
     secondary?: string[];
-    [key: string]: any;
+    [key: string]: string | string[] | undefined;
   };
   description?: string;
   benefits?: string[] | string;

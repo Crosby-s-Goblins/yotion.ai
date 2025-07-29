@@ -16,7 +16,7 @@ export default function PricingPage() {
   const isLoggedIn = !!user;
 
   const handleSubscribe = async () => {
-    if (!isLoggedIn) {
+    if (!isLoggedIn || !user) {
       // If not logged in, redirect to sign up
       router.push("/auth/sign-up");
       return;

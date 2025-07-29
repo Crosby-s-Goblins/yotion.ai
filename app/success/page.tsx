@@ -1,20 +1,23 @@
 'use client'
 
-import { useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, Loader2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
-export default function SuccessPage() {
+function SuccessPageContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const sessionId = searchParams.get('session_id');
   const [isVerifying, setIsVerifying] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [userStatus, setUserStatus] = useState<any>(null);
+  const [userStatus, setUserStatus] = useState<{ 
+    paidUser?: boolean; 
+    subscription_status?: string; 
+    stripe_customer_id?: string; 
+  } | null>(null);
 
   useEffect(() => {
     if (sessionId) {
@@ -101,7 +104,7 @@ export default function SuccessPage() {
           </CardHeader>
           <CardContent className="text-center space-y-4">
             <p className="text-sm text-muted-foreground">
-              Don't worry! Your payment was successful and is being processed. 
+              Don&apos;t worry! Your payment was successful and is being processed. 
               Your premium features should be available shortly.
             </p>
             <div className="space-y-2">
@@ -191,5 +194,23 @@ export default function SuccessPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <Card className="w-full max-w-md mx-auto">
+          <CardHeader className="text-center">
+            <Loader2 className="mx-auto h-12 w-12 text-primary animate-spin" />
+            <CardTitle className="text-2xl text-primary">Loading...</CardTitle>
+            <CardDescription>Verifying your payment</CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    }>
+      <SuccessPageContent />
+    </Suspense>
   );
 } 

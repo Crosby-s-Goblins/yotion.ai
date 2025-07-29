@@ -7,10 +7,12 @@ export const difficultyColors = {
   Hard: 'bg-red-500',
 } as const;
 
-type PoseItemProps = Pose & {
+interface PoseItemProps {
+  name: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard'; // add this line
   onClick: () => void;
   isExpanded: boolean;
-};
+}
 
 export const PoseItem = ({ name, difficulty, onClick, isExpanded }: PoseItemProps) => (
   <motion.div 

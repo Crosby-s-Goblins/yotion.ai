@@ -4,7 +4,7 @@ import React, { useState, useEffect, useDeferredValue, useMemo } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from 'framer-motion';
 import { Input } from "@/components/ui/input";
-import {Select, SelectTrigger, SelectValue, SelectContent, SelectItem} from '@/components/ui/select';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { createClient } from "@/lib/supabase/client";
 import Loading from "@/components/loading";
 import { difficultyColors } from "@/components/selectorCardComponents/poseItem";
@@ -21,6 +21,7 @@ import { Session } from '@/components/selectorCardComponents/types';
 import { SessionCard } from '@/components/selectorCardComponents/programCard';
 import { useProgramSession } from '@/context/ProgramSessionContext';
 import AddProgramModal from '@/components/selectorCardComponents/addProgramModal';
+import { Badge } from "@/components/ui/badge";
 
 export default function SelectionComponents() {
   const [poses, setPoses] = useState<Pose[]>([]);
@@ -36,7 +37,7 @@ export default function SelectionComponents() {
   const [hasPageEntered, setHasPageEntered] = useState(false);
   const [reflectPose, setReflectPose] = useState(false);
   // Add state for sessions and tab
-  const [tab, setTab] = useState('poses');
+  const [tab, setTab] = useState('programs');
   const [programs, setPrograms] = useState<Session[]>([]);
   const [programsLoading, setProgramsLoading] = useState(false);
   const [programsError, setProgramsError] = useState<string | null>(null);
@@ -51,6 +52,7 @@ export default function SelectionComponents() {
   const [editProgramOpen, setEditProgramOpen] = useState(false);
   const [selectedProgram, setSelectedProgram] = useState<Session | null>(null);
 
+
   useEffect(() => {
     resetTimerToDefault();
   }, [resetTimerToDefault]);
@@ -64,57 +66,57 @@ export default function SelectionComponents() {
   }, []);
 
   useEffect(() => {
-  const fetchEverything = async () => {
-    try {
-      const supabase = createClient();
+    const fetchEverything = async () => {
+      try {
+        const supabase = createClient();
 
-      // Check paid status first (Resolving unintentional race codition)
-      let finalPaidStatus = false;
+        // Check paid status first (Resolving unintentional race codition)
+        let finalPaidStatus = false;
 
-      if (user) {
-        const { data: allProfileData } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
+        if (user) {
+          const { data: allProfileData } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
 
-        const parseBool = (v: unknown) => v === true || v === 'true';
+          const parseBool = (v: unknown) => v === true || v === 'true';
 
-        finalPaidStatus =
-          parseBool(allProfileData?.paidUser) ||
-          parseBool(allProfileData?.paid_status) ||
-          parseBool(allProfileData?.isPaid) ||
-          parseBool(allProfileData?.premium);
+          finalPaidStatus =
+            parseBool(allProfileData?.paidUser) ||
+            parseBool(allProfileData?.paid_status) ||
+            parseBool(allProfileData?.isPaid) ||
+            parseBool(allProfileData?.premium);
 
-        setPaidStatus(finalPaidStatus);
+          setPaidStatus(finalPaidStatus);
+        }
+
+        // Fetch poses using correct paid status
+        let poseCall = supabase
+          .from('poseLibrary')
+          .select('*');
+
+        if (!finalPaidStatus) {
+          poseCall = poseCall.order('isFree', { ascending: false });
+        }
+
+        poseCall = poseCall.order('name');
+
+        const { data } = await poseCall;
+
+        if (data) {
+          setPoses(data || []);
+        }
+      } catch (error) {
+        console.error('Error during fetch:', error);
+      } finally {
       }
+    };
 
-      // Fetch poses using correct paid status
-      let poseCall = supabase
-        .from('poseLibrary')
-        .select('*');
-
-      if (!finalPaidStatus) {
-        poseCall = poseCall.order('isFree', { ascending: false });
-      }
-
-      poseCall = poseCall.order('name');
-
-      const { data } = await poseCall;
-
-      if (data) {
-        setPoses(data || []);
-      }
-    } catch (error) {
-      console.error('Error during fetch:', error);
-    } finally {
+    if (user) {
+      fetchEverything();
     }
-  };
-
-  if (user) {
-    fetchEverything();
-  }
-}, [user]);
+  }, [user]);
 
   // Fetch programs from both sessionLibrary and userSessionLibrary ONCE per page load
   useEffect(() => {
@@ -219,14 +221,14 @@ export default function SelectionComponents() {
 
   //Search filter functionality
   const searchedItems = useMemo(() => {
-  return poses.filter((item) => {
-    const matchesSearch = item.name.toLowerCase().includes(deferredSearch.toLowerCase());
-    const matchesDifficulty =
-      selectedDifficulty === 'all' ||
-      item.difficulty.toLowerCase() === selectedDifficulty;
-    return matchesSearch && matchesDifficulty;
-  });
-}, [poses, deferredSearch, selectedDifficulty]);
+    return poses.filter((item) => {
+      const matchesSearch = item.name.toLowerCase().includes(deferredSearch.toLowerCase());
+      const matchesDifficulty =
+        selectedDifficulty === 'all' ||
+        item.labels?.difficulty?.toLowerCase() === selectedDifficulty
+      return matchesSearch && matchesDifficulty;
+    });
+  }, [poses, deferredSearch, selectedDifficulty]);
 
   if (!isLoaded || paidStatus === null) {
     return <Loading />;
@@ -249,9 +251,21 @@ export default function SelectionComponents() {
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-lg leading-snug h-[3rem] break-words line-clamp-2">{pose.name}</h3>
-            <div className={`px-3 py-1 rounded-full text-xs font-medium text-white ${difficultyColors[pose.difficulty]}`}>
-              {pose.difficulty}
-            </div>
+            <div className="flex flex-wrap gap-2">
+            {/* Difficulty badge */}
+            {pose.labels?.difficulty && (
+              <Badge className={difficultyColors[pose.labels.difficulty]}>
+                {pose.labels.difficulty === "Easy"
+                  ? "Beginner"
+                  : pose.labels.difficulty === "Medium"
+                    ? "Intermediate"
+                    : pose.labels.difficulty === "Hard"
+                      ? "Advanced"
+                      : pose.labels.difficulty}
+              </Badge>
+            )}
+          </div>
+
           </div>
           {pose.description && (
             <p className="text-sm text-muted-foreground line-clamp-2">
@@ -283,11 +297,11 @@ export default function SelectionComponents() {
         {/* Tabs Switcher */}
         <Tabs value={tab} onValueChange={setTab} className="mb-8">
           <TabsList className="border-b border-border">
-            <TabsTrigger value="poses" className="cursor-pointer data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-muted data-[state=active]:font-semibold transition-colors">
-              Poses
-            </TabsTrigger>
             <TabsTrigger value="programs" className="cursor-pointer data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-muted data-[state=active]:font-semibold transition-colors">
               Programs
+            </TabsTrigger>
+            <TabsTrigger value="poses" className="cursor-pointer data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-muted data-[state=active]:font-semibold transition-colors">
+              Poses
             </TabsTrigger>
           </TabsList>
           {/* Pose Selection Tab */}
@@ -326,7 +340,7 @@ export default function SelectionComponents() {
                           </SelectTrigger>
                           <SelectContent className="bg-white">
                             <SelectItem value="all">All Levels</SelectItem>
-                            <SelectItem value="easy">Easy</SelectItem>
+                            <SelectItem value="easy">Beginner</SelectItem>
                             <SelectItem value="medium">Medium</SelectItem>
                             <SelectItem value="hard">Hard</SelectItem>
                           </SelectContent>
@@ -484,31 +498,31 @@ export default function SelectionComponents() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   <AnimatePresence mode="popLayout" initial={false}>
                     {isProgramFilterReady ? (
-                        (
-                          searchedPrograms
-                            .filter((program) =>
-                              programSourceFilter === 'all' ? true :
+                      (
+                        searchedPrograms
+                          .filter((program) =>
+                            programSourceFilter === 'all' ? true :
                               programSourceFilter === 'premade' ? !program.isUser :
-                              program.isUser
-                            )
-                            .sort((a, b) => a.name.localeCompare(b.name))
-                            .map((program) => (
-                              <div key={program.id} className="relative group">
-                                <SessionCard session={program} locked={!paidStatus} />
-                                {program.isUser && (
-                                  <button
-                                    className="absolute top-2 right-2 z-10 bg-white/80 rounded-full p-1 shadow hover:bg-white"
-                                    onClick={() => { setSelectedProgram(program as Session); setEditProgramOpen(true); }}
-                                    title="Edit Program"
-                                  >
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-gray-600">
-                                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 5.487a2.1 2.1 0 1 1 2.97 2.97L7.5 20.79l-4 1 1-4 14.362-14.303z" />
-                                    </svg>
-                                  </button>
-                                )}
-                              </div>
-                            ))
-                        )
+                                program.isUser
+                          )
+                          .sort((a, b) => a.name.localeCompare(b.name))
+                          .map((program) => (
+                            <div key={program.id} className="relative group">
+                              <SessionCard session={program} locked={!paidStatus} />
+                              {program.isUser && (
+                                <button
+                                  className="absolute top-2 right-2 z-10 bg-white/80 rounded-full p-1 shadow hover:bg-white"
+                                  onClick={() => { setSelectedProgram(program as Session); setEditProgramOpen(true); }}
+                                  title="Edit Program"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-gray-600">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 5.487a2.1 2.1 0 1 1 2.97 2.97L7.5 20.79l-4 1 1-4 14.362-14.303z" />
+                                  </svg>
+                                </button>
+                              )}
+                            </div>
+                          ))
+                      )
                     ) : (
                       <motion.div
                         key="no-programs"
@@ -613,6 +627,29 @@ export default function SelectionComponents() {
                       ))}
                     </select>
                   </div>
+                  <div className="flex flex-col gap-4 mb-4">
+                    <div className="flex flex-col gap-1">
+                      <h1 className="text-sm">Primary muscles worked:</h1>
+                      <div className="flex gap-2">
+                        {selectedPose.labels?.primary?.map((muscle: string) => (
+                          <Badge key={`primary-${muscle}`} variant="secondary" className="bg-blue-300">
+                            {muscle.replaceAll("_", " ")}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <h1 className="text-sm">Secondary muscles worked:</h1>
+                      <div className="flex gap-2">
+                        {selectedPose.labels?.secondary?.map((muscle: string) => (
+                          <Badge key={`secondary-${muscle}`} variant="secondary" className="bg-blue-200">
+                            {muscle.replaceAll("_", " ")}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                </div>
+
                   {/* Reverse Pose Toggle (only for asymmetric poses) */}
                   {selectedPose.isAsymmetric && (
                     <div className="w-full flex flex-col items-center mb-4">

@@ -13,7 +13,7 @@ import PageTopBar from "@/components/page-top-bar";
 import { useTimer } from "@/context/TimerContext";
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { Filter, Search, Target } from 'lucide-react';
+import { Filter, Search, Target, X } from 'lucide-react';
 import { Pose } from "@/components/selectorCardComponents/types";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -569,7 +569,7 @@ export default function SelectionComponents() {
                 onClick={(e) => e.stopPropagation()}
               >
                 <button onClick={handleCloseExpanded} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors">
-                  ×
+                  <X className="w-6 h-6" />
                 </button>
                 <div className="flex-grow">
                   <div className="text-center mb-6">

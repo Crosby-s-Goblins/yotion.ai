@@ -28,8 +28,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
 import { FileUpload } from "@/components/ui/file-upload";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
+// import { ScrollArea } from "@/components/ui/scroll-area";
+// import { Badge } from "@/components/ui/badge";
 
 //Icons
 import { Loader2Icon, Check, CircleAlert } from "lucide-react";
@@ -165,7 +165,7 @@ const Settings = ({ user }: SettingsProps) => {
                 >
                     <TabsList className="bg-gray-200 rounded-md">
                         <TabsTrigger value="profile">Profile</TabsTrigger>
-                        <TabsTrigger value="details">Details</TabsTrigger>
+                        {/* <TabsTrigger value="details">Details</TabsTrigger> */}
                     </TabsList>
 
                     <TabsContent value="profile" className="w-full">
@@ -253,7 +253,7 @@ const Settings = ({ user }: SettingsProps) => {
                             </Card>
                         </div>
                     </TabsContent>
-                    <TabsContent value="details" className="w-full">
+                    {/* <TabsContent value="details" className="w-full">
                         <div className="w-full">
                             <div className="flex items-center gap-3">
                                 <p className="text-lg font-bold my-3">Account Details</p>
@@ -268,7 +268,7 @@ const Settings = ({ user }: SettingsProps) => {
                                 </pre>
                             </ScrollArea>
                         </div>
-                    </TabsContent>
+                    </TabsContent> */}
                 </Tabs>
             </div>
         </div>

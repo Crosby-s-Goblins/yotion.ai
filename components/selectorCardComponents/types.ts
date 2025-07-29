@@ -1,7 +1,12 @@
 export interface Pose {
   id: number;
   name: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
+  labels?: {
+    difficulty?: 'Easy' | 'Medium' | 'Hard';
+    primary?: string[];
+    secondary?: string[];
+    [key: string]: any;
+  };
   description?: string;
   benefits?: string[] | string;
   images?: string;

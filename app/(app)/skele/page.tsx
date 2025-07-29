@@ -614,7 +614,7 @@ function SkelePageContent() {
           )}
         </div>
         {/* Score/Debug Panel - low opacity, non-intrusive */}
-        <div className="fixed bottom-8 left-8 z-40 pointer-events-none opacity-25">
+        {/* <div className="fixed bottom-8 left-8 z-40 pointer-events-none opacity-25">
           <div className="bg-white/80 backdrop-blur-lg rounded-2xl px-8 py-6 shadow-2xl border border-white/40 text-2xl font-bold text-black flex flex-col items-end gap-2">
             <span>Score: {Math.round(score * 10) / 100}</span>
             <span className="text-base font-normal">Timer: {`${stopwatch.minutes}:${stopwatch.seconds}:${stopwatch.milliseconds}`}</span>
@@ -624,7 +624,7 @@ function SkelePageContent() {
               <span className="text-base font-normal">Held Pose: {heldPercentage.toFixed(1)}%</span>
             )}
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Info Modal */}

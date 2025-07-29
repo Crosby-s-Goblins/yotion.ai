@@ -5,38 +5,38 @@ import { Activity, Mic, Users, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
-const TEAM = [
-  {
-    name: 'Name Here',
-    role: 'Role Here',
-    img: '/team/placeholder.jpg', // Placeholder image
-    bio: 'Short team member bio goes here.'
-  },
-  {
-    name: 'Name Here',
-    role: 'Role Here',
-    img: '/team/placeholder.jpg',
-    bio: 'Short team member bio goes here.'
-  },
-  {
-    name: 'Name Here',
-    role: 'Role Here',
-    img: '/team/placeholder.jpg',
-    bio: 'Short team member bio goes here.'
-  },
-  {
-    name: 'Name Here',
-    role: 'Role Here',
-    img: '/team/placeholder.jpg',
-    bio: 'Short team member bio goes here.'
-  },
-];
+// const TEAM = [
+//   {
+//     name: 'Name Here',
+//     role: 'Role Here',
+//     img: '/team/placeholder.jpg', // Placeholder image
+//     bio: 'Short team member bio goes here.'
+//   },
+//   {
+//     name: 'Name Here',
+//     role: 'Role Here',
+//     img: '/team/placeholder.jpg',
+//     bio: 'Short team member bio goes here.'
+//   },
+//   {
+//     name: 'Name Here',
+//     role: 'Role Here',
+//     img: '/team/placeholder.jpg',
+//     bio: 'Short team member bio goes here.'
+//   },
+//   {
+//     name: 'Name Here',
+//     role: 'Role Here',
+//     img: '/team/placeholder.jpg',
+//     bio: 'Short team member bio goes here.'
+//   },
+// ];
 
 export default function AboutPage() {
   return (
-    <main className="max-w-5xl mx-auto px-4 sm:px-6 py-12 space-y-16">
+    <main className="max-w-5xl mx-auto px-4 sm:px-6">
       {/* Hero Section */}
-      <section className="flex flex-col items-center text-center gap-6">
+      <section className="flex flex-col items-center text-center gap-6 mt-20 mb-10">
         <h1 className="text-5xl sm:text-6xl font-extrabold bg-gradient-to-tr from-primary to-accent bg-clip-text text-transparent drop-shadow-lg">About Yotion</h1>
         <p className="text-lg sm:text-xl text-gray-700 max-w-2xl">
           <span className="font-semibold">Yotion</span> is your AI-powered yoga companion—blending intelligent pose correction, real-time feedback, and a vibrant community to help you move, breathe, and grow with confidence.

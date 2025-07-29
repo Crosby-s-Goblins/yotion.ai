@@ -14,7 +14,7 @@ export default function AboutPage() {
       <ProductFeatures />
 
       {/* Call to Action */}
-      <section className="flex flex-col items-center pt-12 gap-4">
+      <section className="flex flex-col items-center mt-20 pb-20 gap-4">
         <h3 className="text-2xl font-semibold text-center">Ready to elevate your practice?</h3>
         <p className="text-gray-700 text-center max-w-xl">
           Join Yotion today and experience the future of mindful movement—powered by AI, inspired by community, and designed for you.

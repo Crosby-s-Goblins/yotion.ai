@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
-import { AlertTriangle, Clock, UserX, Frown } from 'lucide-react';
+import { AlertTriangle, Clock, UserX, Frown, Zap, ArrowDown, Sparkles, Heart } from 'lucide-react';
 
 const PROBLEMS = [
   {
@@ -40,7 +40,7 @@ const PROBLEMS = [
 
 export default function ProblemStatement() {
   return (
-    <section className="py-16 mt-8 mb-12">
+    <section className="my-20">
       <div className="text-center mb-12">
         <h2 className="font-semibold text-2xl sm:text-3xl lg:text-4xl !leading-tight mx-auto max-w-xl text-center">
           <span className="bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">Traditional yoga</span> sucks.
@@ -67,10 +67,52 @@ export default function ProblemStatement() {
         })}
       </div>
       
-      <div className="text-center mt-12">
-        <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full">
-          <span className="text-2xl">⬇️</span>
-          <span className="font-medium text-gray-800">That's where Yotion steps in</span>
+      {/* Story Transition */}
+      <div className="relative mt-16 mb-8">
+        {/* Decorative line with gradient */}
+        <div className="absolute left-1/2 top-0 transform -translate-x-1/2 w-px h-12 bg-gradient-to-b from-transparent via-gray-300 to-transparent"></div>
+        
+        {/* Main transition container */}
+        <div className="flex flex-col items-center text-center space-y-6 pt-16">
+          {/* Visual separator with icons */}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center">
+              <Sparkles className="w-5 h-5 text-yellow-500 animate-pulse" />
+              <div className="w-16 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent mx-2"></div>
+            </div>
+            
+            <div className="relative">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center border-2 border-white shadow-lg">
+                <Zap className="w-8 h-8 text-primary" />
+              </div>
+              {/* Subtle glow effect */}
+              <div className="absolute inset-0 w-16 h-16 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 animate-pulse"></div>
+            </div>
+            
+            <div className="flex items-center">
+              <div className="w-16 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent mx-2"></div>
+              <Heart className="w-5 h-5 text-red-500 animate-pulse" />
+            </div>
+          </div>
+          
+          {/* Main message */}
+          <div className="space-y-2">
+            <p className="text-sm uppercase tracking-wider text-gray-500 font-medium">
+              Enter the Solution
+            </p>
+            <h3 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              That's where Yotion steps in
+            </h3>
+            <p className="text-gray-600 max-w-md mx-auto text-sm">
+              Transforming traditional yoga with AI-powered guidance and community support
+            </p>
+          </div>
+          
+          {/* Elegant arrow indicator */}
+          <div className="flex flex-col items-center space-y-2 opacity-60">
+            <ArrowDown className="w-6 h-6 text-gray-400 animate-bounce" />
+            <div className="w-8 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+          </div>
         </div>
       </div>
     </section>

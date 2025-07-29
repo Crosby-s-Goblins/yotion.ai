@@ -2,11 +2,12 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import type { User } from '@supabase/supabase-js';
 
-const UserContext = createContext<unknown>(null);
+const UserContext = createContext<User | null>(null);
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
-    const [user, setUser] = useState<unknown>(null);
+    const [user, setUser] = useState<User | null>(null);
 
     useEffect(() => {
         const supabase = createClient();
@@ -21,6 +22,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     return <UserContext.Provider value={user}>{children}</UserContext.Provider>;
 }
 
-export function useUser() {
+export function useUser(): User | null {
     return useContext(UserContext);
 }

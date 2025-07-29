@@ -14,10 +14,14 @@ interface PremiumFeatureGuardProps {
 }
 
 interface SubscriptionInfo {
-  isActive: boolean;
-  isPastDue: boolean;
-  isCancelled: boolean;
+  hasAccess: boolean;
+  status: string;
   displayStatus: string;
+  canUpgrade: boolean;
+  isActive: boolean;
+  isCancelled: boolean;
+  isPastDue: boolean;
+  isTrialing: boolean;
 }
 
 
@@ -112,6 +116,7 @@ export function usePremiumAccess() {
  * Usage: <SubscriptionStatus />
  */
 export function SubscriptionStatus() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { hasAccess, subscriptionInfo, loading } = usePremiumAccess();
 
   if (loading) {

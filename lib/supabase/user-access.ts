@@ -30,6 +30,10 @@ export function getSubscriptionInfo(profile: UserProfile | null) {
       status: 'no_subscription',
       displayStatus: 'Free User',
       canUpgrade: true,
+      isActive: false,
+      isCancelled: false,
+      isPastDue: false,
+      isTrialing: false,
     };
   }
 

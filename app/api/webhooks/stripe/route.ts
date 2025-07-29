@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
         });
 
         // Try to find user by stripe customer ID if userId not in metadata
-        let updateFilter: any = {};
+        const updateFilter: { id?: string; stripe_customer_id?: string } = {};
         if (userId) {
           updateFilter.id = userId;
         } else {
@@ -165,7 +165,7 @@ export async function POST(request: NextRequest) {
         });
 
         // Try to find user by stripe customer ID if userId not in metadata
-        let updateFilter: any = {};
+        const updateFilter: { id?: string; stripe_customer_id?: string } = {};
         if (userId) {
           updateFilter.id = userId;
         } else {
@@ -173,7 +173,11 @@ export async function POST(request: NextRequest) {
         }
 
         const isActive = status === 'active';
-        const updateData: any = {
+        const updateData: { 
+          subscription_status: string; 
+          paidUser: boolean; 
+          stripe_subscription_id: string; 
+        } = {
           subscription_status: status,
           paidUser: isActive,
           stripe_subscription_id: subscription.id,

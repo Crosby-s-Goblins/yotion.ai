@@ -13,6 +13,14 @@ interface PremiumFeatureGuardProps {
   featureName?: string;
 }
 
+interface SubscriptionInfo {
+  isActive: boolean;
+  isPastDue: boolean;
+  isCancelled: boolean;
+  displayStatus: string;
+}
+
+
 /**
  * Component that protects premium features
  * Usage: <PremiumFeatureGuard>...</PremiumFeatureGuard>
@@ -25,7 +33,7 @@ export function PremiumFeatureGuard({
   const [userAccess, setUserAccess] = useState<{
     hasAccess: boolean;
     profile: UserProfile | null;
-    subscriptionInfo: any;
+    subscriptionInfo: SubscriptionInfo;
   } | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -79,7 +87,7 @@ export function PremiumFeatureGuard({
 export function usePremiumAccess() {
   const [userAccess, setUserAccess] = useState<{
     hasAccess: boolean;
-    subscriptionInfo: any;
+    subscriptionInfo: SubscriptionInfo;
   }>({
     hasAccess: false,
     subscriptionInfo: getSubscriptionInfo(null),

@@ -101,7 +101,7 @@ export default function ProblemStatement() {
               Enter the Solution
             </p>
             <h3 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              That's where Yotion steps in
+              That&apos;s where Yotion steps in
             </h3>
             <p className="text-gray-600 max-w-md mx-auto text-sm">
               Transforming traditional yoga with AI-powered guidance and community support

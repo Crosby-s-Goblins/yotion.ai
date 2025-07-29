@@ -24,7 +24,7 @@ import AddProgramModal from '@/components/selectorCardComponents/addProgramModal
 import { Badge } from "@/components/ui/badge";
 
 const muscleGroupMap: Record<string, string[]> = {
-  core: ["core", "abs", "obliques", "obliques_stretch", "transverse_abdominis", "rectus_abdominis", "intercostals"],
+  core: ["core", "obliques", "obliques_stretch", "rectus_abdominis", "intercostals"],
   back: ["spinal_erectors", "spinal_extensors", "trapezius", "lower_back", "psosas_stretch", "quadratus_lumborum", "upper_back", "rhomboids", "latissimus_dorsi", "lats", "erector_spinae"],
   shoulders: ["shoulders", "deltoids", "shoulder_stabilizers", "shoulders_stretch"],
   chest: ["chest", "pectorals"],
@@ -240,32 +240,32 @@ export default function SelectionComponents() {
   const searchedItems = useMemo(() => {
     return poses.filter((item) => {
       const matchesSearch = item.name.toLowerCase().includes(deferredSearch.toLowerCase());
-  
+
       const matchesDifficulty =
         selectedDifficulty === "all" ||
         item.labels?.difficulty?.toLowerCase() === selectedDifficulty;
-  
+
       const allMuscles = [
         ...(item.labels?.primary ?? []),
         ...(item.labels?.secondary ?? [])
       ];
-  
+
       const targetMuscles = selectedMuscle === "all"
         ? allMuscles
         : muscleGroupMap[selectedMuscle] ?? [selectedMuscle];
-  
+
       const matchesMuscle =
         selectedMuscle === "all" ||
         allMuscles.some((muscle) => targetMuscles.includes(muscle));
-  
+
       const matchesSpecificMuscle =
         selectedSpecificMuscle === "all" ||
         allMuscles.includes(selectedSpecificMuscle);
-  
+
       return matchesSearch && matchesDifficulty && matchesMuscle && matchesSpecificMuscle;
     });
   }, [poses, deferredSearch, selectedDifficulty, selectedMuscle, selectedSpecificMuscle]);
-  
+
 
 
 
@@ -381,7 +381,16 @@ export default function SelectionComponents() {
                     <label className="text-sm font-medium">
                       Muscles:
                     </label>
-                    <Select value={selectedMuscle} onValueChange={setSelectedMuscle}>
+                    <Select
+                      value={selectedMuscle}
+                      onValueChange={(value) => {
+                        setSelectedMuscle(value);
+                        if (value === "all") {
+                          setSelectedSpecificMuscle("all");
+                        }
+                      }}
+                    >
+
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select muscle group" />
                       </SelectTrigger>
@@ -402,25 +411,25 @@ export default function SelectionComponents() {
                   </div>
                   {
                     <div className="flex items-center gap-1">
-                        <div className={`flex items-center gap-1 ${(selectedMuscle == "all") && "hidden"}`}>
-                          <label className="text-sm font-medium">Specific:</label>
-                          <Select
-                            value={selectedSpecificMuscle}
-                            onValueChange={setSelectedSpecificMuscle}
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select specific muscle" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-white">
-                              <SelectItem value="all">All</SelectItem>
-                              {(muscleGroupMap[selectedMuscle] ?? []).map((muscle) => (
-                                <SelectItem key={muscle} value={muscle}>
-                                  {muscle.replaceAll("_", " ")}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
+                      <div className={`flex items-center gap-1 ${(selectedMuscle == "all") && "hidden"}`}>
+                        <label className="text-sm font-medium">Specific:</label>
+                        <Select
+                          value={selectedSpecificMuscle}
+                          onValueChange={setSelectedSpecificMuscle}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select specific muscle" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white">
+                            <SelectItem value="all">All</SelectItem>
+                            {(muscleGroupMap[selectedMuscle] ?? []).map((muscle) => (
+                              <SelectItem key={muscle} value={muscle}>
+                                {muscle.replaceAll("_", " ")}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   }
                 </div>

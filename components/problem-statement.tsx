@@ -42,11 +42,11 @@ export default function ProblemStatement() {
   return (
     <section className="py-16 mt-8 mb-12">
       <div className="text-center mb-12">
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">
-          The Struggles of <span className="bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">Traditional Yoga</span>
+        <h2 className="font-semibold text-2xl sm:text-3xl lg:text-4xl !leading-tight mx-auto max-w-xl text-center">
+          <span className="bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">Traditional yoga</span> sucks.
         </h2>
         <p className="text-gray-600 max-w-2xl mx-auto">
-          Many practitioners face common challenges that hold them back from reaching their full potential
+          Beginner yogis face common challenges that hold them back from reaching their full potential
         </p>
       </div>
       

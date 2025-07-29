@@ -1,4 +1,5 @@
 import Navbar from "@/components/Navbar";
+import { UserProvider } from "@/components/user-provider";
 
 export default function MarketingLayout({
   children,
@@ -6,9 +7,9 @@ export default function MarketingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    <UserProvider>
       <Navbar />
       {children}
-    </>
+    </UserProvider>
   );
 } 

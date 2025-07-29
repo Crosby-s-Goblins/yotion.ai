@@ -26,7 +26,7 @@ const FEATURES = [
   {
     icon: Users,
     title: 'Community',
-    description: 'Connect, share, and celebrate with fellow practitioners. Join challenges, post progress, and find your yoga tribe.',
+    description: 'Connect, share, and celebrate with fellow yogis. Join challenges, engange in conversation, and find your yoga tribe.',
     iconColor: 'text-secondary',
     imagePlaceholder: 'Community Hub',
     bgGradient: 'from-purple-100 to-pink-100',
@@ -35,7 +35,7 @@ const FEATURES = [
   {
     icon: TrendingUp,
     title: 'Progress Tracking',
-    description: 'Visualize your journey, review your history, and stay motivated with personalized stats and milestones.',
+    description: 'Visualize your progress, review your history, and stay motivated with personalized stats and milestones.',
     iconColor: 'text-green-600',
     imagePlaceholder: 'Progress Charts',
     bgGradient: 'from-orange-100 to-yellow-100',

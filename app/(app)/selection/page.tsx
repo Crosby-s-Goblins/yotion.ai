@@ -23,6 +23,19 @@ import { useProgramSession } from '@/context/ProgramSessionContext';
 import AddProgramModal from '@/components/selectorCardComponents/addProgramModal';
 import { Badge } from "@/components/ui/badge";
 
+const muscleGroupMap: Record<string, string[]> = {
+  core: ["core", "abs", "obliques", "obliques_stretch", "transverse_abdominis", "rectus_abdominis", "intercostals"],
+  back: ["spinal_erectors", "spinal_extensors", "trapezius", "lower_back", "psosas_stretch", "quadratus_lumborum", "upper_back", "rhomboids", "latissimus_dorsi", "lats", "erector_spinae"],
+  shoulders: ["shoulders", "deltoids", "shoulder_stabilizers", "shoulders_stretch"],
+  chest: ["chest", "pectorals"],
+  arms: ["biceps", "triceps", "forearms"],
+  legs: ["quadriceps", "quadriceps_stretch", "hamstrings", "hamstrings_stretch", "calves", "calves_stretch", "adductors", "adductors_stretch"],
+  glutes: ["glutes", "gluteus_maximus", "gluteus_medius"],
+  hips: ["hip_flexors"],
+  neck: ["neck_flexors", "sternocleidomastoid"],
+  feet_ankles: ["ankle_flexors", "ankle_stabilizers", "feet", "ankles"],
+};
+
 export default function SelectionComponents() {
   const [poses, setPoses] = useState<Pose[]>([]);
   const [search, setSearch] = useState("");
@@ -51,6 +64,10 @@ export default function SelectionComponents() {
   const [addProgramOpen, setAddProgramOpen] = useState(false);
   const [editProgramOpen, setEditProgramOpen] = useState(false);
   const [selectedProgram, setSelectedProgram] = useState<Session | null>(null);
+
+  const [selectedMuscle, setSelectedMuscle] = useState("all");
+  const [selectedSpecificMuscle, setSelectedSpecificMuscle] = useState("all");
+
 
 
   useEffect(() => {
@@ -223,12 +240,34 @@ export default function SelectionComponents() {
   const searchedItems = useMemo(() => {
     return poses.filter((item) => {
       const matchesSearch = item.name.toLowerCase().includes(deferredSearch.toLowerCase());
+  
       const matchesDifficulty =
-        selectedDifficulty === 'all' ||
-        item.labels?.difficulty?.toLowerCase() === selectedDifficulty
-      return matchesSearch && matchesDifficulty;
+        selectedDifficulty === "all" ||
+        item.labels?.difficulty?.toLowerCase() === selectedDifficulty;
+  
+      const allMuscles = [
+        ...(item.labels?.primary ?? []),
+        ...(item.labels?.secondary ?? [])
+      ];
+  
+      const targetMuscles = selectedMuscle === "all"
+        ? allMuscles
+        : muscleGroupMap[selectedMuscle] ?? [selectedMuscle];
+  
+      const matchesMuscle =
+        selectedMuscle === "all" ||
+        allMuscles.some((muscle) => targetMuscles.includes(muscle));
+  
+      const matchesSpecificMuscle =
+        selectedSpecificMuscle === "all" ||
+        allMuscles.includes(selectedSpecificMuscle);
+  
+      return matchesSearch && matchesDifficulty && matchesMuscle && matchesSpecificMuscle;
     });
-  }, [poses, deferredSearch, selectedDifficulty]);
+  }, [poses, deferredSearch, selectedDifficulty, selectedMuscle, selectedSpecificMuscle]);
+  
+
+
 
   if (!isLoaded || paidStatus === null) {
     return <Loading />;
@@ -252,19 +291,19 @@ export default function SelectionComponents() {
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-lg leading-snug h-[3rem] break-words line-clamp-2">{pose.name}</h3>
             <div className="flex flex-wrap gap-2">
-            {/* Difficulty badge */}
-            {pose.labels?.difficulty && (
-              <Badge className={difficultyColors[pose.labels.difficulty]}>
-                {pose.labels.difficulty === "Easy"
-                  ? "Beginner"
-                  : pose.labels.difficulty === "Medium"
-                    ? "Intermediate"
-                    : pose.labels.difficulty === "Hard"
-                      ? "Advanced"
-                      : pose.labels.difficulty}
-              </Badge>
-            )}
-          </div>
+              {/* Difficulty badge */}
+              {pose.labels?.difficulty && (
+                <Badge variant="secondary" className={`${difficultyColors[pose.labels.difficulty]} text-white `}>
+                  {pose.labels.difficulty === "Easy"
+                    ? "Beginner"
+                    : pose.labels.difficulty === "Medium"
+                      ? "Intermediate"
+                      : pose.labels.difficulty === "Hard"
+                        ? "Advanced"
+                        : pose.labels.difficulty}
+                </Badge>
+              )}
+            </div>
 
           </div>
           {pose.description && (
@@ -320,35 +359,71 @@ export default function SelectionComponents() {
                     onChange={(e) => setSearch(e.target.value)}
                   />
                 </div>
-                {/* Filter Popover */}
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="h-12 px-6 rounded-full">
-                      <Filter className="w-4 h-4 mr-2" />
-                      Filter
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-64 p-4 bg-white border border-border/50 shadow-glass">
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground mb-2 block">
-                          Difficulty Level
-                        </label>
-                        <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select difficulty" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-white">
-                            <SelectItem value="all">All Levels</SelectItem>
-                            <SelectItem value="easy">Beginner</SelectItem>
-                            <SelectItem value="medium">Medium</SelectItem>
-                            <SelectItem value="hard">Hard</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
+                {/* Filtering */}
+                <div className="flex flex gap-3">
+                  <div className="flex items-center gap-1">
+                    <label className="text-sm font-medium">
+                      Difficulty:
+                    </label>
+                    <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select difficulty" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white">
+                        <SelectItem value="all">All Levels</SelectItem>
+                        <SelectItem value="easy">Beginner</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="hard">Hard</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <label className="text-sm font-medium">
+                      Muscles:
+                    </label>
+                    <Select value={selectedMuscle} onValueChange={setSelectedMuscle}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select muscle group" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white">
+                        <SelectItem value="all">All</SelectItem>
+                        <SelectItem value="core">Core</SelectItem>
+                        <SelectItem value="back">Back</SelectItem>
+                        <SelectItem value="shoulders">Shoulders</SelectItem>
+                        <SelectItem value="chest">Chest</SelectItem>
+                        <SelectItem value="arms">Arms</SelectItem>
+                        <SelectItem value="legs">Legs</SelectItem>
+                        <SelectItem value="glutes">Glutes</SelectItem>
+                        <SelectItem value="hips">Hips</SelectItem>
+                        <SelectItem value="neck">Neck</SelectItem>
+                        <SelectItem value="feet_ankles">Feet & Ankles</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {
+                    <div className="flex items-center gap-1">
+                        <div className={`flex items-center gap-1 ${(selectedMuscle == "all") && "hidden"}`}>
+                          <label className="text-sm font-medium">Specific:</label>
+                          <Select
+                            value={selectedSpecificMuscle}
+                            onValueChange={setSelectedSpecificMuscle}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select specific muscle" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white">
+                              <SelectItem value="all">All</SelectItem>
+                              {(muscleGroupMap[selectedMuscle] ?? []).map((muscle) => (
+                                <SelectItem key={muscle} value={muscle}>
+                                  {muscle.replaceAll("_", " ")}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                     </div>
-                  </PopoverContent>
-                </Popover>
+                  }
+                </div>
               </div>
             </div>
 
@@ -386,8 +461,7 @@ export default function SelectionComponents() {
                             exit={{ opacity: 0, y: -10 }}
                             transition={{ duration: 0.2 }}
                           >
-                            No poses found for &quot;<span className="font-medium">{search}</span>&quot;
-                          </motion.div>
+                            No poses found for your current search.                          </motion.div>
                         )
                       ) : (
                         <motion.div
@@ -444,49 +518,39 @@ export default function SelectionComponents() {
                   )}
                 </div>
                 {/* Filter Popover */}
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="h-12 px-6 rounded-full">
-                      <Filter className="w-4 h-4 mr-2" />
-                      Filter
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-64 p-4 bg-white border border-border/50 shadow-glass">
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground mb-2 block">
-                          Difficulty Level
-                        </label>
-                        <Select value={selectedProgramDifficulty} onValueChange={setSelectedProgramDifficulty} disabled={programSourceFilter === 'user'}>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select difficulty" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-white">
-                            <SelectItem value="all">All Levels</SelectItem>
-                            <SelectItem value="easy">Easy</SelectItem>
-                            <SelectItem value="medium">Medium</SelectItem>
-                            <SelectItem value="hard">Hard</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground mb-2 block">
-                          Program Source
-                        </label>
-                        <Select value={programSourceFilter} onValueChange={v => setProgramSourceFilter(v as 'all' | 'premade' | 'user')}>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select source" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-white">
-                            <SelectItem value="all">All</SelectItem>
-                            <SelectItem value="premade">Premade</SelectItem>
-                            <SelectItem value="user">User-Created</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </PopoverContent>
-                </Popover>
+                <div className="flex gap-3">
+                  <div className="flex items-center gap-1">
+                    <label className="text-sm font-medium">
+                      Difficulty:
+                    </label>
+                    <Select value={selectedProgramDifficulty} onValueChange={setSelectedProgramDifficulty} disabled={programSourceFilter === 'user'}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select difficulty" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white">
+                        <SelectItem value="all">All Levels</SelectItem>
+                        <SelectItem value="easy">Easy</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="hard">Hard</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <label className="text-sm font-medium">
+                      Source:
+                    </label>
+                    <Select value={programSourceFilter} onValueChange={v => setProgramSourceFilter(v as 'all' | 'premade' | 'user')}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select source" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white">
+                        <SelectItem value="all">All</SelectItem>
+                        <SelectItem value="premade">Premade</SelectItem>
+                        <SelectItem value="user">User-Created</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </div>
             </div>
             {paidStatus ? (
@@ -648,7 +712,7 @@ export default function SelectionComponents() {
                         ))}
                       </div>
                     </div>
-                </div>
+                  </div>
 
                   {/* Reverse Pose Toggle (only for asymmetric poses) */}
                   {selectedPose.isAsymmetric && (

@@ -11,9 +11,8 @@ import { difficultyColors } from "@/components/selectorCardComponents/poseItem";
 import { useUser } from '@/components/user-provider';
 import PageTopBar from "@/components/page-top-bar";
 import { useTimer } from "@/context/TimerContext";
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { Filter, Search, Target, X } from 'lucide-react';
+import { Search, Target, X } from 'lucide-react';
 import { Pose } from "@/components/selectorCardComponents/types";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -372,8 +371,8 @@ export default function SelectionComponents() {
                       <SelectContent className="bg-white">
                         <SelectItem value="all">All Levels</SelectItem>
                         <SelectItem value="easy">Beginner</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="hard">Hard</SelectItem>
+                        <SelectItem value="medium">Intermediate</SelectItem>
+                        <SelectItem value="hard">Advanced</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -538,9 +537,9 @@ export default function SelectionComponents() {
                       </SelectTrigger>
                       <SelectContent className="bg-white">
                         <SelectItem value="all">All Levels</SelectItem>
-                        <SelectItem value="easy">Easy</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="hard">Hard</SelectItem>
+                        <SelectItem value="easy">Beginner</SelectItem>
+                        <SelectItem value="medium">Intermediate</SelectItem>
+                        <SelectItem value="hard">Advanced</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

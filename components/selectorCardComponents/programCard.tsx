@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useProgramSession } from '@/context/ProgramSessionContext';
 import { useRouter } from 'next/navigation';
+import { Badge } from '../ui/badge';
 
 const difficultyColors = {
   Easy: 'bg-green-500',
@@ -92,9 +93,15 @@ export const SessionCard = ({ session, locked }: SessionCardProps) => {
                   {session.isUser ? (
                     <div className="px-3 py-1 rounded-full text-xs font-medium h-7 min-w-[56px] flex items-center justify-center text-gray-700 bg-gray-200 border border-gray-300">User</div>
                   ) : (
-                    <div className={`px-3 py-1 rounded-full text-xs font-medium text-white ${difficultyColors[session.difficulty]} h-7 min-w-[56px] flex items-center justify-center`}>
-                      {session.difficulty}
-                    </div>
+                    <Badge variant="secondary" className={`text-white ${difficultyColors[session.difficulty]}`}>
+                      {session.difficulty === "Easy"
+                    ? "Beginner"
+                    : session.difficulty === "Medium"
+                      ? "Intermediate"
+                      : session.difficulty === "Hard"
+                        ? "Advanced"
+                        : session.difficulty}
+                    </Badge>
                   )}
                 </div>
             </div>

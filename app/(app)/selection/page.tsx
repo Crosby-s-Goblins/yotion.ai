@@ -12,7 +12,7 @@ import { useUser } from '@/components/user-provider';
 import PageTopBar from "@/components/page-top-bar";
 import { useTimer } from "@/context/TimerContext";
 import { Button } from '@/components/ui/button';
-import { Search, Target } from 'lucide-react';
+import { Search, Target, X } from 'lucide-react';
 import { Pose } from "@/components/selectorCardComponents/types";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -351,7 +351,7 @@ export default function SelectionComponents() {
                 <div className="relative flex-1 w-full">
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
                   <Input
-                    className="w-full pl-12 pr-4 h-12 rounded-full border-2 bg-background/50 backdrop-blur-sm"
+                    className="w-full pl-12 pr-4 h-12 rounded-full border-2 bg-background/50"
                     placeholder="Search poses..."
                     type="text"
                     value={search}
@@ -371,8 +371,8 @@ export default function SelectionComponents() {
                       <SelectContent className="bg-white">
                         <SelectItem value="all">All Levels</SelectItem>
                         <SelectItem value="easy">Beginner</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="hard">Hard</SelectItem>
+                        <SelectItem value="medium">Intermediate</SelectItem>
+                        <SelectItem value="hard">Advanced</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -506,7 +506,7 @@ export default function SelectionComponents() {
                 <div className="relative flex-1 w-full flex items-center gap-2">
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
                   <Input
-                    className="w-full pl-12 pr-4 h-12 rounded-full border-2 bg-background/50 backdrop-blur-sm"
+                    className="w-full pl-12 pr-4 h-12 rounded-full border-2 bg-background/50"
                     placeholder="Search programs..."
                     type="text"
                     value={programSearch}
@@ -537,9 +537,9 @@ export default function SelectionComponents() {
                       </SelectTrigger>
                       <SelectContent className="bg-white">
                         <SelectItem value="all">All Levels</SelectItem>
-                        <SelectItem value="easy">Easy</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="hard">Hard</SelectItem>
+                        <SelectItem value="easy">Beginner</SelectItem>
+                        <SelectItem value="medium">Intermediate</SelectItem>
+                        <SelectItem value="hard">Advanced</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -655,7 +655,7 @@ export default function SelectionComponents() {
                 onClick={(e) => e.stopPropagation()}
               >
                 <button onClick={handleCloseExpanded} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors">
-                  ×
+                  <X className="w-6 h-6" />
                 </button>
                 <div className="flex-grow">
                   <div className="text-center mb-6">

@@ -69,7 +69,6 @@ function SkelePageContent() {
   });
   
   const {
-    formText,
     videoRef: poseVideoRef,
     canvasRef,
     score,
@@ -175,7 +174,6 @@ function SkelePageContent() {
 
       {/* Countdown Overlay */}
       <CountdownOverlay
-        formText={formText || ""}
         timerStarted={timer.timerStarted}
         poseStartTimer={timer.poseStartTimer}
       />

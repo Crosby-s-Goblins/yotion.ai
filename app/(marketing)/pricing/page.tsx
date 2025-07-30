@@ -202,7 +202,7 @@ export default function PricingPage() {
 
         {/* Trust Indicators */}
         <div className="text-center text-sm text-muted-foreground max-w-2xl px-4">
-          <p>✓ Cancel anytime • ✓ 7-day free trial • ✓ Secure payment processing</p>
+          <p>✓ Cancel anytime • ✓ Secure payment processing</p>
         </div>
       </div>
     </main>

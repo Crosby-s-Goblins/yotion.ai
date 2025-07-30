@@ -111,7 +111,7 @@ export default function PostWorkoutPage() {
             if (performance.exercises_performed?.length) {
                 const { data: poses } = await supabase
                     .from('poseLibrary')
-                    .select('difficulty, id, name')
+                    .select('labels->difficulty, id, name')
                     .in('id', performance.exercises_performed);
                 console.log('[DEBUG] poseLibrary fetch result:', poses);
                 setPoseDifficulties((poses as Pose[])?.map((p) => p.difficulty) ?? []);
@@ -231,7 +231,7 @@ export default function PostWorkoutPage() {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-primary">
-                                {loading ? '--' : performance?.consistency_score ? performance.consistency_score / 100 : '--'}
+                                {loading ? '--' : performance?.consistency_score ? performance.consistency_score / 100 + '%': '--'}
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
                                 Pose score consistency
@@ -251,7 +251,7 @@ export default function PostWorkoutPage() {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-accent">
-                                {loading ? '--' : performance?.accuracy_score ? performance.accuracy_score / 100 : '--'}
+                                {loading ? '--' : performance?.accuracy_score ? performance.accuracy_score / 100 + '%' : '--'}
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
                                 Pose score accuracy

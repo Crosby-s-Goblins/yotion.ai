@@ -193,15 +193,6 @@ export default function PricingPage() {
                   <span>Priority support</span>
                 </li>
               </ul>
-              
-              <div className="mt-6 pt-4 border-t">
-                <p className="text-sm font-medium mb-2">Coming Soon:</p>
-                <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• Mindfulness features</li>
-                  <li>• Community challenges</li>
-                  <li>• Custom avatar selection</li>
-                </ul>
-              </div>
             </CardContent>
             <div className="p-6 pt-0">
               <PricingButton plan="premier" />

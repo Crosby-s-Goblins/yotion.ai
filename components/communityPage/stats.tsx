@@ -44,50 +44,48 @@ const Stats = () => {
   }, [user]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 items-center">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8 items-center">
       <div className="bg-card.glass rounded-2xl p-6 border border-border/50 shadow-card">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-center text-center sm:text-left sm:justify-between">
           <div>
             <p className="text-sm text-muted-foreground">Active Members</p>
             <p className="text-3xl font-bold bg-gradient-to-tr from-primary to-accent bg-clip-text text-transparent">
               {loadingMembers ? '...' : activeMembers}
             </p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-primary/10 to-accent/10 flex items-center justify-center">
+          <div className="hidden sm:flex w-12 h-12 rounded-xl bg-gradient-to-tr from-primary/10 to-accent/10 flex items-center justify-center">
             <Users className="w-6 h-6 text-primary" />
           </div>
         </div>
       </div>
 
-      <div className="bg-card.glass rounded-2xl p-6 border border-border/50 shadow-card">
-        <div className="flex items-center justify-between">
+      <div className="h-full w-full bg-card.glass rounded-2xl p-6 border border-border/50 shadow-card">
+        <div className="h-full flex items-center justify-center text-center sm:text-left sm:justify-between">
           <div>
             <p className="text-sm text-muted-foreground">Challenges</p>
             <p className="text-3xl font-bold bg-gradient-to-tr from-accent to-primary bg-clip-text text-transparent">12</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-accent/10 to-primary/10 flex items-center justify-center">
+          <div className="hidden sm:flex w-12 h-12 rounded-xl bg-gradient-to-tr from-accent/10 to-primary/10 flex items-center justify-center">
             <Trophy className="w-6 h-6 text-accent" />
           </div>
         </div>
       </div>
 
-      <div className="bg-card.glass rounded-2xl p-6 border border-border/50 shadow-card">
-        <div className="flex items-center justify-between">
+      <div className="h-full w-full bg-card.glass rounded-2xl p-6 border border-border/50 shadow-card">
+        <div className="flex items-center justify-center text-center sm:text-left sm:justify-between">
           <div>
             <p className="text-sm text-muted-foreground">Sessions Today</p>
             <p className="text-3xl font-bold bg-gradient-to-tr from-premium to-yellow-200 bg-clip-text text-transparent">
               {loadingSessions ? '...' : sessionsToday}
             </p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-premium/10 to-yellow-200/10 flex items-center justify-center">
+          <div className="hidden sm:flex w-12 h-12 rounded-xl bg-gradient-to-tr from-premium/10 to-yellow-200/10 flex items-center justify-center">
             <TrendingUp className="w-6 h-6 text-premium" />
           </div>
         </div>
       </div>
 
-      <div className="bg-card.glass rounded-2xl p-6 border border-border/50 shadow-card">
-        <Statwheel/>
-      </div>
+      <Statwheel/>
     </div>
   );
 }

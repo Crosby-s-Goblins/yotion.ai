@@ -12,7 +12,7 @@ const statLabels: Record<StatType, string> = {
   accuracy: "Accuracy",
   consistency: "Consistency",
   time: "Duration",
-  poses: "Total Poses",
+  poses: "Poses",
 };
 
 const Statwheel = () => {
@@ -32,17 +32,15 @@ const Statwheel = () => {
 
   // Fetch rank data
   useEffect(() => {
-    if (!user?.id) return;
-
     const fetchAndCalculateRanks = async () => {
-      const fromDate = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split("T")[0];
+      // const fromDate = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000)
+      //   .toISOString()
+      //   .split("T")[0];
 
       const { data: sessions, error } = await supabase
         .from("post_performance")
         .select("user_id, accuracy_score, consistency_score, duration_s, exercises_performed, date")
-        .gte("date", fromDate);
+        // .gte("date", fromDate);
 
       if (error || !sessions) return console.error("Error fetching session data:", error);
 
@@ -77,7 +75,7 @@ const Statwheel = () => {
 
       for (const type of statTypes) {
         const sorted = [...entries].sort((a, b) => (b[type] ?? 0) - (a[type] ?? 0));
-        const index = sorted.findIndex((entry) => entry.id === user.id);
+        const index = sorted.findIndex((entry) => entry.id === user?.id);
         if (index !== -1) {
           userRanks.push({ label: statLabels[type], placement: index + 1 });
         }
@@ -92,27 +90,25 @@ const Statwheel = () => {
   const current = rankStats[rankIndex];
 
   return (
-    <div className="flex items-center justify-between">
-      <div className="overflow-hidden flex items-start relative">
-        <AnimatePresence mode="wait">
-          {current && (
-            <motion.div
-              key={current.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4 }}
-              className="relative"
-            >
-              <p className="text-sm text-muted-foreground">{current.label} Rank</p>
-              <p className="text-3xl font-bold bg-gradient-to-tr from-gray-600 to-gray-500 bg-clip-text text-transparent">
-                #{current.placement}
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-      <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-gray-500/10 to-gray-400/10 flex items-center justify-center">
+    <div className="h-full w-full bg-card.glass rounded-2xl p-6 border border-border/50 shadow-card flex items-center justify-center text-center sm:text-left sm:justify-between">
+      <AnimatePresence mode="wait">
+        {current && (
+          <motion.div
+            key={current.label}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4 }}
+            className="relative"
+          >
+            <p className="text-sm text-muted-foreground text-nowrap"><span className="hidden sm:inline">Overall </span>{current.label} Rank</p>
+            <p className="text-3xl font-bold bg-gradient-to-tr from-gray-600 to-gray-500 bg-clip-text text-transparent">
+              #{current.placement}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <div className="hidden sm:flex w-12 h-12 rounded-xl bg-gradient-to-tr from-gray-500/10 to-gray-400/10 flex items-center justify-center">
         <Trophy className="w-6 h-6 text-gray-500" />
       </div>
     </div>

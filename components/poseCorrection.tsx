@@ -449,7 +449,10 @@ export function usePoseCorrection(selectedPose: number, timerStartedRef: React.R
 
                         else {
                             const now = Date.now();
-                            if (isMounted && formTextRef.current !== "Perfect!" && now - lastFormTextUpdateRef.current > 200) {
+                            if(isMounted && timerStartedRef.current < 2){
+                                setFormText("");
+                            }
+                            else if (isMounted && formTextRef.current !== "Perfect!" && now - lastFormTextUpdateRef.current > 200) {
                               setFormText("Perfect!");
                               lastFormTextUpdateRef.current = now;
                             }

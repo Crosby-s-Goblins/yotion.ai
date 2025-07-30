@@ -54,7 +54,7 @@ function SkelePageContent() {
   // Now safe to initialize timerSecondMove
   const [timerSecondMove, setTimerSecondMove] = useState<number>(60);
   const [initialTimerSeconds, setInitialTimerSeconds] = useState<number | null>(null);
-  const [poseStartTimer, setPoseStartTimer] = useState<number>(1); // changed from 3 to 1 for testing purposes
+  const [poseStartTimer, setPoseStartTimer] = useState<number>(3); // changed from 3 to 1 for testing purposes
   const [timerStarted, setTimerStarted] = useState<number>(0);
   const timerStartedRef = useRef(timerStarted);
   const [showImageRef, setShowImageRef] = useState(false);
@@ -308,7 +308,7 @@ function SkelePageContent() {
       try {
         const { data, error } = await supabase
           .from("poseLibrary")
-          .select('id, name, difficulty, description, images')
+          .select('id, name, labels->difficulty, description, images')
           .eq('id', numericPoseId)
           .single();
 

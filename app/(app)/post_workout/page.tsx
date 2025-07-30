@@ -2,6 +2,15 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { useUser } from "@/components/user-provider";
 import PageTopBar from "@/components/page-top-bar";
 import Link from "next/link";
@@ -51,6 +60,9 @@ export default function PostWorkoutPage() {
     const [insightsError, setInsightsError] = useState<string | null>(null);
     const [weight, setWeight] = useState<number | null>(null);
     const [poseDifficulties, setPoseDifficulties] = useState<string[]>([]);
+
+    const[open, setOpen] = useState<boolean>(false);
+    const [inpWeight, setInpWeight] = useState<string>("");
 
     useEffect(() => {
         const alreadyReloaded = sessionStorage.getItem('reloaded');
@@ -180,11 +192,66 @@ export default function PostWorkoutPage() {
     };
     getAverageMET()
 
+    const handleSubmit = async () => {
+    const numericValue = Number(inpWeight);
+    if (!isNaN(numericValue) && numericValue > 0 && numericValue < 1000) {
+      setWeight(numericValue);
+      setOpen(false);
+
+      const supabase = createClient();
+      const { error } = await supabase.from("user_preferences").upsert({
+        id: user?.id,
+        weight: numericValue,
+      });
+
+      if (error) {
+        console.error("Failed to update weight:", error);
+        alert("Failed to save weight. Please try again.");
+      }
+    } else {
+      alert("Please enter a valid number between 1 and 999.");
+    }
+  };
+
     const getCaloriesBurned = () => {
         console.log('[DEBUG] getCaloriesBurned called with:', { performance, weight, poseDifficulties });
         if (!performance || !weight || !poseDifficulties.length) {
             console.log('[DEBUG] Missing data for calories:', { performance, weight, poseDifficulties });
-            return <Badge variant="outline"><a href="/appSettings">Enter weight</a></Badge>;
+            return (
+                <Dialog
+                    open={open}
+                    onOpenChange={(isOpen) => {
+                        setOpen(isOpen);
+                        if (isOpen) setInpWeight(weight?.toString() || ""); // preload if existing value
+                    }}
+                    >
+                    <DialogTrigger asChild>
+                        <Badge variant="outline" className="cursor-pointer">
+                        {weight !== null ? `${weight}` : "Enter weight"}
+                        </Badge>
+                    </DialogTrigger>
+
+                    <DialogContent className="sm:max-w-sm">
+                        <DialogHeader>
+                            <DialogTitle>Enter your weight (lb)</DialogTitle>
+                        </DialogHeader>
+                        <Input
+                        type="number"
+                        value={inpWeight}
+                        onChange={(e) => setInpWeight(e.target.value)}
+                        placeholder="e.g. 75"
+                        autoFocus
+                        onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+                        />
+                        <DialogFooter className="mt-4">
+                        <Button variant="outline" onClick={() => setOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleSubmit}>Submit</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            );
         }
         const durationMin = performance.duration_s / 60;
         const perExerciseDuration = durationMin / (performance.exercises_performed?.length || 1);

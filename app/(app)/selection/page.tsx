@@ -334,14 +334,16 @@ export default function SelectionComponents() {
       <section className="flex-1 w-full max-w-7xl mx-auto px-6 pb-8">
         {/* Tabs Switcher */}
         <Tabs value={tab} onValueChange={setTab} className="mb-8">
-          <TabsList className="border-b border-border">
-            <TabsTrigger value="programs" className="cursor-pointer data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-muted data-[state=active]:font-semibold transition-colors">
-              Programs
-            </TabsTrigger>
-            <TabsTrigger value="poses" className="cursor-pointer data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-muted data-[state=active]:font-semibold transition-colors">
-              Poses
-            </TabsTrigger>
-          </TabsList>
+        <div className="w-full flex items-center justify-center">
+            <TabsList className="w-full max-w-[500px] bg-gray-200">
+              <TabsTrigger value="programs" className="cursor-pointer data-[state=active]:rounded-xl">
+                Programs
+              </TabsTrigger>
+              <TabsTrigger value="poses" className="cursor-pointer data-[state=active]:rounded-xl">
+                Poses
+              </TabsTrigger>
+            </TabsList>
+        </div>
           {/* Pose Selection Tab */}
           <TabsContent value="poses">
             {/* Search and Filter Section */}

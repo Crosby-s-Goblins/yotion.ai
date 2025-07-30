@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from "react";
-import { Heart, MessageCircle, Share2, EllipsisVertical, Trophy } from "lucide-react";
+import { Heart, EllipsisVertical, Trophy } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -345,14 +345,6 @@ const AllPosts = ({ reloadKey }: { reloadKey?: number }) => {
                       <Heart className="w-4 h-4 lg:mr-2" fill={liked ? "currentColor" : "none"} />
                       {fp.likes ?? 0}
                     </Button>
-                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
-                      <MessageCircle className="w-4 h-4 lg:mr-2" />
-                      0
-                    </Button>
-                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
-                      <Share2 className="w-4 h-4 lg:mr-2" />
-                      <span className="hidden lg:flex">Share</span>
-                    </Button>
                   </div>
                   <span className="text-xs text-muted-foreground">
                     {fp.created_at ? formatDistanceToNow(new Date(fp.created_at), { addSuffix: true }) : ""}
@@ -422,14 +414,6 @@ const AllPosts = ({ reloadKey }: { reloadKey?: number }) => {
                   >
                     <Heart className="w-4 h-4 lg:mr-2" fill={liked ? "currentColor" : "none"} />
                     {p.likes ?? 0}
-                  </Button>
-                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
-                    <MessageCircle className="w-4 h-4 lg:mr-2" />
-                    0
-                  </Button>
-                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
-                    <Share2 className="w-4 h-4 lg:mr-2" />
-                    <span className="hidden lg:flex">Share</span>
                   </Button>
                 </div>
                 <span className="text-xs text-muted-foreground">

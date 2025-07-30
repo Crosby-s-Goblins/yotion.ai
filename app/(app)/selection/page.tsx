@@ -23,16 +23,16 @@ import AddProgramModal from '@/components/selectorCardComponents/addProgramModal
 import { Badge } from "@/components/ui/badge";
 
 const muscleGroupMap: Record<string, string[]> = {
-  core: ["core", "obliques", "obliques_stretch", "rectus_abdominis", "intercostals"],
-  back: ["spinal_erectors", "spinal_extensors", "trapezius", "lower_back", "psosas_stretch", "quadratus_lumborum", "upper_back", "rhomboids", "latissimus_dorsi", "lats", "erector_spinae"],
-  shoulders: ["shoulders", "deltoids", "shoulder_stabilizers", "shoulders_stretch"],
-  chest: ["chest", "pectorals"],
-  arms: ["biceps", "triceps", "forearms"],
-  legs: ["quadriceps", "quadriceps_stretch", "hamstrings", "hamstrings_stretch", "calves", "calves_stretch", "adductors", "adductors_stretch"],
-  glutes: ["glutes", "gluteus_maximus", "gluteus_medius"],
-  hips: ["hip_flexors"],
-  neck: ["neck_flexors", "sternocleidomastoid"],
-  feet_ankles: ["ankle_flexors", "ankle_stabilizers", "feet", "ankles"],
+  core: ["Core", "Obliques", "Obliques_Stretch", "Rectus_Abdominis", "Intercostals"],
+  back: ["Spinal_Erectors", "Spinal_Extensors", "Trapezius", "Lower_Back", "Psosas_Stretch", "Quadratus_Lumborum", "Upper_Back", "Rhomboids", "Latissimus_Dorsi", "Lats", "Erector_Spinae"],
+  shoulders: ["Shoulders", "Deltoids", "Shoulder_Stabilizers", "Shoulders_Stretch"],
+  chest: ["Chest", "Pectorals"],
+  arms: ["Biceps", "Triceps", "Forearms"],
+  legs: ["Quadriceps", "Quadriceps_Stretch", "Hamstrings", "Hamstrings_Stretch", "Calves", "Calves_Stretch", "Adductors", "Adductors_Stretch"],
+  glutes: ["Glutes", "Gluteus_Maximus", "Gluteus_Medius"],
+  hips: ["Hip_Flexors"],
+  neck: ["Neck_Flexors", "Sternocleidomastoid"],
+  feet_ankles: ["Ankle_Flexors", "Ankle_Stabilizers", "Feet", "Ankles"],
 };
 
 export default function SelectionComponents() {

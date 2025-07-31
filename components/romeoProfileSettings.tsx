@@ -28,8 +28,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
 import { FileUpload } from "@/components/ui/file-upload";
-// import { ScrollArea } from "@/components/ui/scroll-area";
-// import { Badge } from "@/components/ui/badge";
 
 //Icons
 import { Loader2Icon, Check, CircleAlert } from "lucide-react";
@@ -163,10 +161,6 @@ const Settings = ({ user }: SettingsProps) => {
                     defaultValue="profile"
                     className="flex items-center w-[80%] max-w-[450px] mb-10"
                 >
-                    <TabsList className="bg-gray-200 rounded-md">
-                        <TabsTrigger value="profile">Profile</TabsTrigger>
-                        {/* <TabsTrigger value="details">Details</TabsTrigger> */}
-                    </TabsList>
 
                     <TabsContent value="profile" className="w-full">
                         <div>
@@ -253,22 +247,6 @@ const Settings = ({ user }: SettingsProps) => {
                             </Card>
                         </div>
                     </TabsContent>
-                    {/* <TabsContent value="details" className="w-full">
-                        <div className="w-full">
-                            <div className="flex items-center gap-3">
-                                <p className="text-lg font-bold my-3">Account Details</p>
-                                <Badge variant="destructive" className="flex gap-1">
-                                    <CircleAlert size={11} />
-                                    Advanced
-                                </Badge>
-                            </div>
-                            <ScrollArea className="py-4 h-[500px] rounded-md border bg-muted">
-                                <pre className="text-xs whitespace-pre-wrap">
-                                    {JSON.stringify(user, null, 2)}
-                                </pre>
-                            </ScrollArea>
-                        </div>
-                    </TabsContent> */}
                 </Tabs>
             </div>
         </div>

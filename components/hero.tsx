@@ -39,10 +39,10 @@ export function Hero() {
         ) : (
           <>
             <Button className="px-8 py-4 text-lg" size="lg" variant="outline" asChild>
-              <Link href="/auth/sign-up">Sign Up</Link>
+              <Link href="/auth/login">Log In</Link>
             </Button>
             <Button className="px-8 py-4 text-lg" size="lg" variant="outline" asChild>
-              <Link href="/auth/login">Sign In</Link>
+              <Link href="/auth/sign-up">Sign Up</Link>
             </Button>
           </>
         )}

@@ -49,7 +49,7 @@ export default function SelectionComponents() {
   const [hasPageEntered, setHasPageEntered] = useState(false);
   const [reflectPose, setReflectPose] = useState(false);
   // Add state for sessions and tab
-  const [tab, setTab] = useState('programs');
+  const [tab, setTab] = useState('poses');
   const [programs, setPrograms] = useState<Session[]>([]);
   const [programsLoading, setProgramsLoading] = useState(false);
   const [programsError, setProgramsError] = useState<string | null>(null);
@@ -336,11 +336,11 @@ export default function SelectionComponents() {
         <Tabs value={tab} onValueChange={setTab} className="mb-8">
         <div className="w-full flex items-center justify-center">
             <TabsList className="w-full max-w-[500px] bg-gray-200">
-              <TabsTrigger value="programs" className="cursor-pointer data-[state=active]:rounded-xl">
-                Programs
-              </TabsTrigger>
               <TabsTrigger value="poses" className="cursor-pointer data-[state=active]:rounded-xl">
                 Poses
+              </TabsTrigger>
+              <TabsTrigger value="programs" className="cursor-pointer data-[state=active]:rounded-xl">
+                Programs
               </TabsTrigger>
             </TabsList>
         </div>
@@ -579,7 +579,34 @@ export default function SelectionComponents() {
                               programSourceFilter === 'premade' ? !program.isUser :
                                 program.isUser
                           )
-                          .sort((a, b) => a.name.localeCompare(b.name))
+                          .sort((a, b) => {
+                            // Define difficulty order
+                            const difficultyOrder = { 'Easy': 1, 'Medium': 2, 'Hard': 3 };
+                            
+                            // User programs should come after all difficulty-defined programs
+                            if (a.isUser && !b.isUser) return 1;
+                            if (!a.isUser && b.isUser) return -1;
+                            
+                            // If both are user programs or both are not user programs, sort by difficulty
+                            if (a.isUser && b.isUser) {
+                              // Both are user programs - sort alphabetically
+                              return a.name.localeCompare(b.name);
+                            }
+                            
+                            // Both are non-user programs - sort by difficulty first, then alphabetically
+                            const difficultyA = a.difficulty || 'Hard';
+                            const difficultyB = b.difficulty || 'Hard';
+                            
+                            // Compare difficulties first
+                            const difficultyComparison = difficultyOrder[difficultyA] - difficultyOrder[difficultyB];
+                            
+                            // If difficulties are the same, sort alphabetically by name
+                            if (difficultyComparison === 0) {
+                              return a.name.localeCompare(b.name);
+                            }
+                            
+                            return difficultyComparison;
+                          })
                           .map((program) => (
                             <div key={program.id} className="relative group">
                               <SessionCard session={program} locked={!paidStatus} />

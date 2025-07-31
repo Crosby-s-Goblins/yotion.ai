@@ -44,7 +44,7 @@ export default function ContactPage() {
                 toast.error("Failed to send message. Please try again.");
             }
         } catch (error) {
-            toast.error("An error occurred. Please try again.");
+            toast.error("An error occurred. Please try again." + error);
         } finally {
             setIsSubmitting(false);
         }
@@ -60,7 +60,7 @@ export default function ContactPage() {
                     Contact Us
                 </h1>
                 <p className="text-muted-foreground text-center max-w-2xl text-sm md:text-base">
-                    Get in touch with our team. We'd love to hear from you and will respond as soon as possible.
+                    Get in touch with our team. We&apos;d love to hear from you and will respond as soon as possible.
                 </p>
             </div>
 

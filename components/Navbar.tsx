@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { Button } from './ui/button';
 import { useUser } from './user-provider';
 import { Menu, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
@@ -22,6 +23,13 @@ export default function Navbar() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/");
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -57,41 +65,7 @@ export default function Navbar() {
     return (
       <nav className="w-full border-b border-b-foreground/10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo/Brand - Left aligned */}
-            <div className="flex items-center">
-              <Link href="/" className="text-lg sm:text-xl font-bold">
-                yotion.ai
-              </Link>
-            </div>
-
-            {/* Navigation Links - Center aligned (hidden on mobile) */}
-            <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
-              <Link href="/about" className="text-sm lg:text-base text-foreground/60 hover:text-foreground transition-colors">
-                About
-              </Link>
-              <Link href="/pricing" className="text-sm lg:text-base text-foreground/60 hover:text-foreground transition-colors">
-                Pricing
-              </Link>
-              <Link href="/contact" className="text-sm lg:text-base text-foreground/60 hover:text-foreground transition-colors">
-                Contact
-              </Link>
-            </div>
-
-            {/* Auth Buttons - Right aligned */}
-            <div className="flex items-center space-x-2 sm:space-x-4">
-              <div className="w-16 sm:w-20 h-8 bg-gray-200 animate-pulse rounded"></div>
-            </div>
-          </div>
-        </div>
-      </nav>
-    );
-  }
-
-  return (
-    <nav className="w-full border-b border-b-foreground/10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+                  <div className="flex items-center h-16 relative">
           {/* Logo/Brand - Left aligned */}
           <div className="flex items-center">
             <Link href="/" className="text-lg sm:text-xl font-bold">
@@ -100,7 +74,7 @@ export default function Navbar() {
           </div>
 
           {/* Navigation Links - Center aligned (hidden on mobile) */}
-          <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
+          <div className="hidden md:flex items-center space-x-6 lg:space-x-8 absolute left-1/2 transform -translate-x-1/2">
             <Link href="/about" className="text-sm lg:text-base text-foreground/60 hover:text-foreground transition-colors">
               About
             </Link>
@@ -113,7 +87,41 @@ export default function Navbar() {
           </div>
 
           {/* Auth Buttons - Right aligned */}
-          <div className="flex items-center space-x-2 sm:space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4 ml-auto">
+            <div className="w-16 sm:w-20 h-8 bg-gray-200 animate-pulse rounded"></div>
+          </div>
+          </div>
+        </div>
+      </nav>
+    );
+  }
+
+  return (
+    <nav className="w-full border-b border-b-foreground/10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center h-16 relative">
+          {/* Logo/Brand - Left aligned */}
+          <div className="flex items-center">
+            <Link href="/" className="text-lg sm:text-xl font-bold">
+              yotion.ai
+            </Link>
+          </div>
+
+          {/* Navigation Links - Center aligned (hidden on mobile) */}
+          <div className="hidden md:flex items-center space-x-6 lg:space-x-8 absolute left-1/2 transform -translate-x-1/2">
+            <Link href="/about" className="text-sm lg:text-base text-foreground/60 hover:text-foreground transition-colors">
+              About
+            </Link>
+            <Link href="/pricing" className="text-sm lg:text-base text-foreground/60 hover:text-foreground transition-colors">
+              Pricing
+            </Link>
+            <Link href="/contact" className="text-sm lg:text-base text-foreground/60 hover:text-foreground transition-colors">
+              Contact
+            </Link>
+          </div>
+
+          {/* Auth Buttons - Right aligned */}
+          <div className="flex items-center space-x-2 sm:space-x-4 ml-auto">
             {isLoggedIn ? (
               <div className="flex items-center space-x-2 sm:space-x-4">
                 <span className="hidden lg:block text-sm text-foreground/60">
@@ -145,10 +153,10 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="flex items-center space-x-2">
-                <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+                <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex">
                   <Link href="/auth/login">Log in</Link>
                 </Button>
-                <Button asChild size="sm" className="text-xs sm:text-sm px-2 sm:px-4">
+                <Button asChild size="sm" className="hidden md:inline-flex text-xs sm:text-sm px-2 sm:px-4">
                   <Link href="/auth/sign-up">Sign up</Link>
                 </Button>
               </div>
@@ -171,7 +179,7 @@ export default function Navbar() {
 
         {/* Mobile menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-foreground/10 bg-background/95 backdrop-blur">
+          <div className="md:hidden border-t border-foreground/10 border-b-2 border-b-foreground/20 bg-background/95 backdrop-blur shadow-lg">
             <div className="px-2 pt-2 pb-3 space-y-1">
               <Link
                 href="/about"
@@ -198,29 +206,39 @@ export default function Navbar() {
                 <>
                   <Link
                     href="/settings"
-                    className="block px-3 py-2 text-base text-foreground/60 hover:text-foreground hover:bg-foreground/5 rounded-md transition-colors"
+                    className="block px-3 py-2 text-base bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hover:from-blue-700 hover:to-purple-700 hover:bg-foreground/5 rounded-md transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Profile Settings
                   </Link>
-                  <div className="px-3 py-2">
-                    <LogoutButton/>
-                  </div>
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="block w-full text-left px-3 py-2 text-base text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                  >
+                    Logout
+                  </button>
                 </>
               )}
               {!isLoggedIn && (
-                <div className="px-3 py-2 space-y-2">
-                  <Button asChild variant="ghost" className="w-full justify-start">
-                    <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>
-                      Log in
-                    </Link>
-                  </Button>
-                  <Button asChild className="w-full justify-start">
-                    <Link href="/auth/sign-up" onClick={() => setMobileMenuOpen(false)}>
-                      Sign up
-                    </Link>
-                  </Button>
-                </div>
+                <>
+                  <Link
+                    href="/auth/login"
+                    className="block px-3 py-2 text-base bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hover:from-blue-700 hover:to-purple-700 hover:bg-foreground/5 rounded-md transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Log in
+                  </Link>
+                  <Link
+                    href="/auth/sign-up"
+                    className="block px-3 py-2 text-base bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hover:from-blue-700 hover:to-purple-700 hover:bg-foreground/5 rounded-md transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Sign up
+                  </Link>
+                </>
               )}
             </div>
           </div>

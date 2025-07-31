@@ -372,8 +372,8 @@ export default function SelectionComponents() {
                     >
                       {/* ...Filters... */}
                       <div className="flex items-center gap-1">
-                        <label className="text-sm font-medium">
-                          Difficulty:
+                        <label className="text-sm font-medium whitespace-nowrap">
+                          Difficulty level:
                         </label>
                         <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
                           <SelectTrigger>
@@ -388,8 +388,8 @@ export default function SelectionComponents() {
                         </Select>
                       </div>
                       <div className="flex items-center gap-1">
-                        <label className="text-sm font-medium">
-                          Muscles:
+                        <label className="text-sm font-medium whitespace-nowrap">
+                          Muscle group:
                         </label>
                         <Select
                           value={selectedMuscle}
@@ -422,7 +422,7 @@ export default function SelectionComponents() {
                       {
                         <div className="flex items-center gap-1">
                           <div className={`flex items-center gap-1 ${(selectedMuscle == "all") && "hidden"}`}>
-                            <label className="text-sm font-medium">Specific:</label>
+                            <label className="text-sm font-medium whitespace-nowrap">Specific muscle:</label>
                             <Select
                               value={selectedSpecificMuscle}
                               onValueChange={setSelectedSpecificMuscle}

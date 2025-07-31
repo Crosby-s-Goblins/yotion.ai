@@ -26,7 +26,7 @@ function SkelePageContent() {
   const user = useUser() as { id?: string } | null;
   const [showInfoModal, setShowInfoModal] = useState<boolean>(false);
   const [showImageRef, setShowImageRef] = useState(false);
-  const { isLoaded } = useTimer();
+  const { isLoaded, timerSeconds } = useTimer();
   const searchParams = useSearchParams();
   
   // --- Program session integration ---
@@ -49,8 +49,7 @@ function SkelePageContent() {
     poseId = searchParams.get('poseId');
     const reverseParam = searchParams.get('reverse');
     isReversed = reverseParam === 'true';
-    const timerParam = searchParams.get('timer');
-    timerForPose = timerParam ? Number(timerParam) : 60;
+    timerForPose = timerSeconds;
   }
   
   const [go] = useState(true);

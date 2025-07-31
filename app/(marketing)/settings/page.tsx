@@ -1,5 +1,5 @@
 // settings/page.tsx
-import ProfileSettings from '@/components/romeoProfileSettings'
+import ProfileSettings from '@/components/settingsPage/profileSettings'
 import { createClient } from '@/lib/supabase/server';
 
 export default async function SettingsPage() {

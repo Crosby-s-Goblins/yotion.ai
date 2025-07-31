@@ -12,7 +12,7 @@ import { useUser } from '@/components/user-provider';
 import PageTopBar from "@/components/page-top-bar";
 import { useTimer } from "@/context/TimerContext";
 import { Button } from '@/components/ui/button';
-import { Search, Target, X } from 'lucide-react';
+import { ChevronDown, Search, Target, X } from 'lucide-react';
 import { Pose } from "@/components/selectorCardComponents/types";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -66,8 +66,7 @@ export default function SelectionComponents() {
 
   const [selectedMuscle, setSelectedMuscle] = useState("all");
   const [selectedSpecificMuscle, setSelectedSpecificMuscle] = useState("all");
-
-
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     resetTimerToDefault();
@@ -334,7 +333,7 @@ export default function SelectionComponents() {
       <section className="flex-1 w-full max-w-7xl mx-auto px-6 pb-8">
         {/* Tabs Switcher */}
         <Tabs value={tab} onValueChange={setTab} className="mb-8">
-        <div className="w-full flex items-center justify-center">
+          <div className="w-full flex items-center justify-center">
             <TabsList className="w-full max-w-[500px] bg-gray-200">
               <TabsTrigger value="poses" className="cursor-pointer data-[state=active]:rounded-xl">
                 Poses
@@ -343,7 +342,7 @@ export default function SelectionComponents() {
                 Programs
               </TabsTrigger>
             </TabsList>
-        </div>
+          </div>
           {/* Pose Selection Tab */}
           <TabsContent value="poses">
             {/* Search and Filter Section */}
@@ -361,79 +360,106 @@ export default function SelectionComponents() {
                   />
                 </div>
                 {/* Filtering */}
-                <div className="flex gap-3">
-                  <div className="flex items-center gap-1">
-                    <label className="text-sm font-medium">
-                      Difficulty:
-                    </label>
-                    <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select difficulty" />
-                      </SelectTrigger>
-                      <SelectContent className="">
-                        <SelectItem value="all">All Levels</SelectItem>
-                        <SelectItem value="easy">Beginner</SelectItem>
-                        <SelectItem value="medium">Intermediate</SelectItem>
-                        <SelectItem value="hard">Advanced</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <label className="text-sm font-medium">
-                      Muscles:
-                    </label>
-                    <Select
-                      value={selectedMuscle}
-                      onValueChange={(value) => {
-                        setSelectedMuscle(value);
-                        if (value === "all") {
-                          setSelectedSpecificMuscle("all");
-                        }
-                      }}
+                <AnimatePresence initial={false}>
+                  {showFilters && (
+                    <motion.div
+                      key="filters"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="flex gap-3 flex-col sm:flex-row"
                     >
-
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select muscle group" />
-                      </SelectTrigger>
-                      <SelectContent className="">
-                        <SelectItem value="all">All</SelectItem>
-                        <SelectItem value="core">Core</SelectItem>
-                        <SelectItem value="back">Back</SelectItem>
-                        <SelectItem value="shoulders">Shoulders</SelectItem>
-                        <SelectItem value="chest">Chest</SelectItem>
-                        <SelectItem value="arms">Arms</SelectItem>
-                        <SelectItem value="legs">Legs</SelectItem>
-                        <SelectItem value="glutes">Glutes</SelectItem>
-                        <SelectItem value="hips">Hips</SelectItem>
-                        <SelectItem value="neck">Neck</SelectItem>
-                        <SelectItem value="feet_ankles">Feet & Ankles</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  {
-                    <div className="flex items-center gap-1">
-                      <div className={`flex items-center gap-1 ${(selectedMuscle == "all") && "hidden"}`}>
-                        <label className="text-sm font-medium">Specific:</label>
-                        <Select
-                          value={selectedSpecificMuscle}
-                          onValueChange={setSelectedSpecificMuscle}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select specific muscle" />
+                      {/* ...Filters... */}
+                      <div className="flex items-center gap-1">
+                        <label className="text-sm font-medium">
+                          Difficulty:
+                        </label>
+                        <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
+                          <SelectTrigger>
+                            <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="">
-                            <SelectItem value="all">All</SelectItem>
-                            {(muscleGroupMap[selectedMuscle] ?? []).map((muscle) => (
-                              <SelectItem key={muscle} value={muscle}>
-                                {muscle.replaceAll("_", " ")}
-                              </SelectItem>
-                            ))}
+                          <SelectContent>
+                            <SelectItem value="all">All Levels</SelectItem>
+                            <SelectItem value="easy">Beginner</SelectItem>
+                            <SelectItem value="medium">Intermediate</SelectItem>
+                            <SelectItem value="hard">Advanced</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
-                    </div>
-                  }
-                </div>
+                      <div className="flex items-center gap-1">
+                        <label className="text-sm font-medium">
+                          Muscles:
+                        </label>
+                        <Select
+                          value={selectedMuscle}
+                          onValueChange={(value) => {
+                            setSelectedMuscle(value);
+                            if (value === "all") {
+                              setSelectedSpecificMuscle("all");
+                            }
+                          }}
+                        >
+
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select muscle group" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All</SelectItem>
+                            <SelectItem value="core">Core</SelectItem>
+                            <SelectItem value="back">Back</SelectItem>
+                            <SelectItem value="shoulders">Shoulders</SelectItem>
+                            <SelectItem value="chest">Chest</SelectItem>
+                            <SelectItem value="arms">Arms</SelectItem>
+                            <SelectItem value="legs">Legs</SelectItem>
+                            <SelectItem value="glutes">Glutes</SelectItem>
+                            <SelectItem value="hips">Hips</SelectItem>
+                            <SelectItem value="neck">Neck</SelectItem>
+                            <SelectItem value="feet_ankles">Feet & Ankles</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      {
+                        <div className="flex items-center gap-1">
+                          <div className={`flex items-center gap-1 ${(selectedMuscle == "all") && "hidden"}`}>
+                            <label className="text-sm font-medium">Specific:</label>
+                            <Select
+                              value={selectedSpecificMuscle}
+                              onValueChange={setSelectedSpecificMuscle}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select specific muscle" />
+                              </SelectTrigger>
+                              <SelectContent className="">
+                                <SelectItem value="all">All</SelectItem>
+                                {(muscleGroupMap[selectedMuscle] ?? []).map((muscle) => (
+                                  <SelectItem key={muscle} value={muscle}>
+                                    {muscle.replaceAll("_", " ")}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      }
+                    </motion.div>)}
+                </AnimatePresence>
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-1 h-4 w-fit p-0 px-2 border-gray-300"
+                  onClick={() => setShowFilters(prev => !prev)}
+                >
+                  <p className="font-light text-gray-500 text-sm">{showFilters ? "hide" : "show"} filters</p>
+                  <motion.span
+                    initial={false}
+                    animate={{ rotate: showFilters ? 180 : 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <ChevronDown color="gray" className="w-4 h-4" />
+                  </motion.span>
+                </Button>
+
+
               </div>
             </div>
 
@@ -446,7 +472,7 @@ export default function SelectionComponents() {
             >
               <div className=""> {/* "max-h-[calc(x*10rem)] overflow-y-auto" --To confine list of poses to x rows */}
                 {hasPageEntered ? (
-                  <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     <AnimatePresence mode="popLayout" initial={false}>
                       {isFilterReady ? (
                         searchedItems.length > 0 ? (
@@ -528,39 +554,64 @@ export default function SelectionComponents() {
                   )}
                 </div>
                 {/* Filter Popover */}
-                <div className="flex gap-3">
-                  <div className="flex items-center gap-1">
-                    <label className="text-sm font-medium">
-                      Difficulty:
-                    </label>
-                    <Select value={selectedProgramDifficulty} onValueChange={setSelectedProgramDifficulty} disabled={programSourceFilter === 'user'}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select difficulty" />
-                      </SelectTrigger>
-                      <SelectContent className="">
-                        <SelectItem value="all">All Levels</SelectItem>
-                        <SelectItem value="easy">Beginner</SelectItem>
-                        <SelectItem value="medium">Intermediate</SelectItem>
-                        <SelectItem value="hard">Advanced</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <label className="text-sm font-medium">
-                      Source:
-                    </label>
-                    <Select value={programSourceFilter} onValueChange={v => setProgramSourceFilter(v as 'all' | 'premade' | 'user')}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select source" />
-                      </SelectTrigger>
-                      <SelectContent className="">
-                        <SelectItem value="all">All</SelectItem>
-                        <SelectItem value="premade">Yotion-Select</SelectItem>
-                        <SelectItem value="user">User-Created</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+                <AnimatePresence initial={false}>
+                  {showFilters && (
+                    <motion.div
+                      key="program-filters"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="flex gap-3 flex-col sm:flex-row"
+                    >
+                      <div className="flex items-center gap-1">
+                        <label className="text-sm font-medium">
+                          Difficulty:
+                        </label>
+                        <Select value={selectedProgramDifficulty} onValueChange={setSelectedProgramDifficulty} disabled={programSourceFilter === 'user'}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select difficulty" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Levels</SelectItem>
+                            <SelectItem value="easy">Beginner</SelectItem>
+                            <SelectItem value="medium">Intermediate</SelectItem>
+                            <SelectItem value="hard">Advanced</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <label className="text-sm font-medium">
+                          Source:
+                        </label>
+                        <Select value={programSourceFilter} onValueChange={v => setProgramSourceFilter(v as 'all' | 'premade' | 'user')}>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select source" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All</SelectItem>
+                            <SelectItem value="premade">Yotion-Select</SelectItem>
+                            <SelectItem value="user">User-Created</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-1 h-4 w-fit p-0 px-2 border-gray-300"
+                  onClick={() => setShowFilters(prev => !prev)}
+                >
+                  <p className="font-light text-gray-500 text-sm">{showFilters ? "hide" : "show"} filters</p>
+                  <motion.span
+                    initial={false}
+                    animate={{ rotate: showFilters ? 180 : 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <ChevronDown color="gray" className="w-4 h-4" />
+                  </motion.span>
+                </Button>
               </div>
             </div>
             {paidStatus ? (
@@ -582,29 +633,29 @@ export default function SelectionComponents() {
                           .sort((a, b) => {
                             // Define difficulty order
                             const difficultyOrder = { 'Easy': 1, 'Medium': 2, 'Hard': 3 };
-                            
+
                             // User programs should come after all difficulty-defined programs
                             if (a.isUser && !b.isUser) return 1;
                             if (!a.isUser && b.isUser) return -1;
-                            
+
                             // If both are user programs or both are not user programs, sort by difficulty
                             if (a.isUser && b.isUser) {
                               // Both are user programs - sort alphabetically
                               return a.name.localeCompare(b.name);
                             }
-                            
+
                             // Both are non-user programs - sort by difficulty first, then alphabetically
                             const difficultyA = a.difficulty || 'Hard';
                             const difficultyB = b.difficulty || 'Hard';
-                            
+
                             // Compare difficulties first
                             const difficultyComparison = difficultyOrder[difficultyA] - difficultyOrder[difficultyB];
-                            
+
                             // If difficulties are the same, sort alphabetically by name
                             if (difficultyComparison === 0) {
                               return a.name.localeCompare(b.name);
                             }
-                            
+
                             return difficultyComparison;
                           })
                           .map((program) => (

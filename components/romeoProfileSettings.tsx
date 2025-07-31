@@ -5,13 +5,6 @@ import { useState } from "react";
 
 // UI stuff
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
-import {
-    Card,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -23,7 +16,16 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Separator } from "@/components/ui/separator";
+
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
@@ -148,107 +150,162 @@ const Settings = ({ user }: SettingsProps) => {
     };
 
     return (
-        <div>
+        <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/95">
             <Toaster />
-            <div className="w-full flex flex-col items-center">
-                <div className="my-8 w-[80%] max-w-[450px]">
-                    <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-                        Manage Settings
-                    </h1>
-                    <h1 className="leading-7">Welcome, fellow Yogi!</h1>
-                </div>
-                <Tabs
-                    defaultValue="profile"
-                    className="flex items-center w-[80%] max-w-[450px] mb-10"
-                >
+            
+            {/* Hero Header */}
+            <div className="flex flex-col gap-4 items-center px-4 md:px-8 pt-12 md:pt-20">
+                <h1 className="font-semibold text-2xl sm:text-3xl lg:text-4xl !leading-tight mx-auto max-w-xl text-center">
+                    Profile
+                </h1>
+                <p className="text-muted-foreground text-center max-w-2xl text-sm md:text-base">
+                    Update your personal information and how others see you.
+                </p>
+            </div>
 
-                    <TabsContent value="profile" className="w-full">
-                        <div>
-                            <p className="text-lg font-bold my-3">Account Preferences</p>
+            {/* Main Content */}
+            <main className="max-w-2xl mx-auto px-4 sm:px-6 pt-6 md:pt-10 pb-8 md:pb-16">
+                <div className="space-y-8 md:space-y-16">
+                    
+                    {/* Profile Picture */}
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between py-4 md:py-6 border-b border-border/50 gap-4 md:gap-0">
+                        <div className="flex-1 space-y-2 text-left">
+                            <h3 className="text-xl font-semibold">Profile Picture</h3>
+                            <p className="text-muted-foreground">
+                                Upload a new profile picture for your account. Maximum file size is 5MB.
+                            </p>
                         </div>
-                        <div className="flex flex-col gap-3">
-                            <Card>
-                                <CardHeader className="flex flex-col gap-5">
-                                    <div className="flex items-center">
-                                        <div className="w-full">
-                                            <div className="flex flex-col gap-1 flex-1">
-                                                <CardTitle>Change Avatar</CardTitle>
-                                                <CardDescription>
-                                                    Upload a new profile picture for your account.
-                                                </CardDescription>
-                                            </div>
-                                        </div>
-                                        <FileUpload
-                                            isLoading={loadingAvatar}
-                                            onChange={handleAvatarUpload}
+                        <div className="w-full md:w-1/2 flex justify-center md:justify-end">
+                            <div className="w-32 md:w-48 aspect-square">
+                                <FileUpload
+                                    isLoading={loadingAvatar}
+                                    onChange={handleAvatarUpload}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Username Change */}
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between py-4 md:py-6 border-b border-border/50 gap-4 md:gap-0">
+                        <div className="flex-1 space-y-2 text-left">
+                            <h3 className="text-xl font-semibold">Username</h3>
+                            <p className="text-muted-foreground">
+                                Change how your name appears on yotion.ai. Use letters and numbers only, 3-15 characters.
+                            </p>
+                        </div>
+                        <div className="w-full md:w-1/2 flex justify-center md:justify-end">
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button variant="outline" className="w-full max-w-xs md:w-48">
+                                        Edit Username
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Change Username</DialogTitle>
+                                        <DialogDescription>
+                                            Update how your name appears on yotion.ai. Use letters and numbers only, 3-15 characters.
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <form className="space-y-4" onSubmit={handleUsernameSubmit}>
+                                        <Input
+                                            placeholder="New username"
+                                            value={username}
+                                            onChange={(e) => setUsername(e.target.value)}
+                                            disabled={locked}
                                         />
-                                    </div>
-                                    <Separator />
-                                    <div className="flex flex-col gap-3">
-                                        <div className="flex flex-col gap-1">
-                                            <CardTitle>Change Username</CardTitle>
-                                            <CardDescription>
-                                                Change the way your name appears on Yogai.
-                                            </CardDescription>
-                                        </div>
-                                        <form
-                                            className="flex gap-2"
-                                            onSubmit={handleUsernameSubmit}
-                                        >
-                                            <Input
-                                                placeholder="New username"
-                                                value={username}
-                                                onChange={(e) => setUsername(e.target.value)}
-                                                disabled={locked}
-                                            />
-                                            <Button type="submit" disabled={loading || locked}>
+                                        <div className="flex gap-3 justify-end">
+                                            <DialogTrigger asChild>
+                                                <Button variant="outline" type="button">
+                                                    Cancel
+                                                </Button>
+                                            </DialogTrigger>
+                                            <Button 
+                                                type="submit" 
+                                                disabled={loading || locked}
+                                            >
                                                 {loading ? (
-                                                    <Loader2Icon className="animate-spin" />
+                                                    <Loader2Icon className="animate-spin w-4 h-4" />
                                                 ) : locked ? (
-                                                    <Check></Check>
+                                                    <Check className="w-4 h-4" />
                                                 ) : (
-                                                    "Submit"
+                                                    "Update"
                                                 )}
                                             </Button>
-                                        </form>
-                                    </div>
-                                    <Separator />
-                                    <div className="flex flex-col gap-2">
-                                        <CardTitle>Change Password</CardTitle>
-                                        <CardDescription>
-                                            Change the password associated with your account.
-                                        </CardDescription>
-                                        <PasswordAlteration />
-                                    </div>
-                                    <Separator />
-                                    <div className="flex flex-col gap-3">
-                                        <CardTitle>User Settings</CardTitle>
-                                        <Button onClick={logout}>
-                                            Logout
-                                        </Button>
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button variant="destructive"><CircleAlert/>Delete account</Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                    <p className="font-bold text-red-500 text-2xl">WARNING!</p>
-                                                    <AlertDialogTitle>Are you <span className="text-red-600">absolutely</span> sure?</AlertDialogTitle>
-                                                    <AlertDialogDescription> This action cannot be undone. This will permanently delete your account and remove your data from our servers.</AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                    <AlertDialogAction>Continue</AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    </div>
-                                </CardHeader>
-                            </Card>
+                                        </div>
+                                    </form>
+                                </DialogContent>
+                            </Dialog>
                         </div>
-                    </TabsContent>
-                </Tabs>
-            </div>
+                    </div>
+
+                    {/* Password Change */}
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between py-4 md:py-6 border-b border-border/50 gap-4 md:gap-0">
+                        <div className="flex-1 space-y-2 text-left">
+                            <h3 className="text-xl font-semibold">Password</h3>
+                            <p className="text-muted-foreground">
+                                Update your password to keep your account secure.
+                            </p>
+                        </div>
+                        <div className="w-full md:w-1/2 flex justify-center md:justify-end">
+                            <PasswordAlteration />
+                        </div>
+                    </div>
+
+                    {/* Account Actions */}
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between py-4 md:py-6 gap-4 md:gap-0">
+                        <div className="flex-1 space-y-2 text-left">
+                            <h3 className="text-xl font-semibold">Account Actions</h3>
+                            <p className="text-muted-foreground">
+                                Sign out of your account or permanently delete your data.
+                            </p>
+                        </div>
+                        <div className="w-full md:w-1/2 flex justify-center md:justify-end">
+                            <div className="flex flex-col space-y-3 items-center md:items-end w-full max-w-xs md:max-w-none">
+                                <Button 
+                                    onClick={logout}
+                                    variant="outline"
+                                    className="w-full md:w-48"
+                                >
+                                    Sign Out
+                                </Button>
+                                
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button 
+                                            variant="destructive"
+                                            className="w-full md:w-48"
+                                        >
+                                            <CircleAlert className="w-4 h-4 mr-2" />
+                                            Delete Account
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <CircleAlert className="w-6 h-6 text-red-500" />
+                                                <p className="font-bold text-red-500 text-2xl">WARNING!</p>
+                                            </div>
+                                            <AlertDialogTitle>
+                                                Are you <span className="text-red-600">absolutely</span> sure?
+                                            </AlertDialogTitle>
+                                            <AlertDialogDescription className="text-base">
+                                                This action cannot be undone. This will permanently delete your account and remove all your data from our servers, including your progress, posts, and profile information.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction className="bg-red-600 hover:bg-red-700">
+                                                Yes, Delete My Account
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
     );
 };

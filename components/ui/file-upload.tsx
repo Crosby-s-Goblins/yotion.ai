@@ -110,7 +110,7 @@ export const FileUpload = ({
                   damping: 20,
                 }}
                 className={cn(
-                  "relative group-hover/file:shadow-2xl z-40 bg-black dark:bg-neutral-900 flex items-center justify-center h-32 mt-4 w-full rounded-md",
+                  "relative group-hover/file:shadow-2xl z-40 bg-black dark:bg-neutral-900 flex items-center justify-center min-h-32 h-full mt-4 w-full rounded-md",
                   "shadow-[0px_10px_50px_rgba(0,0,0,0.1)]"
                 )}
               >
@@ -140,7 +140,7 @@ export const FileUpload = ({
             {!files.length && (
               <motion.div
                 variants={secondaryVariant}
-                className="absolute opacity-0 border border-dashed border-sky-400 inset-0 z-30 bg-transparent flex items-center justify-center h-32 mt-4 w-full rounded-md"
+                className="absolute opacity-0 border border-dashed border-sky-400 inset-0 z-30 bg-transparent flex items-center justify-center min-h-32 h-full mt-4 w-full rounded-md"
               />
             )}
           </div>

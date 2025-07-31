@@ -1,5 +1,5 @@
 import PageTopBar from "@/components/page-top-bar";
-import SettingsPane from "@/components/appSettingPane";
+import SettingsPane from "@/components/settingsPage/appSettingPane";
 
 export default function AppSettingsPage() {
   return (

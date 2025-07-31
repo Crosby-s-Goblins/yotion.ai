@@ -28,13 +28,13 @@ import {
 
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { FileUpload } from "@/components/ui/file-upload";
 
 //Icons
 import { Loader2Icon, Check, CircleAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
-import PasswordAlteration from "./passwordChanger";
+import PasswordAlteration from "../passwordChanger";
 
 interface SettingsProps {
     user: User;

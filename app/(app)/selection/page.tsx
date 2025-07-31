@@ -555,7 +555,7 @@ export default function SelectionComponents() {
                       </SelectTrigger>
                       <SelectContent className="bg-white">
                         <SelectItem value="all">All</SelectItem>
-                        <SelectItem value="premade">Premade</SelectItem>
+                        <SelectItem value="premade">Yotion-Select</SelectItem>
                         <SelectItem value="user">User-Created</SelectItem>
                       </SelectContent>
                     </Select>

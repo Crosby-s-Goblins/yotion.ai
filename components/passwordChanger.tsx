@@ -63,7 +63,7 @@ export default function PasswordAlteration(){
 
     return (
     <>
-      <Button onClick={() => setIsOpen(true)}>
+      <Button onClick={() => setIsOpen(true)} className="w-full max-w-xs md:w-48">
         Edit Password
       </Button>
 

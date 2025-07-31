@@ -287,7 +287,7 @@ export default function SelectionComponents() {
         onClick={() => !locked && handlePoseSelect(pose)}
       >
         <div className="p-6">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-start justify-between mb-4">
             <h3 className="font-semibold text-lg leading-snug h-[3rem] break-words line-clamp-2">{pose.name}</h3>
             <div className="flex flex-wrap gap-2">
               {/* Difficulty badge */}
@@ -361,7 +361,7 @@ export default function SelectionComponents() {
                   />
                 </div>
                 {/* Filtering */}
-                <div className="flex flex gap-3">
+                <div className="flex gap-3">
                   <div className="flex items-center gap-1">
                     <label className="text-sm font-medium">
                       Difficulty:
@@ -370,7 +370,7 @@ export default function SelectionComponents() {
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select difficulty" />
                       </SelectTrigger>
-                      <SelectContent className="bg-white">
+                      <SelectContent className="">
                         <SelectItem value="all">All Levels</SelectItem>
                         <SelectItem value="easy">Beginner</SelectItem>
                         <SelectItem value="medium">Intermediate</SelectItem>
@@ -395,7 +395,7 @@ export default function SelectionComponents() {
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select muscle group" />
                       </SelectTrigger>
-                      <SelectContent className="bg-white">
+                      <SelectContent className="">
                         <SelectItem value="all">All</SelectItem>
                         <SelectItem value="core">Core</SelectItem>
                         <SelectItem value="back">Back</SelectItem>
@@ -421,7 +421,7 @@ export default function SelectionComponents() {
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select specific muscle" />
                           </SelectTrigger>
-                          <SelectContent className="bg-white">
+                          <SelectContent className="">
                             <SelectItem value="all">All</SelectItem>
                             {(muscleGroupMap[selectedMuscle] ?? []).map((muscle) => (
                               <SelectItem key={muscle} value={muscle}>
@@ -446,7 +446,7 @@ export default function SelectionComponents() {
             >
               <div className=""> {/* "max-h-[calc(x*10rem)] overflow-y-auto" --To confine list of poses to x rows */}
                 {hasPageEntered ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     <AnimatePresence mode="popLayout" initial={false}>
                       {isFilterReady ? (
                         searchedItems.length > 0 ? (
@@ -537,7 +537,7 @@ export default function SelectionComponents() {
                       <SelectTrigger>
                         <SelectValue placeholder="Select difficulty" />
                       </SelectTrigger>
-                      <SelectContent className="bg-white">
+                      <SelectContent className="">
                         <SelectItem value="all">All Levels</SelectItem>
                         <SelectItem value="easy">Beginner</SelectItem>
                         <SelectItem value="medium">Intermediate</SelectItem>
@@ -553,9 +553,9 @@ export default function SelectionComponents() {
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select source" />
                       </SelectTrigger>
-                      <SelectContent className="bg-white">
+                      <SelectContent className="">
                         <SelectItem value="all">All</SelectItem>
-                        <SelectItem value="premade">Premade</SelectItem>
+                        <SelectItem value="premade">Yotion-Select</SelectItem>
                         <SelectItem value="user">User-Created</SelectItem>
                       </SelectContent>
                     </Select>

@@ -136,7 +136,7 @@ export default function Navbar() {
                       </Avatar>
                     </a>
                   </HoverCardTrigger>
-                  <HoverCardContent className='bg-white'>
+                  <HoverCardContent>
                     <div className='flex flex-col items-left gap-2'>
                       <div className='flex flex-col'>
                         <p className='opacity-50 text-sm'>Logged in as:</p>

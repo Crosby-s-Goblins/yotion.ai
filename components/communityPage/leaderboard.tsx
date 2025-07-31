@@ -155,7 +155,7 @@ export default function Leaderboard() {
           <SelectTrigger className="w-[130px] h-8 text-xs">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className='bg-white'>
+          <SelectContent>
             <SelectItem value="poses">Poses</SelectItem>
             <SelectItem value="accuracy">Accuracy</SelectItem>
             <SelectItem value="consistency">Consistency</SelectItem>

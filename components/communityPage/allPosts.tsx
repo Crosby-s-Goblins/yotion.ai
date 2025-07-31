@@ -207,7 +207,7 @@ const AllPosts = ({ reloadKey }: { reloadKey?: number }) => {
   if (loading) {
     return (
       <div className="lg:col-span-2 space-y-6">
-        <Card className="w-full h-10 flex gap-7 flex justify-center items-center">
+        <Card className="w-full h-10 flex gap-7 justify-center items-center">
           <Skeleton className="bg-gray-300 w-12 h-4 rounded-full"></Skeleton>
           <Skeleton className="bg-gray-300 w-12 h-4 rounded-full"></Skeleton>
           <Skeleton className="bg-gray-300 w-12 h-4 rounded-full"></Skeleton>
@@ -241,15 +241,15 @@ const AllPosts = ({ reloadKey }: { reloadKey?: number }) => {
   return (
     <div className="lg:col-span-2 space-y-6" id="posts-section">
       <Card className="p-3 px-6 flex items-center justify-between">
-        <h1 className="text-md hidden md:flex">Filter Options:</h1>
+        <h1 className="text-md hidden md:flex">Filtering</h1>
         <div className="flex gap-4">
           <div className="flex text-sm items-center gap-1">
-            posted by:
+            Author:
             <Select value={postedBy} onValueChange={setPostedBy}>
               <SelectTrigger>
                 <SelectValue placeholder="All" />
               </SelectTrigger>
-              <SelectContent className="bg-white">
+              <SelectContent className="">
                   <SelectItem value="all">All</SelectItem>
                   <SelectItem value="myself">Myself</SelectItem>
                   <SelectItem value="others">Others</SelectItem>
@@ -262,7 +262,7 @@ const AllPosts = ({ reloadKey }: { reloadKey?: number }) => {
               <SelectTrigger>
                 <SelectValue placeholder="week" />
               </SelectTrigger>
-              <SelectContent className="bg-white">
+              <SelectContent className="">
                   <SelectItem value="week">Week</SelectItem>
                   <SelectItem value="month">Month</SelectItem>
                   <SelectItem value="year">Year</SelectItem>
@@ -320,7 +320,7 @@ const AllPosts = ({ reloadKey }: { reloadKey?: number }) => {
                       <DropdownMenuTrigger asChild>
                         <button><EllipsisVertical /></button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent className="bg-white" align="start">
+                      <DropdownMenuContent className="" align="start">
                         <DropdownMenuItem>
                           <button onClick={() => handleDeletePost(fp.post_id)}>Delete Post</button>
                         </DropdownMenuItem>
@@ -337,8 +337,9 @@ const AllPosts = ({ reloadKey }: { reloadKey?: number }) => {
                       variant="ghost"
                       size="sm"
                       className={clsx(
-                        "hover:text-primary",
-                        liked ? "text-red-500" : "text-muted-foreground"
+                        "bg-background/60 border border-border/40 rounded-full px-3 transition-all duration-200",
+                        "hover:text-primary hover:border-border/60",
+                        liked ? "text-red-500 bg-red-50/50 border-red-200/50 hover:bg-red-100/50" : "text-muted-foreground"
                       )}
                       onClick={() => handleLike(fp.post_id, liked)}
                     >
@@ -390,7 +391,7 @@ const AllPosts = ({ reloadKey }: { reloadKey?: number }) => {
                     <DropdownMenuTrigger asChild>
                       <button><EllipsisVertical /></button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="bg-white" align="start">
+                    <DropdownMenuContent className="" align="start">
                       <DropdownMenuItem>
                         <button onClick={() => handleDeletePost(p.post_id)}>Delete Post</button>
                       </DropdownMenuItem>
@@ -407,8 +408,9 @@ const AllPosts = ({ reloadKey }: { reloadKey?: number }) => {
                     variant="ghost"
                     size="sm"
                     className={clsx(
-                      "hover:text-primary",
-                      liked ? "text-red-500" : "text-muted-foreground"
+                      "bg-background/60 border border-border/40 rounded-full px-3 transition-all duration-200",
+                      "hover:text-primary hover:border-border/60",
+                      liked ? "text-red-500 bg-red-50/50 hover:bg-red-100/50" : "text-muted-foreground"
                     )}
                     onClick={() => handleLike(p.post_id, liked)}
                   >

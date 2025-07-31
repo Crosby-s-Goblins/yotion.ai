@@ -54,9 +54,9 @@ const Posts = ({ onPostSubmit }: { onPostSubmit?: () => void }) => {
     };
 
     return (
-        <Card className="bg-card.glass rounded-2xl p-6 border border-border/50 shadow-card mb-8">
-            <CardHeader className="pb-4">
-                <div className="flex items-center gap-3">
+        <Card className="bg-card.glass rounded-2xl p-6 border border-border/50 shadow-card mb-10">
+            <CardHeader className="">
+                <div className="flex items-center gap-4">
                     <Avatar className="w-12 h-12 rounded-full bg-gradient-to-tr from-primary to-accent flex items-center justify-center">
                         <AvatarImage src={profile?.avatar_url} alt="avatar" />
                         <AvatarFallback>
@@ -72,7 +72,7 @@ const Posts = ({ onPostSubmit }: { onPostSubmit?: () => void }) => {
                 </div>
             </CardHeader>
             <div className="flex flex-col gap-4 items-center">
-                <form className="relative flex-1 w-full flex gap-3" onSubmit={handleSubmit}>
+                <form className="relative flex-1 w-full flex gap-4" onSubmit={handleSubmit}>
                     <Input
                         className="w-full pl-4 pr-4 h-12 rounded-full border-2 bg-background/50 backdrop-blur-sm"
                         placeholder="Write a message..."

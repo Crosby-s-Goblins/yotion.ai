@@ -173,7 +173,7 @@ export default function SettingsPane() {
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select timer duration"/>
             </SelectTrigger>
-            <SelectContent className="bg-white border border-border shadow-lg">
+            <SelectContent>
               {[30, 60, 90, 120, 150].map((sec) => (
                 <SelectItem key={sec} value={sec.toString()}>
                   {sec} seconds ({Math.floor(sec / 60) > 0 ? `${Math.floor(sec / 60)}m ` : ''}{sec % 60 > 0 ? `${sec % 60}s` : ''})

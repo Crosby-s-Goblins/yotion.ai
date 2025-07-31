@@ -370,7 +370,7 @@ export default function SelectionComponents() {
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select difficulty" />
                       </SelectTrigger>
-                      <SelectContent className="bg-white">
+                      <SelectContent className="">
                         <SelectItem value="all">All Levels</SelectItem>
                         <SelectItem value="easy">Beginner</SelectItem>
                         <SelectItem value="medium">Intermediate</SelectItem>
@@ -395,7 +395,7 @@ export default function SelectionComponents() {
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select muscle group" />
                       </SelectTrigger>
-                      <SelectContent className="bg-white">
+                      <SelectContent className="">
                         <SelectItem value="all">All</SelectItem>
                         <SelectItem value="core">Core</SelectItem>
                         <SelectItem value="back">Back</SelectItem>
@@ -421,7 +421,7 @@ export default function SelectionComponents() {
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select specific muscle" />
                           </SelectTrigger>
-                          <SelectContent className="bg-white">
+                          <SelectContent className="">
                             <SelectItem value="all">All</SelectItem>
                             {(muscleGroupMap[selectedMuscle] ?? []).map((muscle) => (
                               <SelectItem key={muscle} value={muscle}>
@@ -537,7 +537,7 @@ export default function SelectionComponents() {
                       <SelectTrigger>
                         <SelectValue placeholder="Select difficulty" />
                       </SelectTrigger>
-                      <SelectContent className="bg-white">
+                      <SelectContent className="">
                         <SelectItem value="all">All Levels</SelectItem>
                         <SelectItem value="easy">Beginner</SelectItem>
                         <SelectItem value="medium">Intermediate</SelectItem>
@@ -553,7 +553,7 @@ export default function SelectionComponents() {
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select source" />
                       </SelectTrigger>
-                      <SelectContent className="bg-white">
+                      <SelectContent className="">
                         <SelectItem value="all">All</SelectItem>
                         <SelectItem value="premade">Yotion-Select</SelectItem>
                         <SelectItem value="user">User-Created</SelectItem>

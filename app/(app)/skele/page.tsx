@@ -141,16 +141,16 @@ function SkelePageContent() {
         />
         
         {/* Breathing Indicator - Left Side */}
-        <div className="absolute left-10 top-1/2 -translate-y-1/2 pointer-events-auto">
+        <div className="absolute left-2 sm:left-4 lg:left-10 top-1/2 -translate-y-1/2 pointer-events-auto">
           <div className="bg-white/80 rounded-full shadow-2xl border border-white/40">
-            <div className="w-16 h-96 drop-shadow-2xl flex items-center justify-center">
+            <div className="w-12 h-48 sm:w-14 sm:h-64 lg:w-16 lg:h-80 drop-shadow-2xl flex items-center justify-center">
               <BreathIndication duration={10} />
             </div>
           </div>
         </div>
 
         {/* Bottom spacer */}
-        <div className="flex items-end justify-between px-10 pb-8 w-full max-w-6xl mx-auto pointer-events-auto">
+        <div className="flex items-end justify-between px-4 sm:px-6 lg:px-10 pb-4 sm:pb-6 lg:pb-8 w-full max-w-6xl mx-auto pointer-events-auto">
           <div className="w-1/3" />
         </div>
       </div>

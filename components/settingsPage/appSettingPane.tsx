@@ -19,7 +19,6 @@ import { createClient } from '@/lib/supabase/client';
 import { useUserPreferences } from '@/context/UserPreferencesContext';
 import { useUser } from '../user-provider';
 import { Input } from '../ui/input';
-import { Tabs, TabsTrigger, TabsContent } from '@radix-ui/react-tabs';
 
 const supabase = createClient();
 

@@ -347,7 +347,7 @@ export default function SelectionComponents() {
           <TabsContent value="poses">
             {/* Search and Filter Section */}
             <div className="bg-card.glass rounded-2xl p-6 border border-border/50 shadow-card mb-8">
-              <div className="flex flex-col lg:flex-row gap-4 items-center">
+              <div className="flex flex-col gap-4 items-center">
                 {/* Search Bar */}
                 <div className="relative flex-1 w-full">
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
@@ -529,7 +529,7 @@ export default function SelectionComponents() {
           <TabsContent value="programs">
             {/* Search and Filter Section for Programs */}
             <div className="bg-card.glass rounded-2xl p-6 border border-border/50 shadow-card mb-8">
-              <div className="flex flex-col lg:flex-row gap-4 items-center">
+              <div className="flex flex-col gap-4 items-center">
                 {/* Search Bar */}
                 <div className="relative flex-1 w-full flex items-center gap-2">
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />

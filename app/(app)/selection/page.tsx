@@ -347,7 +347,7 @@ export default function SelectionComponents() {
           <TabsContent value="poses">
             {/* Search and Filter Section */}
             <div className="bg-card.glass rounded-2xl p-6 border border-border/50 shadow-card mb-8">
-              <div className="flex flex-col gap-4 items-center">
+              <div className="flex flex-col lg:flex-row gap-4 items-center">
                 {/* Search Bar */}
                 <div className="relative flex-1 w-full">
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
@@ -373,7 +373,7 @@ export default function SelectionComponents() {
                       {/* ...Filters... */}
                       <div className="flex items-center gap-1">
                         <label className="text-sm font-medium whitespace-nowrap">
-                          Difficulty level:
+                          Difficulty:
                         </label>
                         <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
                           <SelectTrigger>
@@ -389,7 +389,7 @@ export default function SelectionComponents() {
                       </div>
                       <div className="flex items-center gap-1">
                         <label className="text-sm font-medium whitespace-nowrap">
-                          Muscle group:
+                          Muscle:
                         </label>
                         <Select
                           value={selectedMuscle}
@@ -422,7 +422,7 @@ export default function SelectionComponents() {
                       {
                         <div className="flex items-center gap-1">
                           <div className={`flex items-center gap-1 ${(selectedMuscle == "all") && "hidden"}`}>
-                            <label className="text-sm font-medium whitespace-nowrap">Specific muscle:</label>
+                            <label className="text-sm font-medium whitespace-nowrap">Specific:</label>
                             <Select
                               value={selectedSpecificMuscle}
                               onValueChange={setSelectedSpecificMuscle}
@@ -446,7 +446,7 @@ export default function SelectionComponents() {
                 </AnimatePresence>
                 <Button
                   variant="ghost"
-                  className="flex items-center gap-1 h-4 w-fit p-0 px-2 border-gray-300"
+                  className="inline lg:hidden flex items-center gap-1 h-4 w-fit p-0 px-2 border-gray-300"
                   onClick={() => setShowFilters(prev => !prev)}
                 >
                   <p className="font-light text-gray-500 text-sm">{showFilters ? "hide" : "show"} filters</p>
@@ -529,7 +529,7 @@ export default function SelectionComponents() {
           <TabsContent value="programs">
             {/* Search and Filter Section for Programs */}
             <div className="bg-card.glass rounded-2xl p-6 border border-border/50 shadow-card mb-8">
-              <div className="flex flex-col gap-4 items-center">
+              <div className="flex flex-col lg:flex-row gap-4 items-center">
                 {/* Search Bar */}
                 <div className="relative flex-1 w-full flex items-center gap-2">
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
@@ -600,7 +600,7 @@ export default function SelectionComponents() {
                 </AnimatePresence>
                 <Button
                   variant="ghost"
-                  className="flex items-center gap-1 h-4 w-fit p-0 px-2 border-gray-300"
+                  className="inline lg:hidden flex items-center gap-1 h-4 w-fit p-0 px-2 border-gray-300"
                   onClick={() => setShowFilters(prev => !prev)}
                 >
                   <p className="font-light text-gray-500 text-sm">{showFilters ? "hide" : "show"} filters</p>
